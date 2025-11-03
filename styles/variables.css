@@ -1,0 +1,221 @@
+/* ===================================
+   BrainMark - Design
+   Material Design 3 Variables
+   =================================== */
+
+:root {
+  /* ===== Color Palette - Light Mode ===== */
+
+  /* Primary Colors */
+  --color-primary: #1F6FED;
+  --color-primary-hover: #1557C9;
+  --color-primary-light: #E3F2FD;
+
+  /* Secondary Colors */
+  --color-secondary: #5E548E;
+  --color-secondary-hover: #4A4270;
+  --color-secondary-light: #F3F2F7;
+
+  /* Tertiary Colors */
+  --color-tertiary: #B4654A;
+  --color-tertiary-hover: #9A5439;
+
+  /* Background & Surface */
+  --color-background: #FFFFFF;
+  --color-bg: #FFFFFF;
+  --color-surface: #F5F5F5;
+  --color-card: #FFFFFF;
+  --color-hover: #F5F5F5;
+  --color-surface-variant: #E7E0EC;
+  --color-overlay: rgba(0, 0, 0, 0.32);
+
+  /* Status Colors */
+  --color-error: #B3261E;
+  --color-error-light: #F9DEDC;
+  --color-error-bg: #F9DEDC;
+  --color-success: #1B5E20;
+  --color-success-light: #E8F5E9;
+  --color-success-bg: #E8F5E9;
+  --color-warning: #FF9800;
+  --color-warning-light: #FFF3E0;
+  --color-warning-bg: #FFF3CD;
+  --color-info: #0288D1;
+  --color-info-light: #E1F5FE;
+  --color-info-bg: #E1F5FE;
+
+  /* Text Colors */
+  --color-text: #1C1B1F;
+  --color-text-primary: #1C1B1F;
+  --color-text-secondary: #49454E;
+  --color-text-tertiary: #79747E;
+  --color-text-disabled: #C4C4C4;
+  --color-text-on-primary: #FFFFFF;
+
+  /* Border & Divider */
+  --color-border: #E0E0E0;
+  --color-divider: #E0E0E0;
+  --color-outline: #79747E;
+
+  /* ===== Typography ===== */
+
+  /* Font Family */
+  --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Font Sizes */
+  --font-size-headline-large: 32px;
+  --font-size-headline-medium: 28px;
+  --font-size-title-large: 22px;
+  --font-size-title-medium: 16px;
+  --font-size-body-large: 16px;
+  --font-size-body-medium: 14px;
+  --font-size-label-large: 14px;
+  --font-size-label-small: 12px;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-headline-large: 40px;
+  --line-height-headline-medium: 36px;
+  --line-height-title-large: 28px;
+  --line-height-title-medium: 24px;
+  --line-height-body-large: 24px;
+  --line-height-body-medium: 20px;
+  --line-height-label-large: 20px;
+  --line-height-label-small: 16px;
+
+  /* ===== Spacing (8px Grid System) ===== */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 40px;
+
+  /* ===== Border Radius ===== */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* ===== Shadows (Material Design) ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ===== Transitions ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== Layout Dimensions ===== */
+  --popup-width: 400px;
+  --popup-min-width: 300px;
+  --popup-max-width: 600px;
+  --popup-height: 600px;
+  --popup-min-height: 400px;
+
+  --header-height: 56px;
+  --search-bar-height: 40px;
+  --footer-height: 56px;
+
+  /* ===== Z-Index Layers ===== */
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-modal-backdrop: 100;
+  --z-modal: 101;
+  --z-toast: 200;
+}
+
+/* ===== Dark Mode Variables ===== */
+[data-theme="dark"] {
+  /* Primary Colors */
+  --color-primary: #A8C7FA;
+  --color-primary-hover: #8AB4F8;
+  --color-primary-light: #1E3A5F;
+
+  /* Secondary Colors */
+  --color-secondary: #B8A7D4;
+  --color-secondary-hover: #9D88C3;
+  --color-secondary-light: #2D2640;
+
+  /* Background & Surface */
+  --color-background: #1C1B1F;
+  --color-bg: #1C1B1F;
+  --color-surface: #2B2930;
+  --color-card: #2B2930;
+  --color-hover: #3A3740;
+  --color-surface-variant: #49454F;
+
+  /* Text Colors */
+  --color-text: #E6E1E5;
+  --color-text-primary: #E6E1E5;
+  --color-text-secondary: #CAC4D0;
+  --color-text-tertiary: #938F99;
+  --color-text-disabled: #5E5E5E;
+  --color-text-on-primary: #1C1B1F;
+
+  /* Border & Divider */
+  --color-border: #49454F;
+  --color-divider: #49454F;
+  --color-outline: #938F99;
+
+  /* Status Colors (adjusted for dark) */
+  --color-error: #F2B8B5;
+  --color-error-light: #601410;
+  --color-error-bg: #601410;
+  --color-success: #A5D6A7;
+  --color-success-light: #1B5E20;
+  --color-success-bg: #1B5E20;
+  --color-warning: #FFB74D;
+  --color-warning-light: #663D00;
+  --color-warning-bg: #663D00;
+  --color-info: #81D4FA;
+  --color-info-light: #01579B;
+  --color-info-bg: #01579B;
+
+  /* Overlay */
+  --color-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Shadows (lighter for dark mode) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Compact Mode ===== */
+[data-density="compact"] {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+
+  --header-height: 48px;
+  --search-bar-height: 36px;
+  --footer-height: 48px;
+}
+
+/* ===== Material Symbols Icons ===== */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+}

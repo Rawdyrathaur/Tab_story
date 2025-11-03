@@ -1,0 +1,71 @@
+BRAINMARK - EXPLAINER VIDEO NARRATION
+Clean Text for Voice-Over Recording
+=====================================
+
+[INTRO - 15 seconds]
+
+We've all been there. Twenty browser tabs open. Thirty. Fifty. You're researching a project, shopping for a gift, and planning a vacation all at once. But which tab was that important article in? Where did you see that price comparison? The tab chaos is real, and it's costing you time.
+
+[SOLUTION - 12 seconds]
+
+Meet BrainMark. The Chrome extension that uses AI to transform your tab chaos into organized intelligence. Built with Chrome's powerful Built-in AI APIs, BrainMark understands what you're working on and helps you stay focused.
+
+[FEATURE 1: TAB ORGANIZATION - 20 seconds]
+
+Let's see how it works. Open BrainMark from your Chrome toolbar. Click "AI Cluster" and watch the magic happen. BrainMark analyzes all your open tabs using advanced AI and automatically groups them by purpose. Job search tabs here. Shopping tabs there. Research articles over here. Each group becomes a project you can save, organize, and return to anytime. No more hunting through endless tabs.
+
+[FEATURE 2: DEEP RESEARCH - 25 seconds]
+
+But BrainMark goes beyond organization. Navigate to any webpage and click the "Research" button. Within seconds, BrainMark's AI analyzes the entire page and generates a comprehensive research report. You get an eighty to one-twenty word summary with specific data points. Four detailed key findings with evidence-based analysis. Expert-level frequently asked questions with comprehensive answers. Even structured data like tables and lists, all extracted automatically. It's like having a research assistant built right into your browser.
+
+[FEATURE 3: DIG DEEPER - 18 seconds]
+
+Want to know more? Use the "Dig Deeper" feature at the bottom of any research page. Type your question: "What are the main benefits mentioned?" BrainMark's AI reads the page context and provides detailed, intelligent answers. Ask as many questions as you want. Copy answers. Remove them when done. It's interactive research powered by AI.
+
+[PRIVACY & TECH - 20 seconds]
+
+Here's what makes BrainMark special. It uses Chrome's Built-in AI APIs for one hundred percent client-side processing. That means your data never leaves your device. No cloud uploads. No tracking. Complete privacy. The AI runs directly in your browser, making it fast, secure, and offline-capable. For extended compatibility, there's an optional Gemini API fallback, but Chrome's AI is always prioritized.
+
+[BENEFITS - 15 seconds]
+
+With BrainMark, you get: Automatic tab clustering by intent and topic. Deep content analysis with AI-generated insights. Privacy-first design with on-device processing. Smart project management with timeline tracking. And optional Google Calendar integration to schedule your research sessions.
+
+[TECHNICAL EXCELLENCE - 18 seconds]
+
+BrainMark leverages five Chrome Built-in AI APIs. The Summarizer API for intelligent page summaries. The Prompt API for intent detection and content analysis. The Rewriter API for polished, professional output. Plus Writer and Translator APIs for future features. It's cutting-edge AI technology, made simple and accessible.
+
+[USE CASES - 22 seconds]
+
+Imagine you're researching a topic for work. BrainMark organizes your twenty research tabs into a single project. Each article gets summarized. Key findings extracted. Questions answered. Or you're shopping for a laptop. BrainMark groups all your comparison tabs, extracts specs and prices, and helps you make informed decisions. Planning a trip? BrainMark keeps your hotel, flight, and activity tabs organized and summarized.
+
+[USER EXPERIENCE - 15 seconds]
+
+The interface is clean and intuitive. Dark mode for comfortable browsing. Smooth animations and instant feedback. Everything is accessible from the side panel, no need to open new tabs. Export your research as PDF, JSON, or CSV. Share findings with your team.
+
+[GETTING STARTED - 20 seconds]
+
+Ready to take control of your tabs? Install BrainMark from the Chrome Web Store. For the best experience, enable Chrome's Built-in AI in chrome flags. Just search for "optimization guide on device model" and enable it. Restart Chrome, and you're ready to go. The AI model downloads automatically, usually in just a few minutes. Then enjoy instant, private AI-powered research.
+
+[PERFORMANCE - 15 seconds]
+
+BrainMark is fast and efficient. Generate a summary in half a second. Analyze a full page in under three seconds. It uses minimal memory, typically thirty to fifty megabytes. And when using Chrome's Built-in AI, it consumes zero network bandwidth. Completely offline capable.
+
+[CALL TO ACTION - 12 seconds]
+
+Stop drowning in browser tabs. Start working smarter with BrainMark. Download now from the Chrome Web Store. Transform your browsing from chaotic to organized. From scattered to focused. From overwhelmed to in control.
+
+[CLOSING - 8 seconds]
+
+BrainMark. AI-powered tab management and research. Built for Chrome's Built-in AI Challenge. Your tabs, organized. Your research, simplified. Get BrainMark today.
+
+=====================================
+TOTAL DURATION: Approximately 4 minutes 35 seconds
+WORD COUNT: 640 words
+SPEAKING RATE: 140 words per minute (natural, professional pace)
+=====================================
+
+ALTERNATIVE 60-SECOND VERSION:
+
+Drowning in browser tabs? Meet BrainMark. The Chrome extension that uses AI to organize your tabs automatically. Click "AI Cluster" and watch BrainMark group your tabs by purpose. Job search, shopping, research - all organized instantly. Need deeper insights? Click "Research" on any page. BrainMark generates comprehensive summaries, key findings, and answers your questions. The best part? It uses Chrome's Built-in AI. One hundred percent privacy-first. Your data never leaves your device. Fast, secure, and completely free. Download BrainMark from the Chrome Web Store today. Transform tab chaos into organized intelligence. BrainMark. Your tabs, simplified.
+
+=====================================

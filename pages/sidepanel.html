@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrainMark</title>
+  <link rel="icon" type="image/png" href="../icons/icon-48.png">
+
+  <!-- Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles/variables.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <link rel="stylesheet" href="../styles/animations.css">
+  <link rel="stylesheet" href="../styles/sidepanel.css">
+</head>
+<body>
+
+  <!-- ===== Main Side Panel View ===== -->
+  <div id="main-view" class="view active">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <img src="../icons/logo.png" alt="BrainMark Logo" class="app-logo">
+        <h1 class="app-title">BrainMark</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn-icon" id="timeline-btn" aria-label="Timeline view" title="Timeline View">
+          <span class="material-symbols-outlined">schedule</span>
+        </button>
+        <button class="btn-icon" id="settings-btn" aria-label="Settings" title="Settings">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          id="search-input"
+          placeholder="Search tabs, notes, or intent..."
+          aria-label="Search tabs"
+        >
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="quick-action-btn" id="new-intent-quick">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        <span>New Intent</span>
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content custom-scrollbar">
+      <div id="content-area" class="content-scroll">
+
+        <!-- Loading State (Hidden by default) -->
+        <div id="loading-state" class="loading-container hidden">
+          <div class="spinner"></div>
+          <p class="loading-text">Loading your tabs...</p>
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="empty-state-container hidden">
+          <div class="empty-icon">📭</div>
+          <h2 class="empty-title">No Tabs Yet</h2>
+          <p class="empty-description">Start browsing and organize your tabs with intents!</p>
+          <button class="btn btn-primary" id="new-intent-btn">
+            <span class="material-symbols-outlined">add</span>
+            Create Intent
+          </button>
+        </div>
+
+        <!-- Project Groups Container (dynamically populated by JavaScript) -->
+        <div id="project-groups" class="project-groups"></div>
+
+      </div>
+    </main>
+
+    <!-- Footer Stats -->
+    <footer class="footer">
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="material-symbols-outlined">tab</span>
+          <span id="total-tabs">10 tabs</span>
+        </div>
+        <div class="stat-item">
+          <span class="material-symbols-outlined">folder</span>
+          <span id="total-groups">3 groups</span>
+        </div>
+        <div class="stat-item">
+          <span class="material-symbols-outlined">schedule</span>
+          <span id="session-time">2h 30m</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ===== Tab Detail View ===== -->
+  <div id="detail-view" class="detail-view">
+    <div class="detail-header">
+      <button class="detail-back-btn" id="detail-back-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+      <h2 class="detail-title" id="detail-title">Tab Details</h2>
+    </div>
+
+    <div class="detail-body custom-scrollbar" id="detail-body">
+      <!-- Tab Detail Card -->
+      <div class="tab-detail-card">
+        <div class="tab-detail-header">
+          <span class="tab-detail-title" id="detail-card-title">Shopping <span class="tab-detail-count">(1 tab)</span></span>
+        </div>
+
+        <div class="tab-detail-body">
+          <div class="tab-detail-intent">
+            <div class="intent-label">
+              <span class="material-symbols-outlined intent-icon">lightbulb</span>
+              Intent
+            </div>
+            <span class="intent-value" id="detail-intent">Shopping</span>
+          </div>
+
+          <div class="tab-detail-summary">
+            <div class="summary-label">
+              <span class="material-symbols-outlined summary-icon">description</span>
+              Summary
+            </div>
+            <p class="summary-text" id="detail-summary">
+              Online shopping for electronics and tech gadgets with fast delivery options.
+            </p>
+            <span class="tab-opened" id="detail-time">
+              <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
+              Opened 3 days ago
+            </span>
+          </div>
+        </div>
+
+        <div class="tab-detail-actions">
+          <button class="btn btn-outlined btn-icon-only" id="detail-summarize" title="AI Summary" aria-label="AI Summary">
+            <span class="material-symbols-outlined">auto_awesome</span>
+          </button>
+          <button class="btn btn-outlined btn-icon-only" id="detail-restore-all" title="Restore All Tabs" aria-label="Restore All Tabs">
+            <span class="material-symbols-outlined">open_in_new</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Timeline View ===== -->
+  <div id="timeline-view" class="timeline-view">
+    <div class="detail-header">
+      <button class="detail-back-btn" id="timeline-back-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+      <h2 class="detail-title">Tab Story Timeline</h2>
+      <button class="btn-icon" id="timeline-more-btn" aria-label="More options">
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+    </div>
+
+    <div class="timeline-filters">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="today">Today</button>
+      <button class="chip" data-filter="week">This Week</button>
+    </div>
+
+    <div class="timeline-content custom-scrollbar">
+      <div class="timeline">
+
+        <div class="timeline-item stagger-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">2:45 PM</div>
+            <div class="timeline-title">LinkedIn</div>
+            <div class="tab-url">Job Search</div>
+          </div>
+        </div>
+
+        <div class="timeline-item stagger-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">2:30 PM</div>
+            <div class="timeline-title">Indeed</div>
+            <div class="tab-url">Job Search</div>
+          </div>
+        </div>
+
+        <div class="timeline-item stagger-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">1:15 PM</div>
+            <div class="timeline-title">GitHub</div>
+            <div class="tab-url">2D Game Dev</div>
+          </div>
+        </div>
+
+        <div class="timeline-item stagger-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">12:30 PM</div>
+            <div class="timeline-title">WebGL Tutorial</div>
+            <div class="tab-url">2D Game Dev</div>
+          </div>
+        </div>
+
+        <div class="timeline-item stagger-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">11:00 AM</div>
+            <div class="timeline-title">Phaser Framework</div>
+            <div class="tab-url">2D Game Dev</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Intent Capture Modal ===== -->
+  <div class="modal-backdrop" id="intent-modal-backdrop">
+    <div class="modal animate-slide-up">
+      <div class="modal-header">
+        <h2 class="modal-title">What are you working on?</h2>
+        <button class="modal-close" id="intent-modal-close" aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 16px; color: var(--color-text-secondary);">
+          <span class="material -symbols-outlined" style="vertical-align: middle; font-size: 18px;">edit</span>
+          Enter your intent:
+        </p>
+        <input
+          type="text"
+          class="input-field"
+          id="intent-input"
+          placeholder='e.g., "Job Search", "Game Dev"'
+          aria-label="Intent input"
+        >
+
+        <p style="margin-top: 24px; margin-bottom: 12px; font-weight: 500; color: var(--color-text-secondary);">
+          Recent intents:
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="recent-intents">
+          <button class="chip">Job Search</button>
+          <button class="chip">Game Dev</button>
+          <button class="chip">Shopping</button>
+          <button class="chip">Research</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-text" id="intent-skip-btn">Skip</button>
+        <button class="btn btn-primary" id="intent-save-btn">
+          <span class="material-symbols-outlined">save</span>
+          Save Intent
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Settings Modal ===== -->
+  <div class="modal-backdrop" id="settings-modal-backdrop">
+    <div class="modal animate-slide-up" style="width: 420px; max-width: 90%;">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings</h2>
+        <button class="modal-close" id="settings-modal-close" aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height: 500px;">
+
+        <!-- Privacy & Security -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
+            <span class="material-symbols-outlined">lock</span>
+            Privacy & Security
+          </h3>
+          <label class="toggle">
+            <input type="checkbox" id="encrypt-data">
+            <span class="toggle-switch"></span>
+            <span>Enable Data Encryption</span>
+          </label>
+          <div style="height: 12px;"></div>
+          <label class="toggle">
+            <input type="checkbox" id="auto-clear">
+            <span class="toggle-switch"></span>
+            <span>Auto-clear closed tabs</span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Appearance -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
+            <span class="material-symbols-outlined">palette</span>
+            Appearance
+          </h3>
+          <label class="toggle">
+            <input type="checkbox" id="dark-mode">
+            <span class="toggle-switch"></span>
+            <span>Dark Mode</span>
+          </label>
+          <div style="height: 12px;"></div>
+          <label class="toggle">
+            <input type="checkbox" id="compact-view">
+            <span class="toggle-switch"></span>
+            <span>Compact View</span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Data Management -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
+            <span class="material-symbols-outlined">storage</span>
+            Data Management
+          </h3>
+          <button class="btn btn-outline" id="clear-data-btn">
+            <span class="material-symbols-outlined">delete</span>
+            Clear All Data
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- About -->
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
+            <span class="material-symbols-outlined">info</span>
+            About
+          </h3>
+          <p style="font-size: 14px; color: var(--color-text-secondary); margin-bottom: 12px;">
+            Version: 1.0.0
+          </p>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-text" id="report-bug-btn">
+              <span class="material-symbols-outlined">bug_report</span>
+              Report Bug
+            </button>
+            <button class="btn btn-text" id="feedback-btn">
+              <span class="material-symbols-outlined">feedback</span>
+              Feedback
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="settings-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <!-- jsPDF Library (local) -->
+  <script src="../scripts/jspdf.umd.min.js"></script>
+
+  <script src="../scripts/storage-manager.js"></script>
+  <script src="../scripts/ai-manager.js"></script>
+  <script src="../scripts/google-auth-service.js"></script>
+  <script src="../scripts/google-calendar-service.js"></script>
+  <script src="../scripts/modal-manager.js"></script>
+  <script src="../scripts/tab-manager.js"></script>
+  <script src="../scripts/sidepanel.js"></script>
+
+</body>
+</html>
