@@ -946,6 +946,26 @@ input[type="checkbox"]:checked + .toggle-switch::after {
   justify-content: space-between;
   gap: 16px;
   min-width: 280px;
+  background-color: #ef5350;
+  animation: fadeRedToLight 3s ease-in-out forwards;
+}
+
+@keyframes fadeRedToLight {
+  0% {
+    background-color: #ef5350;
+  }
+  25% {
+    background-color: #ef6c69;
+  }
+  50% {
+    background-color: #f48f8d;
+  }
+  75% {
+    background-color: #f9b3b1;
+  }
+  100% {
+    background-color: #fcd6d5;
+  }
 }
 
 .toast-undo-btn {
