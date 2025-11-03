@@ -598,8 +598,8 @@ Enable detailed logging:
 ### Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/Rawdyrathaur)
+- Email: mrathaur704@gmail.com
 - Website: [yourwebsite.com](https://yourwebsite.com)
 
 ### License
