@@ -618,7 +618,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**[Star this repo](https://github.com/yourusername/brainmark)** • **[Report Bug](https://github.com/yourusername/brainmark/issues)** • **[Request Feature](https://github.com/yourusername/brainmark/issues)**
+**[Star this repo](https://github.com/Rawdyrathaur/Brainmark)** • **[Report Bug](https://github.com/Rawdyrathaur/Brainmark/issues/new)** • **[Request Feature](https://github.com/Rawdyrathaur/Brainmark/issues/new)**
 
 Made with care by the BrainMark Team
 
