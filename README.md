@@ -11,7 +11,7 @@
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=google-chrome&logoColor=white)](https://chrome.google.com/webstore)
 [![Built-in AI](https://img.shields.io/badge/Chrome-Built--in_AI-00C853)](https://developer.chrome.com/docs/ai/built-in)
 [![Privacy First](https://img.shields.io/badge/Privacy-First-blue)](https://developer.chrome.com/docs/privacy-sandbox)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active-success)](https://github.com/yourusername/brainmark)
 [![Chrome Version](https://img.shields.io/badge/Chrome-127%2B-yellow?logo=google-chrome)](https://www.google.com/chrome/)
 
@@ -604,7 +604,7 @@ Enable detailed logging:
 
 ### License
 
-This project is proprietary. All rights reserved.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
