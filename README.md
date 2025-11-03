@@ -15,7 +15,7 @@
 [![Status](https://img.shields.io/badge/Status-Active-success)](https://github.com/yourusername/brainmark)
 [![Chrome Version](https://img.shields.io/badge/Chrome-127%2B-yellow?logo=google-chrome)](https://www.google.com/chrome/)
 
-**Chrome Built-in AI Challenge 2024 Submission**
+**Chrome Built-in AI Challenge 2025 Submission**
 
 </div>
 
@@ -612,7 +612,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <img src="icons/logo.png" alt="BrainMark" width="100" />
 
-### Built for Chrome Built-in AI Challenge 2024
+### Built for Chrome Built-in AI Challenge 2025
 
 *Transforming tab chaos into organized intelligence*
 
