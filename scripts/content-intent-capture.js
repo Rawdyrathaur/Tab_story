@@ -1,5 +1,5 @@
 /**
- * BrainMark - Content Script for Intent Capture
+ * Tab Story - Content Script for Intent Capture
  * Injects intent capture modal into new tabs
  */
 

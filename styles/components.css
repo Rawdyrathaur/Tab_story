@@ -634,6 +634,10 @@ input[type="checkbox"]:checked + .toggle-switch::after {
   animation: slideUpFade var(--transition-medium);
 }
 
+.toast:not(.toast-undo) {
+  background-color: var(--color-text-primary);
+}
+
 .toast-success {
   background-color: var(--color-success);
 }
@@ -650,27 +654,29 @@ input[type="checkbox"]:checked + .toggle-switch::after {
 
 .tab-detail-card {
   background: var(--color-card);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 0;
-  margin: 0;
+  margin: 16px;
   font-family: var(--font-primary);
   border: 1px solid var(--color-border);
   max-width: 100%;
   overflow: hidden;
+  transition: box-shadow 0.2s ease;
 }
 
 .tab-detail-header {
-  padding: 20px 20px 16px;
+  padding: 24px 24px 20px;
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
 }
 
 .tab-detail-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -687,20 +693,57 @@ input[type="checkbox"]:checked + .toggle-switch::after {
 }
 
 .tab-detail-body {
-  padding: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.tab-detail-intent,
-.tab-detail-summary {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--color-border);
+/* Detail Sections */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.tab-detail-summary {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+/* Intent Badge */
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--color-primary), #5a9ce6);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  width: fit-content;
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Description */
+.detail-description {
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  word-wrap: break-word;
+}
+
+/* Timestamp */
+.detail-timestamp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.detail-timestamp .material-symbols-outlined {
+  font-size: 16px;
+  opacity: 0.7;
 }
 
 .intent-label, .summary-label {
@@ -761,33 +804,71 @@ input[type="checkbox"]:checked + .toggle-switch::after {
 
 .tab-detail-actions {
   display: flex;
-  gap: 8px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 20px 24px;
   background: var(--color-bg);
   border-top: 1px solid var(--color-border);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 16px 16px;
 }
 
-/* Detail View Button Overrides */
-.tab-detail-actions .btn-primary {
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+.tab-detail-actions .btn {
+  flex: 1;
+}
+
+/* New Button Styles for Detail View */
+.btn-detail {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
 }
 
-.tab-detail-actions .btn-primary:hover {
-  background: var(--color-primary-hover);
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
-  transform: translateY(-1px);
+.btn-detail .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.btn-detail-primary {
+  background: linear-gradient(135deg, var(--color-primary), #5a9ce6);
+  color: white;
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+}
+
+.btn-detail-primary:hover {
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-detail-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+}
+
+.btn-detail-secondary {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+
+.btn-detail-secondary:hover {
+  background: var(--color-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-detail-secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .tab-detail-actions .btn-secondary {
@@ -940,50 +1021,74 @@ input[type="checkbox"]:checked + .toggle-switch::after {
 }
 
 /* ===== UNDO TOAST ===== */
-.toast-undo {
+.toast.toast-undo {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   min-width: 280px;
-  background-color: #ef5350;
-  animation: fadeRedToLight 3s ease-in-out forwards;
+  max-width: 320px;
+  padding: 10px 16px !important;
+  position: fixed !important;
+  bottom: 80px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background-color: #ffebee !important;
+  overflow: hidden;
+  border-radius: 30px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  color: #333 !important;
+  z-index: 999999 !important;
+  font-size: 13px;
 }
 
-@keyframes fadeRedToLight {
+.toast-undo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ffcdd2 0%, #ef9a9a 50%, #e57373 100%);
+  animation: lifeDecreasing 3s linear forwards;
+  z-index: 0;
+}
+
+.toast-undo > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes lifeDecreasing {
   0% {
-    background-color: #ef5350;
-  }
-  25% {
-    background-color: #ef6c69;
-  }
-  50% {
-    background-color: #f48f8d;
-  }
-  75% {
-    background-color: #f9b3b1;
+    width: 100%;
   }
   100% {
-    background-color: #fcd6d5;
+    width: 0%;
   }
 }
 
 .toast-undo-btn {
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  color: white;
-  font-weight: 600;
-  font-size: 13px;
+  padding: 6px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .toast-undo-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 

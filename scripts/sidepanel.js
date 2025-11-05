@@ -1,5 +1,5 @@
 /**
- * BrainMark - Side Panel Script
+ * Tab Story - Side Panel Script
  * Initializes the application in the side panel context
  */
 
@@ -10,8 +10,6 @@ class SidePanelApp {
   constructor() {
     this.storageManager = new StorageManager();
     this.aiManager = new AIManager();
-    this.googleAuthService = new GoogleAuthService();
-    this.googleCalendarService = new GoogleCalendarService(this.googleAuthService);
     this.modalManager = new ModalManager();
     this.tabManager = new TabManager(this.storageManager);
     this.currentView = 'main';
@@ -20,11 +18,15 @@ class SidePanelApp {
   }
 
   async init() {
+    // Check for crashed session FIRST
+    await this.checkForCrashedSession();
+
+    // Mark this session as active and initialize session start time
+    await this.storageManager.markSessionActive();
+    await this.initializeSessionTime();
+
     // Detect and apply Chrome browser theme
     await this.detectBrowserTheme();
-
-    // Initialize Google Auth Service
-    await this.googleAuthService.init();
 
     // Load settings and apply theme
     await this.loadSettings();
@@ -38,33 +40,132 @@ class SidePanelApp {
     // Update stats
     await this.updateStats();
 
+    // Update storage indicator
+    await this.updateStorageIndicator();
+
     // Expose services globally for other components to access
     window.modalManager = this.modalManager;
-    window.googleAuthService = this.googleAuthService;
-    window.googleCalendarService = this.googleCalendarService;
 
-    // Check if this is first time and Google Calendar not connected
-    await this.checkFirstTimeSetup();
+    // Setup beforeunload handler for clean shutdown
+    this.setupBeforeUnloadHandler();
+
+    // Setup periodic updates
+    this.setupPeriodicStorageUpdates();
+    this.setupPeriodicSessionTimeUpdate();
   }
 
   /**
-   * Check if user needs onboarding
+   * Check for crashed session and offer recovery
    */
-  async checkFirstTimeSetup() {
+  async checkForCrashedSession() {
     try {
-      // Disabled automatic onboarding modal
-      // Users can manually connect from settings if they want to use Google Calendar
-      console.log('Google Calendar integration available but not auto-prompted');
+      const crashCheck = await this.storageManager.checkPreviousSessionCrashed();
 
-      // Optional: Check connection status
-      const isConnected = await this.googleAuthService.isAuthenticated();
-      if (isConnected) {
-        console.log('Google Calendar connected');
+      if (crashCheck.crashed) {
+        console.log('Previous session crashed, showing recovery option');
+
+        // Show crash recovery notification after a short delay
+        setTimeout(() => {
+          this.showCrashRecoveryPrompt();
+        }, 1000);
       }
     } catch (error) {
-      console.error('Error checking first time setup:', error);
+      console.error('Error checking for crashed session:', error);
     }
   }
+
+  /**
+   * Show crash recovery prompt
+   */
+  showCrashRecoveryPrompt() {
+    this.modalManager.showConfirmDialog({
+      title: 'Welcome Back!',
+      message: 'Your last session ended unexpectedly. Restore your previous tabs?',
+      confirmText: 'Restore Session',
+      cancelText: 'Start Fresh',
+      onConfirm: async () => {
+        await this.restoreLastSession();
+      },
+      onCancel: async () => {
+        console.log('User chose to start fresh');
+        // Mark session as closed to prevent showing this again
+        await this.storageManager.markSessionClosed();
+        // Reset session start time for fresh session
+        const now = new Date().toISOString();
+        await this.storageManager.storage.set({ 'session_start_time': now });
+        this.modalManager.showToast('Starting fresh session', 'info');
+      }
+    });
+  }
+
+  /**
+   * Restore last session
+   */
+  async restoreLastSession() {
+    try {
+      const lastSession = await this.storageManager.getLastSession();
+
+      if (!lastSession || !lastSession.projects) {
+        this.modalManager.showToast('No session backup found', 'warning');
+        return;
+      }
+
+      // Restore the projects
+      await this.storageManager.saveProjects(lastSession.projects);
+
+      // Show success message
+      this.modalManager.showToast(`Restoring ${lastSession.tabCount} tabs...`, 'success');
+
+      // Reload the page to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+
+    } catch (error) {
+      console.error('Failed to restore session:', error);
+      this.modalManager.showToast('Failed to restore session', 'error');
+    }
+  }
+
+  /**
+   * Setup beforeunload handler for clean shutdown
+   */
+  setupBeforeUnloadHandler() {
+    window.addEventListener('beforeunload', () => {
+      // Synchronous operations only (async doesn't work reliably in beforeunload)
+      // Mark session as closed normally - this prevents false crash detection
+      try {
+        chrome.storage.local.set({
+          'session_state': {
+            active: false,
+            lastUpdate: new Date().toISOString(),
+            closedNormally: true
+          }
+        });
+      } catch (error) {
+        console.error('Failed to mark session closed:', error);
+      }
+    });
+
+    // Also handle visibility change for mobile/tab switching
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Page is hidden, create a backup
+        this.storageManager.createSessionSnapshot('auto');
+      }
+    });
+  }
+
+  /**
+   * Setup periodic storage indicator updates
+   */
+  setupPeriodicStorageUpdates() {
+    // Update storage indicator every 5 seconds for more responsive updates
+    setInterval(() => {
+      this.updateStorageIndicator();
+    }, 5 * 1000); // 5 seconds
+  }
+
 
   /**
    * Detect Chrome browser theme and apply it
@@ -150,9 +251,6 @@ class SidePanelApp {
       newIntentQuick.addEventListener('click', () => this.handleAICluster());
     }
 
-    // Research button removed from Quick Actions
-    // Research is now available per-tab via the science icon on each tab item
-
     // Empty state button also triggers AI Cluster
     const emptyNewIntentBtn = document.getElementById('new-intent-btn');
     if (emptyNewIntentBtn) {
@@ -184,15 +282,22 @@ class SidePanelApp {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local' && changes.projects) {
         this.updateStats();
+        this.updateStorageIndicator();
       }
     });
 
-    const feedbackBtn = document.getElementById('feedback-btn');
-    if (feedbackBtn) {
-      feedbackBtn.addEventListener('click', () => {
-        const email = 'your-email@example.com';
-        const subject = 'Feedback for BrainMark';
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+    // Storage indicator click handler
+    const storageIndicator = document.getElementById('storage-indicator');
+    if (storageIndicator) {
+      storageIndicator.addEventListener('click', () => {
+        this.showSettings();
+      });
+    }
+
+    const githubStarBtn = document.getElementById('github-star-btn');
+    if (githubStarBtn) {
+      githubStarBtn.addEventListener('click', () => {
+        window.open('https://github.com/Rawdyrathaur/Tab_story', '_blank');
       });
     }
   }
@@ -210,8 +315,8 @@ class SidePanelApp {
 
     const totalGroups = projects.length;
 
-    // Calculate session time (simplified)
-    const sessionTime = this.calculateSessionTime();
+    // Calculate session time (async)
+    const sessionTime = await this.calculateSessionTime();
 
     // Update UI
     const totalTabsEl = document.getElementById('total-tabs');
@@ -232,28 +337,127 @@ class SidePanelApp {
   }
 
   /**
-   * Calculate session time
+   * Initialize session time tracking
    */
-  calculateSessionTime() {
-    // This is a simplified version - you could store actual session start time
-    const now = new Date();
-    const sessionStart = localStorage.getItem('sessionStart');
+  async initializeSessionTime() {
+    try {
+      const result = await this.storageManager.storage.get('session_start_time');
+      const sessionStartTime = result.session_start_time;
 
-    if (!sessionStart) {
-      localStorage.setItem('sessionStart', now.toISOString());
-      return '0m';
+      if (!sessionStartTime) {
+        // First time - set session start time
+        const now = new Date().toISOString();
+        await this.storageManager.storage.set({ 'session_start_time': now });
+      }
+    } catch (error) {
+      console.error('Failed to initialize session time:', error);
     }
+  }
 
-    const start = new Date(sessionStart);
-    const diffMs = now - start;
-    const diffMins = Math.floor(diffMs / 60000);
-    const hours = Math.floor(diffMins / 60);
-    const mins = diffMins % 60;
+  /**
+   * Calculate session time based on stored session start
+   */
+  async calculateSessionTime() {
+    try {
+      const result = await this.storageManager.storage.get('session_start_time');
+      const sessionStart = result.session_start_time;
 
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
+      if (!sessionStart) {
+        return '0s';
+      }
+
+      const start = new Date(sessionStart);
+      const now = new Date();
+      const diffMs = now - start;
+
+      const diffSecs = Math.floor(diffMs / 1000);
+      const diffMins = Math.floor(diffSecs / 60);
+      const hours = Math.floor(diffMins / 60);
+      const mins = diffMins % 60;
+      const secs = diffSecs % 60;
+
+      if (hours > 0) {
+        return `${hours}h ${mins}m`;
+      } else if (mins > 0) {
+        return `${mins}m ${secs}s`;
+      } else {
+        return `${secs}s`;
+      }
+    } catch (error) {
+      console.error('Failed to calculate session time:', error);
+      return '0s';
     }
-    return `${mins}m`;
+  }
+
+  /**
+   * Setup periodic session time updates (every second)
+   */
+  setupPeriodicSessionTimeUpdate() {
+    // Update session time every second for smooth counting
+    setInterval(async () => {
+      const sessionTimeEl = document.getElementById('session-time');
+      if (sessionTimeEl) {
+        const sessionTime = await this.calculateSessionTime();
+        sessionTimeEl.textContent = sessionTime;
+      }
+    }, 1000); // Update every second
+  }
+
+  /**
+   * Update storage usage indicator in footer
+   */
+  async updateStorageIndicator() {
+    try {
+      const result = await this.storageManager.getStorageUsage();
+      if (!result.success) {
+        console.error('Failed to get storage usage');
+        return;
+      }
+
+      const { usage } = result;
+      const storageUsageText = document.getElementById('storage-usage-text');
+      const storageIndicator = document.getElementById('storage-indicator');
+
+      if (storageUsageText) {
+        // Format size dynamically - show KB if less than 1 MB
+        let sizeText;
+        let tooltipSize;
+        const totalKB = (usage.total / 1024).toFixed(2);
+        const totalMB = (usage.total / (1024 * 1024)).toFixed(2);
+
+        if (usage.total < 1024 * 1024) {
+          // Less than 1 MB, show in KB
+          sizeText = `${totalKB} KB`;
+          tooltipSize = `${totalKB} KB`;
+        } else {
+          // 1 MB or more, show in MB
+          sizeText = `${totalMB} MB`;
+          tooltipSize = `${totalMB} MB`;
+        }
+
+        storageUsageText.textContent = sizeText;
+
+        // Apply color based on usage percentage
+        if (usage.quotaPercentage > 75) {
+          storageUsageText.style.color = usage.statusColor;
+          if (storageIndicator) {
+            storageIndicator.setAttribute('data-status', usage.status);
+          }
+        } else {
+          storageUsageText.style.color = 'inherit';
+          if (storageIndicator) {
+            storageIndicator.removeAttribute('data-status');
+          }
+        }
+
+        // Update tooltip with more details
+        if (storageIndicator) {
+          storageIndicator.title = `Storage: ${tooltipSize} / ${usage.quotaMB} MB (${usage.quotaPercentage.toFixed(1)}%) - ${usage.statusText}`;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update storage indicator:', error);
+    }
   }
 
   /**
@@ -600,123 +804,6 @@ class SidePanelApp {
   }
 
   /**
-   * Handle Research button - Extract current page data and open research.html
-   */
-  async handleResearch() {
-    try {
-      // Show loading toast
-      this.modalManager.showToast('Extracting page content...', 'info');
-
-      // Get all tabs in current window
-      const tabs = await chrome.tabs.query({ currentWindow: true });
-
-      // Find the active tab that is NOT an extension page
-      let currentTab = tabs.find(tab =>
-        tab.active &&
-        !tab.url.startsWith('chrome://') &&
-        !tab.url.startsWith('chrome-extension://') &&
-        !tab.url.startsWith('about:')
-      );
-
-      // If active tab is extension page, find the most recently accessed regular webpage
-      if (!currentTab) {
-        const validTabs = tabs.filter(tab =>
-          !tab.url.startsWith('chrome://') &&
-          !tab.url.startsWith('chrome-extension://') &&
-          !tab.url.startsWith('about:')
-        ).sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
-
-        currentTab = validTabs[0];
-      }
-
-      if (!currentTab) {
-        this.modalManager.showToast('No valid webpage found. Please open a webpage first.', 'warning');
-        return;
-      }
-
-      console.log('Researching tab:', currentTab.title, currentTab.url);
-
-      // Extract page content using content script
-      let pageContent = '';
-      let visualContent = { images: [], videos: [] };
-      let structuredData = { tables: [], lists: [] };
-      let metadata = {};
-      try {
-        // Try to inject content script if not already injected
-        try {
-          await chrome.scripting.executeScript({
-            target: { tabId: currentTab.id },
-            files: ['scripts/content-extractor.js']
-          });
-          console.log('Content script injected successfully');
-        } catch (injectError) {
-          // Script might already be injected or injection failed - continue anyway
-          console.log('Content script injection skipped:', injectError.message);
-        }
-
-        // Wait a moment for script to initialize
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Try to get page content
-        const response = await chrome.tabs.sendMessage(currentTab.id, { action: 'getPageContent' });
-        if (response && response.success) {
-          pageContent = response.content;
-          visualContent = response.visualContent || { images: [], videos: [] };
-          structuredData = response.structuredData || { tables: [], lists: [] };
-          metadata = response.metadata || {};
-          console.log('Successfully extracted page content:', pageContent.length, 'characters');
-        } else {
-          console.log('Content extraction returned empty response');
-        }
-      } catch (error) {
-        console.log('Content extraction not available, using fallback method:', error.message);
-        // Fallback: use title as content - this is fine, AI will still work
-        pageContent = '';
-      }
-
-      // If content is empty or too short, use title and URL as content
-      if (!pageContent || pageContent.trim().length < 20) {
-        pageContent = `${currentTab.title}\n\nURL: ${currentTab.url}\n\nThis page may have limited text content. Analysis based on available information.`;
-        console.log('Using fallback content (title + URL)');
-      }
-
-      // Prepare page data
-      const pageData = {
-        url: currentTab.url,
-        title: currentTab.title,
-        content: pageContent,
-        visualContent: visualContent || { images: [], videos: [] },
-        structuredData: structuredData || { tables: [], lists: [] },
-        metadata: metadata || {},
-        favicon: currentTab.favIconUrl || 'https://www.google.com/s2/favicons?domain=' + new URL(currentTab.url).hostname + '&sz=32',
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('Saving page data for research:', {
-        url: pageData.url,
-        title: pageData.title,
-        contentLength: pageData.content.length
-      });
-
-      // Save to storage for research.html to use
-      await chrome.storage.local.set({ currentPageData: pageData });
-
-      // Verify data was saved
-      const verification = await chrome.storage.local.get(['currentPageData']);
-      console.log('Data saved successfully:', !!verification.currentPageData);
-
-      // Open research.html in a new tab
-      const researchUrl = chrome.runtime.getURL('pages/research.html');
-      await chrome.tabs.create({ url: researchUrl, active: true });
-
-      this.modalManager.showToast('Opening research page...', 'success');
-    } catch (error) {
-      console.error('Research error:', error);
-      this.modalManager.showToast('Failed to open research: ' + error.message, 'error');
-    }
-  }
-
-  /**
    * Cluster tabs using Chrome AI API
    */
   async clusterTabsWithAI(tabs) {
@@ -1004,35 +1091,59 @@ class SidePanelApp {
    * Render timeline
    */
   async renderTimeline() {
-    const projects = await this.storageManager.getProjects();
-    const timelineContent = document.querySelector('.timeline-content .timeline');
+    this.filterTimeline('all');
+  }
 
-    if (!timelineContent) return;
+  /**
+   * Group tabs by sessions (same day)
+   */
+  groupTabsBySessions(tabs) {
+    const sessions = {};
 
-    // Flatten all tabs from all projects with timestamps
-    const allTabs = [];
-    projects.forEach(project => {
-      project.tabs.forEach(tab => {
-        allTabs.push({
-          ...tab,
-          projectTitle: project.title
-        });
-      });
+    tabs.forEach(tab => {
+      const date = new Date(tab.timestamp);
+      const dateKey = date.toDateString();
+
+      if (!sessions[dateKey]) {
+        sessions[dateKey] = {
+          date: date,
+          tabs: [],
+          projects: new Set()
+        };
+      }
+
+      sessions[dateKey].tabs.push(tab);
+      sessions[dateKey].projects.add(tab.projectTitle);
     });
 
-    // Sort by timestamp (newest first)
-    allTabs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Convert to array and sort by date (newest first)
+    return Object.values(sessions).sort((a, b) => b.date - a.date);
+  }
 
-    // Render timeline items
-    timelineContent.innerHTML = allTabs
-      .slice(0, 20)
-      .map((tab, index) => {
+  /**
+   * Render session group
+   */
+  renderSessionGroup(session, index) {
+    const dateStr = session.date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    const tabCount = session.tabs.length;
+    const projectCount = session.projects.size;
+    const sessionId = session.date.getTime();
+
+    const tabsHtml = session.tabs
+      .slice(0, 10) // Show max 10 tabs per session
+      .map((tab, tabIndex) => {
         const faviconHtml = this.getFaviconHtml(tab.url, tab.favicon);
         const isRemoved = tab.removed;
         const removedClass = isRemoved ? 'timeline-item-removed' : '';
 
         return `
-          <div class="timeline-item ${removedClass} stagger-item" style="animation-delay: ${index * 50}ms">
+          <div class="timeline-item ${removedClass} stagger-item" style="animation-delay: ${(tabIndex + index * 10) * 30}ms" data-project-id="${tab.projectId || ''}" data-tab-id="${tab.id || ''}" data-tab-url="${this.escapeHtml(tab.url)}" data-tab-title="${this.escapeHtml(tab.title)}">
             <div class="timeline-marker"></div>
             <div class="timeline-content">
               <div class="timeline-header">
@@ -1043,11 +1154,92 @@ class SidePanelApp {
                   <div class="tab-url">${this.escapeHtml(tab.projectTitle)}</div>
                 </div>
               </div>
+              ${isRemoved ? `
+              <div class="timeline-actions">
+                <button class="timeline-restore-btn" data-project-id="${tab.projectId || ''}" data-tab-id="${tab.id || ''}">
+                  <span class="material-symbols-outlined">restore</span>
+                  Restore
+                </button>
+              </div>
+              ` : ''}
             </div>
           </div>
         `;
       })
       .join('');
+
+    return `
+      <div class="session-group" data-session-id="${sessionId}">
+        <div class="session-header">
+          <div class="session-info">
+            <div class="session-date">${dateStr}</div>
+            <div class="session-meta">
+              <span>${tabCount} tab${tabCount > 1 ? 's' : ''}</span>
+              <span>•</span>
+              <span>${projectCount} project${projectCount > 1 ? 's' : ''}</span>
+            </div>
+          </div>
+          <div class="session-actions">
+            <button class="session-restore-btn" data-session-id="${sessionId}">
+              <span class="material-symbols-outlined">restore</span>
+              Restore Session
+            </button>
+          </div>
+        </div>
+        ${tabsHtml}
+      </div>
+    `;
+  }
+
+  /**
+   * Restore a single tab
+   */
+  async restoreTab(url, title) {
+    try {
+      await chrome.tabs.create({ url, active: true });
+      this.modalManager.showToast(`Restored: ${title}`, 'success');
+    } catch (error) {
+      console.error('Failed to restore tab:', error);
+      this.modalManager.showToast('Failed to restore tab', 'error');
+    }
+  }
+
+  /**
+   * Restore session by date
+   */
+  async restoreSession(sessionId) {
+    const projects = await this.storageManager.getProjects();
+    const allTabs = [];
+
+    projects.forEach(project => {
+      project.tabs.forEach(tab => {
+        allTabs.push({ ...tab, projectTitle: project.title });
+      });
+    });
+
+    // Filter tabs for this session
+    const sessionTabs = allTabs.filter(tab => {
+      const tabDate = new Date(tab.timestamp).toDateString();
+      const sessionDate = new Date(parseInt(sessionId)).toDateString();
+      return tabDate === sessionDate && !tab.removed;
+    });
+
+    if (sessionTabs.length === 0) {
+      this.modalManager.showToast('No tabs to restore in this session', 'info');
+      return;
+    }
+
+    try {
+      // Restore all tabs from the session
+      for (const tab of sessionTabs) {
+        await chrome.tabs.create({ url: tab.url, active: false });
+      }
+
+      this.modalManager.showToast(`Restored ${sessionTabs.length} tab${sessionTabs.length > 1 ? 's' : ''} from session`, 'success');
+    } catch (error) {
+      console.error('Failed to restore session:', error);
+      this.modalManager.showToast('Failed to restore session', 'error');
+    }
   }
 
   /**
@@ -1080,10 +1272,13 @@ class SidePanelApp {
       project.tabs.forEach(tab => {
         allTabs.push({
           ...tab,
-          projectTitle: project.title
+          projectTitle: project.title,
+          projectId: project.id
         });
       });
     });
+
+    console.log('Timeline tabs:', allTabs.filter(t => t.removed).length, 'removed tabs out of', allTabs.length);
 
     // Filter based on time period
     const now = new Date();
@@ -1097,10 +1292,10 @@ class SidePanelApp {
       } else if (filter === 'week') {
         return diffDays <= 7;
       }
-      return true; // 'all'
+      return true; // 'all' or 'sessions'
     });
 
-    // Sort and render
+    // Sort by timestamp
     filteredTabs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (filteredTabs.length === 0) {
@@ -1111,16 +1306,30 @@ class SidePanelApp {
           <p class="empty-description">No tabs match the selected filter.</p>
         </div>
       `;
+      return;
+    }
+
+    // Render based on filter type
+    if (filter === 'sessions') {
+      // Group by sessions and render
+      const sessions = this.groupTabsBySessions(filteredTabs);
+      timelineContent.innerHTML = sessions
+        .map((session, index) => this.renderSessionGroup(session, index))
+        .join('');
+
+      // Add event listeners for restore buttons
+      this.attachRestoreEventListeners();
     } else {
+      // Render as regular timeline
       timelineContent.innerHTML = filteredTabs
-        .slice(0, 20)
+        .slice(0, 50)
         .map((tab, index) => {
           const faviconHtml = this.getFaviconHtml(tab.url, tab.favicon);
           const isRemoved = tab.removed;
           const removedClass = isRemoved ? 'timeline-item-removed' : '';
 
           return `
-            <div class="timeline-item ${removedClass} stagger-item" style="animation-delay: ${index * 50}ms">
+            <div class="timeline-item ${removedClass} stagger-item" style="animation-delay: ${index * 30}ms" data-project-id="${tab.projectId || ''}" data-tab-id="${tab.id || ''}">
               <div class="timeline-marker"></div>
               <div class="timeline-content">
                 <div class="timeline-header">
@@ -1131,11 +1340,91 @@ class SidePanelApp {
                     <div class="tab-url">${this.escapeHtml(tab.projectTitle)}</div>
                   </div>
                 </div>
+                ${isRemoved ? `
+                <div class="timeline-actions">
+                  <button class="timeline-restore-btn" data-project-id="${tab.projectId || ''}" data-tab-id="${tab.id || ''}">
+                    <span class="material-symbols-outlined">restore</span>
+                    Restore
+                  </button>
+                </div>
+                ` : ''}
               </div>
             </div>
           `;
         })
         .join('');
+
+      // Add event listeners for restore buttons
+      this.attachRestoreEventListeners();
+    }
+  }
+
+  /**
+   * Attach event listeners to restore buttons
+   */
+  attachRestoreEventListeners() {
+    // Individual tab restore buttons
+    document.querySelectorAll('.timeline-restore-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const projectId = btn.dataset.projectId;
+        const tabId = btn.dataset.tabId;
+
+        if (projectId && tabId) {
+          // Restore removed tab
+          await this.restoreRemovedTab(projectId, tabId);
+        } else {
+          // Fallback to URL restoration
+          const url = btn.dataset.tabUrl;
+          const title = btn.dataset.tabTitle;
+          this.restoreTab(url, title);
+        }
+      });
+    });
+
+    // Session restore buttons
+    document.querySelectorAll('.session-restore-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sessionId = btn.dataset.sessionId;
+        this.restoreSession(sessionId);
+      });
+    });
+  }
+
+  /**
+   * Restore a removed tab
+   */
+  async restoreRemovedTab(projectId, tabId) {
+    try {
+      console.log('Restoring tab:', projectId, tabId);
+
+      if (!projectId || !tabId) {
+        console.error('Missing projectId or tabId');
+        this.modalManager.showToast('Cannot restore: missing data', 'error');
+        return;
+      }
+
+      const result = await this.storageManager.undoRemoveTab(projectId, tabId);
+      console.log('Restore result:', result);
+
+      if (result.success) {
+        this.modalManager.showToast('Tab restored successfully', 'success');
+
+        // Reload timeline
+        await this.renderTimeline();
+
+        // Update main view if needed
+        if (window.app && window.app.tabManager) {
+          await window.app.tabManager.loadProjects();
+          window.app.tabManager.renderProjects();
+        }
+      } else {
+        this.modalManager.showToast('Failed to restore tab', 'error');
+      }
+    } catch (error) {
+      console.error('Error restoring tab:', error);
+      this.modalManager.showToast('Error restoring tab', 'error');
     }
   }
 

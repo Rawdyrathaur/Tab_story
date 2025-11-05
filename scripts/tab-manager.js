@@ -1,5 +1,5 @@
 /**
- * BrainMark - Tab Manager
+ * Tab Story - Tab Manager
  * Handles tab grouping, rendering, and interactions
  */
 
@@ -10,6 +10,7 @@ class TabManager {
     this.projects = [];
     this.filteredProjects = [];
     this.searchQuery = '';
+    this.renderTimeout = null; // For debouncing renders
 
     // Initialize asynchronously
     this.init().catch(err => {});
@@ -158,18 +159,9 @@ class TabManager {
 
       // Create and store the listener
       this.projectGroupsListener = (e) => {
-        // Handle research group button
-        const researchGroupBtn = e.target.closest('.btn-research-group');
-        if (researchGroupBtn) {
-          const projectId = researchGroupBtn.dataset.projectId;
-          this.handleGroupResearch(projectId);
-          e.stopPropagation();
-          return;
-        }
-
         // Handle group header click (expand/collapse)
         const groupHeader = e.target.closest('.group-header');
-        if (groupHeader && !e.target.closest('.tab-item') && !e.target.closest('.btn-research-group')) {
+        if (groupHeader && !e.target.closest('.tab-item')) {
           const projectGroup = groupHeader.closest('.project-group');
           this.toggleGroup(projectGroup);
           return;
@@ -287,6 +279,11 @@ class TabManager {
    * Render all projects
    */
   renderProjects() {
+    // Cancel any pending render
+    if (this.renderTimeout) {
+      clearTimeout(this.renderTimeout);
+    }
+
     const container = document.getElementById('project-groups');
     const loadingState = document.getElementById('loading-state');
     const emptyState = document.getElementById('empty-state');
@@ -299,7 +296,9 @@ class TabManager {
     if (emptyState) emptyState.classList.add('hidden');
     container.innerHTML = '';
 
-    setTimeout(() => {
+    this.renderTimeout = setTimeout(() => {
+      this.renderTimeout = null;
+
       if (loadingState) loadingState.classList.add('hidden');
 
       if (this.filteredProjects.length === 0) {
@@ -307,25 +306,29 @@ class TabManager {
         return;
       }
 
+      // Calculate sections WITHOUT modifying the original projects
       const now = new Date();
-      this.filteredProjects.forEach(project => {
-        if (!project.section) {
-          const projectDate = new Date(project.timestamp || project.createdAt || now);
-          const daysDiff = Math.floor((now - projectDate) / (24 * 60 * 60 * 1000));
+      const projectsWithSections = this.filteredProjects.map(project => {
+        const projectDate = new Date(project.timestamp || project.createdAt || now);
+        const daysDiff = Math.floor((now - projectDate) / (24 * 60 * 60 * 1000));
 
+        let section = project.section;
+        if (!section) {
           if (daysDiff === 0) {
-            project.section = 'today';
+            section = 'today';
           } else if (daysDiff <= 7) {
-            project.section = 'week';
+            section = 'week';
           } else {
-            project.section = 'older';
+            section = 'older';
           }
         }
+
+        return { ...project, section };
       });
 
-      const todayProjects = this.filteredProjects.filter(p => p.section === 'today');
-      const weekProjects = this.filteredProjects.filter(p => p.section === 'week');
-      const olderProjects = this.filteredProjects.filter(p => p.section === 'older');
+      const todayProjects = projectsWithSections.filter(p => p.section === 'today');
+      const weekProjects = projectsWithSections.filter(p => p.section === 'week');
+      const olderProjects = projectsWithSections.filter(p => p.section === 'older');
 
       if (todayProjects.length > 0) {
         const todayHeader = this.createSectionHeader('today', 'TODAY');
@@ -408,12 +411,7 @@ class TabManager {
           </div>
           <span class="group-count">${tabCount} ${tabsLabel}</span>
         </div>
-        <div class="group-header-actions">
-          <button class="btn-icon btn-research-group" data-project-id="${project.id}" title="Research all tabs">
-            <span class="material-symbols-outlined">science</span>
-          </button>
-          <span class="material-symbols-outlined group-expand-icon">chevron_right</span>
-        </div>
+        <span class="material-symbols-outlined group-expand-icon">chevron_right</span>
       </div>
       <div class="group-content">
         <div class="tab-list">
@@ -507,12 +505,8 @@ class TabManager {
       // Show undo toast for 4 seconds
       this.showUndoToast(projectId, tabId);
 
-      // Auto-cleanup after 4 seconds
-      setTimeout(async () => {
-        await this.storageManager.cleanupRemovedTabs();
-        await this.loadProjects();
-        this.renderProjects();
-      }, 4000);
+      // NOTE: Removed tabs are kept in storage for timeline view
+      // They can be manually cleaned up via settings or restored via timeline
     } else {
       this.showToast('Failed to remove tab', 'error');
     }
@@ -557,54 +551,6 @@ class TabManager {
       }
     } catch (error) {
       this.showToast('Failed to restore tabs', 'error');
-    }
-  }
-
-  /**
-   * Handle research for all tabs in a group
-   */
-  async handleGroupResearch(projectId) {
-    try {
-      this.showToast('Opening research page...', 'info');
-
-      // Get the project
-      const project = this.projects.find(p => p.id === projectId);
-      if (!project) {
-        this.showToast('Project not found', 'warning');
-        return;
-      }
-
-      // Get all active tabs from the project
-      const activeTabs = project.tabs.filter(tab => !tab.removed);
-
-      if (activeTabs.length === 0) {
-        this.showToast('No tabs to research', 'warning');
-        return;
-      }
-
-      // Prepare combined research data from all tabs
-      const combinedContent = activeTabs.map(tab =>
-        `Title: ${tab.title}\nURL: ${tab.url}\n`
-      ).join('\n---\n\n');
-
-      const pageData = {
-        url: activeTabs[0].url,
-        title: `${project.title} (${activeTabs.length} tabs)`,
-        content: `Research for intent: ${project.title}\n\n${combinedContent}`,
-        favicon: activeTabs[0].favicon || `https://www.google.com/s2/favicons?domain=${new URL(activeTabs[0].url).hostname}&sz=32`,
-        timestamp: new Date().toISOString()
-      };
-
-      // Save to storage for research.html to use
-      await chrome.storage.local.set({ currentPageData: pageData });
-
-      // Open research.html in a new tab
-      const researchUrl = chrome.runtime.getURL('pages/research.html');
-      await chrome.tabs.create({ url: researchUrl, active: true });
-
-    } catch (error) {
-      console.error('Research error:', error);
-      this.showToast('Failed to open research page', 'error');
     }
   }
 
@@ -669,23 +615,32 @@ class TabManager {
 
     // Populate detail card - title with count
     const detailCardTitle = document.getElementById('detail-card-title');
-    detailCardTitle.innerHTML = `${this.escapeHtml(cleanProjectTitle)} <span class="tab-detail-count">(${tabCount} ${tabsLabel})</span>`;
+    if (detailCardTitle) {
+      detailCardTitle.textContent = `${cleanProjectTitle} (${tabCount} ${tabsLabel})`;
+    }
 
     // Generate smart intent or use existing
     const smartIntent = project.intent || this.generateSmartIntent(tab.title);
-    document.getElementById('detail-intent').textContent = smartIntent;
+    const detailIntent = document.getElementById('detail-intent');
+    if (detailIntent) {
+      detailIntent.textContent = smartIntent;
+    }
 
     // Populate summary with description and timestamp
     const detailSummary = document.getElementById('detail-summary');
-    const summary = tab.summary || this.generateSmartSummary(tab, project);
-    detailSummary.textContent = summary;
+    if (detailSummary) {
+      const summary = tab.summary || this.generateSmartSummary(tab, project);
+      detailSummary.textContent = summary;
+    }
 
-    // Update timestamp separately
+    // Update timestamp - find the span inside detail-time
     const detailTime = document.getElementById('detail-time');
-    detailTime.innerHTML = `
-      <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
-      Opened ${this.formatTimestamp(tab.timestamp)}
-    `;
+    if (detailTime) {
+      const timeSpan = detailTime.querySelector('span:last-child');
+      if (timeSpan) {
+        timeSpan.textContent = `Opened ${this.formatTimestamp(tab.timestamp)}`;
+      }
+    }
 
     // Switch to detail view
     this.switchView('detail');

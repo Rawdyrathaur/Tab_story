@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BrainMark</title>
+  <title>Tab Story</title>
   <link rel="icon" type="image/png" href="../icons/icon-48.png">
 
   <!-- Styles -->
@@ -25,8 +25,8 @@
     <!-- Header -->
     <header class="header">
       <div class="header-left">
-        <img src="../icons/logo.png" alt="BrainMark Logo" class="app-logo">
-        <h1 class="app-title">BrainMark</h1>
+        <img src="../icons/logo.png" alt="Tab Story Logo" class="app-logo">
+        <h1 class="app-title">Tab Story</h1>
       </div>
       <div class="header-right">
         <button class="btn-icon" id="timeline-btn" aria-label="Timeline view" title="Timeline View">
@@ -72,7 +72,7 @@
 
         <!-- Empty State (Hidden by default) -->
         <div id="empty-state" class="empty-state-container hidden">
-          <div class="empty-icon">📭</div>
+          <div class="empty-icon">📑</div>
           <h2 class="empty-title">No Tabs Yet</h2>
           <p class="empty-description">Start browsing and organize your tabs with intents!</p>
           <button class="btn btn-primary" id="new-intent-btn">
@@ -92,15 +92,19 @@
       <div class="stats-bar">
         <div class="stat-item">
           <span class="material-symbols-outlined">tab</span>
-          <span id="total-tabs">10 tabs</span>
+          <span id="total-tabs">0 tabs</span>
         </div>
         <div class="stat-item">
           <span class="material-symbols-outlined">folder</span>
-          <span id="total-groups">3 groups</span>
+          <span id="total-groups">0 groups</span>
         </div>
         <div class="stat-item">
           <span class="material-symbols-outlined">schedule</span>
-          <span id="session-time">2h 30m</span>
+          <span id="session-time">0s</span>
+        </div>
+        <div class="stat-item stat-item-storage" id="storage-indicator" title="Storage usage - Click settings to view details">
+          <span class="material-symbols-outlined">storage</span>
+          <span id="storage-usage-text">0 KB</span>
         </div>
       </div>
     </footer>
@@ -120,40 +124,41 @@
     <div class="detail-body custom-scrollbar" id="detail-body">
       <!-- Tab Detail Card -->
       <div class="tab-detail-card">
+        <!-- Project Title Section -->
         <div class="tab-detail-header">
-          <span class="tab-detail-title" id="detail-card-title">Shopping <span class="tab-detail-count">(1 tab)</span></span>
+          <h3 class="tab-detail-title" id="detail-card-title">Tab Details</h3>
         </div>
 
+        <!-- Card Body -->
         <div class="tab-detail-body">
-          <div class="tab-detail-intent">
-            <div class="intent-label">
-              <span class="material-symbols-outlined intent-icon">lightbulb</span>
-              Intent
-            </div>
-            <span class="intent-value" id="detail-intent">Shopping</span>
+          <!-- Intent Badge -->
+          <div class="detail-section">
+            <div class="detail-badge" id="detail-intent">General</div>
           </div>
 
-          <div class="tab-detail-summary">
-            <div class="summary-label">
-              <span class="material-symbols-outlined summary-icon">description</span>
-              Summary
+          <!-- Description -->
+          <div class="detail-section">
+            <p class="detail-description" id="detail-summary">Loading tab information...</p>
+          </div>
+
+          <!-- Timestamp -->
+          <div class="detail-section">
+            <div class="detail-timestamp" id="detail-time">
+              <span class="material-symbols-outlined">schedule</span>
+              <span>Just now</span>
             </div>
-            <p class="summary-text" id="detail-summary">
-              Online shopping for electronics and tech gadgets with fast delivery options.
-            </p>
-            <span class="tab-opened" id="detail-time">
-              <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
-              Opened 3 days ago
-            </span>
           </div>
         </div>
 
+        <!-- Action Buttons -->
         <div class="tab-detail-actions">
-          <button class="btn btn-outlined btn-icon-only" id="detail-summarize" title="AI Summary" aria-label="AI Summary">
+          <button class="btn btn-primary" id="detail-summarize">
             <span class="material-symbols-outlined">auto_awesome</span>
+            AI Summary
           </button>
-          <button class="btn btn-outlined btn-icon-only" id="detail-restore-all" title="Restore All Tabs" aria-label="Restore All Tabs">
-            <span class="material-symbols-outlined">open_in_new</span>
+          <button class="btn btn-outline" id="detail-restore-all">
+            <span class="material-symbols-outlined">restore</span>
+            Restore All Tabs
           </button>
         </div>
       </div>
@@ -168,9 +173,6 @@
         Back
       </button>
       <h2 class="detail-title">Tab Story Timeline</h2>
-      <button class="btn-icon" id="timeline-more-btn" aria-label="More options">
-        <span class="material-symbols-outlined">more_vert</span>
-      </button>
     </div>
 
     <div class="timeline-filters">
@@ -180,53 +182,8 @@
     </div>
 
     <div class="timeline-content custom-scrollbar">
-      <div class="timeline">
-
-        <div class="timeline-item stagger-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-time">2:45 PM</div>
-            <div class="timeline-title">LinkedIn</div>
-            <div class="tab-url">Job Search</div>
-          </div>
-        </div>
-
-        <div class="timeline-item stagger-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-time">2:30 PM</div>
-            <div class="timeline-title">Indeed</div>
-            <div class="tab-url">Job Search</div>
-          </div>
-        </div>
-
-        <div class="timeline-item stagger-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-time">1:15 PM</div>
-            <div class="timeline-title">GitHub</div>
-            <div class="tab-url">2D Game Dev</div>
-          </div>
-        </div>
-
-        <div class="timeline-item stagger-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-time">12:30 PM</div>
-            <div class="timeline-title">WebGL Tutorial</div>
-            <div class="tab-url">2D Game Dev</div>
-          </div>
-        </div>
-
-        <div class="timeline-item stagger-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-time">11:00 AM</div>
-            <div class="timeline-title">Phaser Framework</div>
-            <div class="tab-url">2D Game Dev</div>
-          </div>
-        </div>
-
+      <div class="timeline" id="timeline-container">
+        <!-- Timeline items will be dynamically generated -->
       </div>
     </div>
   </div>
@@ -257,10 +214,7 @@
           Recent intents:
         </p>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="recent-intents">
-          <button class="chip">Job Search</button>
-          <button class="chip">Game Dev</button>
-          <button class="chip">Shopping</button>
-          <button class="chip">Research</button>
+          <!-- Recent intents will be dynamically populated -->
         </div>
       </div>
       <div class="modal-footer">
@@ -284,27 +238,6 @@
       </div>
       <div class="modal-body" style="max-height: 500px;">
 
-        <!-- Privacy & Security -->
-        <div style="margin-bottom: 24px;">
-          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
-            <span class="material-symbols-outlined">lock</span>
-            Privacy & Security
-          </h3>
-          <label class="toggle">
-            <input type="checkbox" id="encrypt-data">
-            <span class="toggle-switch"></span>
-            <span>Enable Data Encryption</span>
-          </label>
-          <div style="height: 12px;"></div>
-          <label class="toggle">
-            <input type="checkbox" id="auto-clear">
-            <span class="toggle-switch"></span>
-            <span>Auto-clear closed tabs</span>
-          </label>
-        </div>
-
-        <div class="divider"></div>
-
         <!-- Appearance -->
         <div style="margin-bottom: 24px;">
           <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
@@ -322,6 +255,87 @@
             <span class="toggle-switch"></span>
             <span>Compact View</span>
           </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Storage Usage -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 500;">
+            <span class="material-symbols-outlined">monitoring</span>
+            Storage Usage
+          </h3>
+
+          <!-- Storage Overview -->
+          <div class="storage-overview" id="storage-overview">
+            <div class="storage-stat-card">
+              <div class="storage-stat-label">Total Used</div>
+              <div class="storage-stat-value" id="storage-total">--</div>
+              <div class="storage-stat-subtitle" id="storage-percentage">-- of 5 MB</div>
+            </div>
+
+            <div class="storage-stat-card">
+              <div class="storage-stat-label">Tab Groups</div>
+              <div class="storage-stat-value" id="storage-project-count">--</div>
+              <div class="storage-stat-subtitle" id="storage-project-size">--</div>
+            </div>
+
+            <div class="storage-stat-card">
+              <div class="storage-stat-label">Backups</div>
+              <div class="storage-stat-value" id="storage-snapshot-count">--</div>
+              <div class="storage-stat-subtitle" id="storage-snapshot-size">--</div>
+            </div>
+          </div>
+
+          <!-- Storage Bar -->
+          <div class="storage-bar-container" style="margin: 16px 0;">
+            <div class="storage-bar">
+              <div class="storage-bar-fill" id="storage-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div class="storage-bar-legend">
+              <span id="storage-status-text" style="font-size: 12px; color: var(--color-text-secondary);">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Storage Breakdown -->
+          <div class="storage-breakdown" id="storage-breakdown">
+            <div class="storage-breakdown-item">
+              <div class="storage-breakdown-color" style="background: #2196F3;"></div>
+              <div class="storage-breakdown-label">Tab Groups</div>
+              <div class="storage-breakdown-value" id="breakdown-projects">--%</div>
+            </div>
+            <div class="storage-breakdown-item">
+              <div class="storage-breakdown-color" style="background: #4CAF50;"></div>
+              <div class="storage-breakdown-label">Backups</div>
+              <div class="storage-breakdown-value" id="breakdown-snapshots">--%</div>
+            </div>
+            <div class="storage-breakdown-item">
+              <div class="storage-breakdown-color" style="background: #FF9800;"></div>
+              <div class="storage-breakdown-label">Other</div>
+              <div class="storage-breakdown-value" id="breakdown-other">--%</div>
+            </div>
+          </div>
+
+          <!-- Storage Actions -->
+          <div class="storage-actions" style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-text btn-sm" id="cleanup-snapshots-btn">
+              <span class="material-symbols-outlined">cleaning_services</span>
+              Clean Backups
+            </button>
+            <button class="btn btn-text btn-sm" id="cleanup-removed-tabs-btn">
+              <span class="material-symbols-outlined">delete_sweep</span>
+              Remove Deleted
+            </button>
+            <button class="btn btn-text btn-sm" id="refresh-storage-btn">
+              <span class="material-symbols-outlined">refresh</span>
+              Refresh
+            </button>
+          </div>
+
+          <!-- Recommendations -->
+          <div id="storage-recommendations" class="storage-recommendations" style="margin-top: 16px; display: none;">
+            <!-- Recommendations will be dynamically added here -->
+          </div>
         </div>
 
         <div class="divider"></div>
@@ -354,9 +368,9 @@
               <span class="material-symbols-outlined">bug_report</span>
               Report Bug
             </button>
-            <button class="btn btn-text" id="feedback-btn">
-              <span class="material-symbols-outlined">feedback</span>
-              Feedback
+            <button class="btn btn-text" id="github-star-btn">
+              <span class="material-symbols-outlined">star</span>
+              Star on GitHub
             </button>
           </div>
         </div>
@@ -372,13 +386,8 @@
   <div id="toast-container"></div>
 
   <!-- Scripts -->
-  <!-- jsPDF Library (local) -->
-  <script src="../scripts/jspdf.umd.min.js"></script>
-
   <script src="../scripts/storage-manager.js"></script>
   <script src="../scripts/ai-manager.js"></script>
-  <script src="../scripts/google-auth-service.js"></script>
-  <script src="../scripts/google-calendar-service.js"></script>
   <script src="../scripts/modal-manager.js"></script>
   <script src="../scripts/tab-manager.js"></script>
   <script src="../scripts/sidepanel.js"></script>

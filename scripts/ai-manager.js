@@ -1,5 +1,5 @@
 /**
- * BrainMark - AI Manager
+ * Tab Story - AI Manager
  * Handles Chrome AI APIs (Summarizer, Prompt, Writer, Rewriter, Translator)
  */
 
