@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Story",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Organize browser tabs by intent with smart clustering, timeline history, and auto-backup",
   "author": "Manish Rathaur",
   "homepage_url": "https://github.com/Rawdyrathaur/Tab_story",
@@ -13,11 +13,7 @@
     "contextMenus",
     "sidePanel",
     "notifications",
-    "identity",
-    "scripting"
-  ],
-  "host_permissions": [
-    "<all_urls>"
+    "identity"
   ],
   "action": {
     "default_title": "Open Tab Story"
@@ -33,14 +29,6 @@
   "background": {
     "service_worker": "scripts/background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["scripts/content-intent-capture.js", "scripts/content-extractor.js"],
-      "run_at": "document_idle",
-      "all_frames": false
-    }
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }
