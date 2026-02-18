@@ -6,7 +6,7 @@
 
 **Smart Tab Organization with AI-Powered Intent Detection**
 
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=google-chrome&logoColor=white)](https://chrome.google.com/webstore)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/tab-story/nhjglpjgddjcjafdabmepgalnaejnleb)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Chrome Version](https://img.shields.io/badge/Chrome-127%2B-yellow?logo=google-chrome)](https://www.google.com/chrome/)
 
