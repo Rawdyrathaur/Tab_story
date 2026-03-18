@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Tests for Tab Story — Storage & Core Logic
@@ -26,7 +26,7 @@ global.chrome = {
               result[k] = mockStorage[k];
             }
           });
-        } else if (typeof keys === "object") {
+        } else if (typeof keys === 'object') {
           // Object of default values: start with defaults, override with stored values
           result = { ...keys };
           Object.keys(keys).forEach((k) => {
@@ -86,8 +86,8 @@ global.chrome = {
 let _groupIdCounter = 0;
 
 function createTabGroup(name, initialTabs) {
-  const trimmed = (name || "").trim();
-  if (!trimmed) throw new Error("Tab group name is required");
+  const trimmed = (name || '').trim();
+  if (!trimmed) throw new Error('Tab group name is required');
   _groupIdCounter += 1;
   return {
     id: `group-${Date.now()}-${_groupIdCounter}`,
@@ -98,7 +98,7 @@ function createTabGroup(name, initialTabs) {
 }
 
 function addTabToGroup(group, tab) {
-  if (!tab.url) throw new Error("Tab must have a URL");
+  if (!tab.url) throw new Error('Tab must have a URL');
   return { ...group, tabs: [...group.tabs, tab] };
 }
 
@@ -124,9 +124,9 @@ function searchTabs(groups, query) {
 }
 
 function sanitizeIntent(input) {
-  if (input == null) return "";
+  if (input == null) return '';
   const str = String(input)
-    .replace(/<[^>]*>/g, "")
+    .replace(/<[^>]*>/g, '')
     .trim();
   return str.length > 100 ? str.slice(0, 100) : str;
 }
