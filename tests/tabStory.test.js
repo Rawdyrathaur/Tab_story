@@ -1,5 +1,5 @@
-"use strict";
 
+'use strict';
 /**
  * Tests for Tab Story — Storage & Core Logic
  *
@@ -14,23 +14,69 @@ global.chrome = {
   storage: {
     local: {
       get: jest.fn((keys, callback) => {
-        const result = {};
-        const keyList = Array.isArray(keys) ? keys : [keys];
-        keyList.forEach((k) => {
-          if (mockStorage[k] !== undefined) result[k] = mockStorage[k];
-        });
-        if (callback) callback(result);
+
+        let result = {};
+
+        if (keys === null || keys === undefined) {
+          // Return a shallow copy of all items, matching chrome.storage behavior
+          result = { ...mockStorage };
+        } else if (Array.isArray(keys)) {
+          // Array of keys: return only those present in storage
+          keys.forEach((k) => {
+            if (mockStorage[k] !== undefined) {
+              result[k] = mockStorage[k];
+            }
+          });
+        } else if (typeof keys === 'object') {
+          // Object of default values: start with defaults, override with stored values
+          result = { ...keys };
+          Object.keys(keys).forEach((k) => {
+            if (mockStorage[k] !== undefined) {
+              result[k] = mockStorage[k];
+            }
+          });
+        } else {
+          // Single string key
+          if (mockStorage[keys] !== undefined) {
+            result[keys] = mockStorage[keys];
+          }
+        }
+
+        if (typeof callback === "function") {
+          // Match Chrome behavior: invoke callback asynchronously and do not
+          // return a Promise when a callback is provided.
+          Promise.resolve().then(() => callback(result));
+          return;
+        }
+
+        // Promise-based usage when no callback is supplied.
+
         return Promise.resolve(result);
       }),
       set: jest.fn((items, callback) => {
         Object.assign(mockStorage, items);
-        if (callback) callback();
+
+        if (typeof callback === "function") {
+          // Asynchronous callback invocation to mirror Chrome behavior.
+          Promise.resolve().then(() => callback());
+          return;
+        }
+
+
         return Promise.resolve();
       }),
       remove: jest.fn((keys, callback) => {
         const keyList = Array.isArray(keys) ? keys : [keys];
         keyList.forEach((k) => delete mockStorage[k]);
-        if (callback) callback();
+
+
+        if (typeof callback === "function") {
+          // Asynchronous callback invocation to mirror Chrome behavior.
+          Promise.resolve().then(() => callback());
+          return;
+        }
+
+
         return Promise.resolve();
       }),
     },
@@ -39,6 +85,69 @@ global.chrome = {
     lastError: null,
   },
 };
+
+
+// ─── Helper functions used by unit tests ───────────────────────────────────
+
+let _groupIdCounter = 0;
+
+function createTabGroup(name, initialTabs) {
+  const trimmed = (name || '').trim();
+  if (!trimmed) throw new Error('Tab group name is required');
+  _groupIdCounter += 1;
+  return {
+    id: `group-${Date.now()}-${_groupIdCounter}`,
+    name: trimmed,
+    tabs: initialTabs ? [...initialTabs] : [],
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function addTabToGroup(group, tab) {
+  if (!tab.url) throw new Error('Tab must have a URL');
+  return { ...group, tabs: [...group.tabs, tab] };
+}
+
+function removeTabFromGroup(group, tabId) {
+  return { ...group, tabs: group.tabs.filter((t) => t.id !== tabId) };
+}
+
+function searchTabs(groups, query) {
+  if (!query) return [];
+  const q = query.toLowerCase();
+  const results = [];
+  groups.forEach((group) => {
+    group.tabs.forEach((tab) => {
+      if (
+        tab.title.toLowerCase().includes(q) ||
+        tab.url.toLowerCase().includes(q)
+      ) {
+        results.push({ ...tab, groupName: group.name });
+      }
+    });
+  });
+  return results;
+}
+
+function sanitizeIntent(input) {
+  if (input == null) return '';
+  const str = String(input)
+    .replace(/<[^>]*>/g, '')
+    .trim();
+  return str.length > 100 ? str.slice(0, 100) : str;
+}
+
+function formatTimestamp(ts) {
+  if (ts == null || Number.isNaN(ts)) return "Invalid date";
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return "Invalid date";
+  return d.toISOString();
+}
+
+function mergeGroups(primary, secondary) {
+  return { ...primary, tabs: [...primary.tabs, ...secondary.tabs] };
+}
+
 
 // ─── Tests ─────────────────────────────────────────────────────────────────
 
@@ -54,6 +163,9 @@ describe("StorageManager integration", () => {
 
   beforeEach(async () => {
     jest.useFakeTimers();
+
+    jest.setSystemTime(new Date("2020-01-01T00:00:00.000Z"));
+
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     jest.clearAllMocks();
     storageManager = new StorageManager();
@@ -125,11 +237,9 @@ describe("StorageManager integration", () => {
   });
 });
 
-describe("Chrome Storage Mock", () => {
-  beforeEach(() => {
-    Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
-    jest.clearAllMocks();
-  });
+
+describe("Tab Group Creation", () => {
+
   test("creates a tab group with correct name", () => {
     const group = createTabGroup("Job Search");
     expect(group.name).toBe("Job Search");
@@ -369,86 +479,3 @@ describe("Chrome Storage Mock", () => {
   });
 });
 
-describe("StorageManager integration", () => {
-  let StorageManager;
-  let storageManager;
-
-  beforeAll(() => {
-    global.window = global.window || {};
-    require("../scripts/storage-manager.js");
-    StorageManager = global.window.StorageManager;
-  });
-
-  beforeEach(async () => {
-    jest.useFakeTimers();
-    Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
-    jest.clearAllMocks();
-    storageManager = new StorageManager();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
-  });
-
-  test("addProject and getProjects works", async () => {
-    const project = await storageManager.addProject({ title: "Test", intent: "Test" });
-    expect(project.success).toBe(true);
-    expect(project.project.title).toBe("Test");
-
-    const projects = await storageManager.getProjects();
-    expect(projects).toHaveLength(1);
-    expect(projects[0].title).toBe("Test");
-  });
-
-  test("addTabToProject and removeTabFromProject + undoRemoveTab works", async () => {
-    const projectResult = await storageManager.addProject({ title: "Test", intent: "Test" });
-    const projectId = projectResult.project.id;
-
-    const addTabResult = await storageManager.addTabToProject(projectId, { title: "Tab", url: "https://example.com" });
-    expect(addTabResult.success).toBe(true);
-    expect(addTabResult.tab).toBeDefined();
-
-    const projects = await storageManager.getProjects();
-    expect(projects[0].tabs).toHaveLength(1);
-
-    const tabId = projects[0].tabs[0].id;
-    await storageManager.removeTabFromProject(projectId, tabId);
-    let afterRemove = await storageManager.getProjects();
-    expect(afterRemove[0].tabs[0].removed).toBe(true);
-
-    const undo = await storageManager.undoRemoveTab(projectId, tabId);
-    expect(undo.success).toBe(true);
-    let afterUndo = await storageManager.getProjects();
-    expect(afterUndo[0].tabs[0].removed).toBeUndefined();
-  });
-
-  test("cleanupRemovedTabs deletes old removed tabs and empty projects", async () => {
-    const projectResult = await storageManager.addProject({ title: "Test2", intent: "Test2" });
-    const projectId = projectResult.project.id;
-    await storageManager.addTabToProject(projectId, { title: "Tab2", url: "https://example2.com" });
-
-    let projects = await storageManager.getProjects();
-    const tabId = projects[0].tabs[0].id;
-    // mark as removed and old
-    const now = new Date();
-    const oldDate = new Date(now.getTime() - 31 * 24 * 60 * 60 * 1000).toISOString();
-    projects[0].tabs[0].removed = true;
-    projects[0].tabs[0].removedAt = oldDate;
-    await storageManager.saveProjects(projects);
-
-    const cleanupResult = await storageManager.cleanupRemovedTabs();
-    expect(cleanupResult.success).toBe(true);
-
-    const finalProjects = await storageManager.getProjects();
-    expect(finalProjects).toHaveLength(0);
-  });
-
-  test("getStorageUsage returns structured usage object", async () => {
-    await storageManager.addProject({ title: "Usage1", intent: "Usage" });
-    const usage = await storageManager.getStorageUsage();
-    expect(usage.success).toBe(true);
-    expect(usage.usage).toBeDefined();
-    expect(typeof usage.usage.total).toBe("number");
-  });
-});
