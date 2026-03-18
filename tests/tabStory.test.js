@@ -156,6 +156,7 @@ describe("StorageManager integration", () => {
 
   beforeEach(async () => {
     jest.useFakeTimers();
+    jest.setSystemTime(new Date("2020-01-01T00:00:00.000Z"));
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     jest.clearAllMocks();
     storageManager = new StorageManager();
