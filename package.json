@@ -1,0 +1,20 @@
+{
+  "name": "tab-story",
+  "version": "1.0.1",
+  "description": "Tab Story Chrome Extension Tests",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "collectCoverageFrom": [
+      "utils/**/*.js",
+      "scripts/**/*.js"
+    ],
+    "coverageReporters": ["text", "lcov"]
+  }
+}
