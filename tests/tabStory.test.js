@@ -14,11 +14,33 @@ global.chrome = {
   storage: {
     local: {
       get: jest.fn((keys, callback) => {
-        const result = {};
-        const keyList = Array.isArray(keys) ? keys : [keys];
-        keyList.forEach((k) => {
-          if (mockStorage[k] !== undefined) result[k] = mockStorage[k];
-        });
+        let result = {};
+
+        if (keys === null || keys === undefined) {
+          // Return a shallow copy of all items, matching chrome.storage behavior
+          result = { ...mockStorage };
+        } else if (Array.isArray(keys)) {
+          // Array of keys: return only those present in storage
+          keys.forEach((k) => {
+            if (mockStorage[k] !== undefined) {
+              result[k] = mockStorage[k];
+            }
+          });
+        } else if (typeof keys === "object") {
+          // Object of default values: start with defaults, override with stored values
+          result = { ...keys };
+          Object.keys(keys).forEach((k) => {
+            if (mockStorage[k] !== undefined) {
+              result[k] = mockStorage[k];
+            }
+          });
+        } else {
+          // Single string key
+          if (mockStorage[keys] !== undefined) {
+            result[keys] = mockStorage[keys];
+          }
+        }
+
         if (callback) callback(result);
         return Promise.resolve(result);
       }),
