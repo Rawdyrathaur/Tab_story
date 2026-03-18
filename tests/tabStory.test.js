@@ -1,5 +1,5 @@
-'use strict';
 
+'use strict';
 /**
  * Tests for Tab Story — Storage & Core Logic
  *
@@ -14,6 +14,7 @@ global.chrome = {
   storage: {
     local: {
       get: jest.fn((keys, callback) => {
+
         let result = {};
 
         if (keys === null || keys === undefined) {
@@ -49,6 +50,7 @@ global.chrome = {
         }
 
         // Promise-based usage when no callback is supplied.
+
         return Promise.resolve(result);
       }),
       set: jest.fn((items, callback) => {
@@ -60,17 +62,20 @@ global.chrome = {
           return;
         }
 
+
         return Promise.resolve();
       }),
       remove: jest.fn((keys, callback) => {
         const keyList = Array.isArray(keys) ? keys : [keys];
         keyList.forEach((k) => delete mockStorage[k]);
 
+
         if (typeof callback === "function") {
           // Asynchronous callback invocation to mirror Chrome behavior.
           Promise.resolve().then(() => callback());
           return;
         }
+
 
         return Promise.resolve();
       }),
@@ -80,6 +85,7 @@ global.chrome = {
     lastError: null,
   },
 };
+
 
 // ─── Helper functions used by unit tests ───────────────────────────────────
 
@@ -142,6 +148,7 @@ function mergeGroups(primary, secondary) {
   return { ...primary, tabs: [...primary.tabs, ...secondary.tabs] };
 }
 
+
 // ─── Tests ─────────────────────────────────────────────────────────────────
 
 describe("StorageManager integration", () => {
@@ -156,7 +163,9 @@ describe("StorageManager integration", () => {
 
   beforeEach(async () => {
     jest.useFakeTimers();
+
     jest.setSystemTime(new Date("2020-01-01T00:00:00.000Z"));
+
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     jest.clearAllMocks();
     storageManager = new StorageManager();
@@ -228,7 +237,9 @@ describe("StorageManager integration", () => {
   });
 });
 
+
 describe("Tab Group Creation", () => {
+
   test("creates a tab group with correct name", () => {
     const group = createTabGroup("Job Search");
     expect(group.name).toBe("Job Search");
@@ -467,3 +478,4 @@ describe("Chrome Storage Mock", () => {
     expect(result.tabGroups[0].name).toBe("Work");
   });
 });
+
