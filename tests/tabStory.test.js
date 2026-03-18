@@ -41,18 +41,37 @@ global.chrome = {
           }
         }
 
-        if (callback) callback(result);
+        if (typeof callback === "function") {
+          // Match Chrome behavior: invoke callback asynchronously and do not
+          // return a Promise when a callback is provided.
+          Promise.resolve().then(() => callback(result));
+          return;
+        }
+
+        // Promise-based usage when no callback is supplied.
         return Promise.resolve(result);
       }),
       set: jest.fn((items, callback) => {
         Object.assign(mockStorage, items);
-        if (callback) callback();
+
+        if (typeof callback === "function") {
+          // Asynchronous callback invocation to mirror Chrome behavior.
+          Promise.resolve().then(() => callback());
+          return;
+        }
+
         return Promise.resolve();
       }),
       remove: jest.fn((keys, callback) => {
         const keyList = Array.isArray(keys) ? keys : [keys];
         keyList.forEach((k) => delete mockStorage[k]);
-        if (callback) callback();
+
+        if (typeof callback === "function") {
+          // Asynchronous callback invocation to mirror Chrome behavior.
+          Promise.resolve().then(() => callback());
+          return;
+        }
+
         return Promise.resolve();
       }),
     },
