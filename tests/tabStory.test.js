@@ -53,9 +53,15 @@ describe("StorageManager integration", () => {
   });
 
   beforeEach(async () => {
+    jest.useFakeTimers();
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     jest.clearAllMocks();
     storageManager = new StorageManager();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test("addProject and getProjects works", async () => {
@@ -374,9 +380,15 @@ describe("StorageManager integration", () => {
   });
 
   beforeEach(async () => {
+    jest.useFakeTimers();
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     jest.clearAllMocks();
     storageManager = new StorageManager();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test("addProject and getProjects works", async () => {
