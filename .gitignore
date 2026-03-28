@@ -5,3 +5,7 @@ build/
 *.log
 .idea/
 .vscode/
+.sfdx/
+
+.sfdx/
+minimal-vite/
