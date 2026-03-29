@@ -1,58 +1,87 @@
-import { useMemo } from 'react';
-import { useTimeSections } from '../../hooks/useTimeSections';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useRef } from 'react';
+import { useTabStore } from '../../store/useTabStore';
 import TimeSectionHeader from './TimeSectionHeader';
 import GroupCard from './GroupCard';
-import { FileText } from 'lucide-react';
-import { memo } from 'react';
 
-/**
- * TabList component - list of time-sectioned tabs
- * @typedef {Object} TabListProps
- */
+export default function TabList() {
+  const containerRef = useRef(null);
+  const timeSections = useTabStore((state) => state.timeSections);
+  const folders = useTabStore((state) => state.folders);
 
-const TabList = memo(function TabList() {
-  const timeSections = useTimeSections();
+  // Combine time sections with folders for virtual scrolling
+  const allItems = Object.values(timeSections).filter(section =>
+    section.tabs && section.tabs.length > 0
+  );
 
-  const allSections = useMemo(() => {
-    return Object.values(timeSections).filter((section) =>
-      section.tabs && section.tabs.length > 0
-    );
-  }, [timeSections]);
+  const virtualizer = useVirtualizer({
+    count: allItems.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => 200, // Estimated height per section
+    overscan: 2,
+  });
 
-  if (allSections.length === 0) {
+  const virtualRows = virtualizer.getVirtualItems();
+
+  if (allItems.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center text-center p-8">
-        <FileText className="h-16 w-16 mb-4 text-white/20" strokeWidth={1.5} />
+        <div className="text-4xl mb-4">📂</div>
         <h3 className="text-lg font-semibold text-white mb-2">No tabs yet</h3>
         <p className="text-sm text-[#A0A0B0]">
-          Tabs you save will appear here
+          Start by creating a new intent to organize your tabs
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col p-4 space-y-3">
-      {allSections.map((section) => (
-        <div key={section.id}>
-          <TimeSectionHeader label={section.label} />
+    <div
+      ref={containerRef}
+      className="flex flex-col overflow-auto"
+      style={{
+        height: 'calc(100vh - 64px)',
+      }}
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualRows.map((virtualRow) => {
+          const section = allItems[virtualRow.index];
 
-          {/* Render tabs as group cards */}
-          {section.tabs.map((tab) => (
-            <GroupCard
-              key={tab.id}
-              group={{
-                id: tab.id,
-                name: tab.title,
-                favicon: tab.favicon,
+          return (
+            <div
+              key={virtualRow.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualRow.start}px)`,
               }}
-              tabs={[tab]}
-            />
-          ))}
-        </div>
-      ))}
+            >
+              <TimeSectionHeader label={section.label} />
+
+              {/* Render tabs as group cards */}
+              {section.tabs.map((tab) => (
+                <GroupCard
+                  key={tab.id}
+                  group={{
+                    id: tab.id,
+                    name: tab.title,
+                    favicon: tab.favicon,
+                  }}
+                  tabs={[tab]}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
-});
-
-export default TabList;
+}

@@ -1,227 +1,287 @@
-import React from 'react';
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { useEffect } from 'react';
 
-const isDevelopment = import.meta.env.DEV;
+// Chrome Storage Keys
+const STORAGE_KEYS = {
+  TABS: 'tab_items',
+  PROJECTS: 'tab_projects',
+  TAGS: 'recent_intents',
+  TIMELINE: 'tab_timeline',
+  SETTINGS: 'user_settings',
+};
 
-/**
- * Load data from Chrome Storage
- */
+// Initial empty state
+const initialState = {
+  tabs: [],
+  folders: [], // Will be populated from tab_projects
+  tags: [],
+  timeSections: {
+    today: { id: 'today', label: 'TODAY', tabs: [] },
+    yesterday: { id: 'yesterday', label: 'YESTERDAY', tabs: [] },
+    week: { id: 'week', label: 'THIS WEEK', tabs: [] },
+    older: { id: 'older', label: 'OLDER', tabs: [] },
+  },
+  selectedFolder: null,
+  selectedTab: null,
+  searchQuery: '',
+  activeFilter: null,
+  isPopupOpen: false,
+  popupPosition: { x: 0, y: 0 },
+  isLoading: true,
+};
+
+// Helper function to load from Chrome Storage
 const loadFromStorage = async (key) => {
-  const result = await chrome.storage.local.get(key);
-  return result[key];
-};
-
-/**
- * Save data to Chrome Storage
- */
-const saveToStorage = async (key, value) => {
-  await chrome.storage.local.set({ [key]: value });
-};
-
-/**
- * Extract all tabs from projects/folders
- */
-const extractTabsFromProjects = (projects) => {
-  const allTabs = [];
-  if (Array.isArray(projects)) {
-    projects.forEach((project) => {
-      if (project.tabs && Array.isArray(project.tabs)) {
-        allTabs.push(...project.tabs);
-      }
-    });
+  if (typeof chrome === 'undefined' || !chrome.storage) {
+    console.warn('Chrome Storage API not available');
+    return null;
   }
-  return allTabs;
+  try {
+    const result = await chrome.storage.local.get(key);
+    return result[key];
+  } catch (error) {
+    console.error(`Error loading ${key} from storage:`, error);
+    return null;
+  }
 };
 
-/**
- * Toggle folder expanded state recursively
- */
-const toggleFolderRecursive = (folders, targetId) => {
-  return folders.map((folder) => {
-    if (folder.id === targetId) {
-      return { ...folder, expanded: !folder.expanded };
+// Helper function to save to Chrome Storage
+const saveToStorage = async (key, value) => {
+  if (typeof chrome === 'undefined' || !chrome.storage) {
+    console.warn('Chrome Storage API not available');
+    return;
+  }
+  try {
+    await chrome.storage.local.set({ [key]: value });
+  } catch (error) {
+    console.error(`Error saving ${key} to storage:`, error);
+  }
+};
+
+// Helper to convert projects to folder structure
+const projectsToFolders = (projects) => {
+  if (!Array.isArray(projects)) return [];
+
+  return projects.map((project) => ({
+    id: project.id || `folder-${Date.now()}`,
+    name: project.title || project.intent || 'Untitled',
+    icon: 'folder',
+    expanded: false,
+    intent: project.intent,
+    tabs: project.tabs || [],
+    createdAt: project.createdAt,
+    section: project.section,
+  }));
+};
+
+// Helper to group tabs by time
+const groupTabsByTime = (tabs) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const week = new Date(today);
+  week.setDate(week.getDate() - 7);
+
+  const groups = {
+    today: { id: 'today', label: 'TODAY', tabs: [] },
+    yesterday: { id: 'yesterday', label: 'YESTERDAY', tabs: [] },
+    week: { id: 'week', label: 'THIS WEEK', tabs: [] },
+    older: { id: 'older', label: 'OLDER', tabs: [] },
+  };
+
+  tabs.forEach((tab) => {
+    const tabDate = new Date(tab.timestamp || tab.createdAt);
+    if (tabDate >= today) {
+      groups.today.tabs.push(tab);
+    } else if (tabDate >= yesterday) {
+      groups.yesterday.tabs.push(tab);
+    } else if (tabDate >= week) {
+      groups.week.tabs.push(tab);
+    } else {
+      groups.older.tabs.push(tab);
     }
-    if (folder.children?.length > 0) {
-      return { ...folder, children: toggleFolderRecursive(folder.children, targetId) };
-    }
-    return folder;
   });
+
+  return groups;
 };
 
-/**
- * Tab Store - manages tab data
- */
-export const useTabStore = create(
-  devtools(
-    (set) => ({
-      // Data
-      tabs: [],
-      projects: [],
-      folders: [],
-      tags: [],
+export const useTabStore = create((set, get) => ({
+  ...initialState,
 
-      // UI State
-      activeTab: null,
+  // Initialize store with data from Chrome Storage
+  initialize: async () => {
+    set({ isLoading: true });
+
+    const [projects, tabs, tags, timeline] = await Promise.all([
+      loadFromStorage(STORAGE_KEYS.PROJECTS),
+      loadFromStorage(STORAGE_KEYS.TABS),
+      loadFromStorage(STORAGE_KEYS.TAGS),
+      loadFromStorage(STORAGE_KEYS.TIMELINE),
+    ]);
+
+    const folders = projectsToFolders(projects || []);
+    const allTabs = [...(tabs || []), ...(timeline || [])];
+
+    set({
+      folders,
+      tabs: tabs || [],
+      tags: tags || [],
+      timeSections: groupTabsByTime(allTabs),
       isLoading: false,
-      error: null,
+    });
+  },
 
-      // Actions
-      setTabs: (tabs) => set({ tabs }),
-      setProjects: (projects) => set({ projects }),
-      setLoading: (bool) => set({ isLoading: bool }),
-      setError: (err) => set({ error: err }),
-      // Load data from storage and update state
-      loadData: async () => {
-        console.log('loadData: Fetching data...');
-        try {
-          const projects = await loadFromStorage('projects') || [];
-          const tabs = extractTabsFromProjects(projects);
-          console.log('loadData: Data fetched successfully', { projects, tabs });
-          set({ projects, tabs, isLoading: false, error: null });
-        } catch (err) {
-          console.error('loadData: Error fetching data', err);
-          set({ isLoading: false, error: 'Failed to load data' });
-        }
-      },
+  // Actions
+  setSelectedFolder: (folderId) => set({ selectedFolder: folderId }),
+
+  setSelectedTab: (tab) => set({ selectedTab: tab }),
+
+  setSearchQuery: (query) => set({ searchQuery: query }),
+
+  setActiveFilter: (filter) => set({ activeFilter: filter }),
+
+  setPopupOpen: (isOpen, tab = null, position = { x: 0, y: 0 }) =>
+    set({
+      isPopupOpen: isOpen,
+      selectedTab: tab,
+      popupPosition: position,
     }),
-    { name: 'TabStore', enabled: isDevelopment }
-  )
-);
 
-export default useTabStore;
+  toggleFolder: (folderId) =>
+    set((state) => {
+      const toggleRecursive = (folders) =>
+        folders.map((folder) => {
+          if (folder.id === folderId) {
+            const newExpanded = !folder.expanded;
+            // Save expanded state to storage
+            saveToStorage(STORAGE_KEYS.PROJECTS, folders);
+            return { ...folder, expanded: newExpanded };
+          }
+          if (folder.children && folder.children.length > 0) {
+            return { ...folder, children: toggleRecursive(folder.children) };
+          }
+          return folder;
+        });
 
-/**
- * Folder Store - manages folder/tree state
- */
-export const useFolderStore = create(
-  devtools(
-    (set) => ({
-      folders: [],
-      selectedFolder: null,
-
-      setFolders: (folders) => set({ folders }),
-      setSelectedFolder: (folderId) => set({ selectedFolder: folderId }),
-      toggleFolder: (folderId) => set((state) => {
-        const newFolders = toggleFolderRecursive(state.folders, folderId);
-        saveToStorage('tab_projects', newFolders);
-        return { folders: newFolders };
-      }),
-      addFolder: (name, intent = '') => set((state) => {
-        const newFolder = {
-          id: `folder-${Date.now()}`,
-          name,
-          intent,
-          icon: 'folder',
-          expanded: false,
-          tabs: [],
-          createdAt: new Date().toISOString(),
-          section: 'today',
-        };
-        const newFolders = [...state.folders, newFolder];
-        saveToStorage('tab_projects', newFolders);
-        return { folders: newFolders };
-      }),
-      deleteFolder: (folderId) => set((state) => {
-        const newFolders = state.folders.filter((folder) => folder.id !== folderId);
-        saveToStorage('tab_projects', newFolders);
-        return {
-          folders: newFolders,
-          selectedFolder: state.selectedFolder === folderId ? null : state.selectedFolder,
-        };
-      }),
-      addTabToFolder: (folderId, tab) => set((state) => {
-        const addToFolderRecursive = (folders) =>
-          folders.map((folder) => {
-            if (folder.id === folderId) {
-              return { ...folder, tabs: [...(folder.tabs || []), tab] };
-            }
-            if (folder.children?.length > 0) {
-              return { ...folder, children: addToFolderRecursive(folder.children) };
-            }
-            return folder;
-          });
-
-        const newFolders = addToFolderRecursive(state.folders);
-        saveToStorage('tab_projects', newFolders);
-
-        return { folders: newFolders };
-      }),
+      return { folders: toggleRecursive(state.folders) };
     }),
-    { name: 'FolderStore' }
-  )
-);
 
-/**
- * UI Store - manages popup, filter, search state
- */
-export const useUIStore = create(
-  devtools(
-    (set) => ({
-      isPopupOpen: false,
-      selectedTab: null,
-      popupPosition: { x: 0, y: 0 },
-      searchQuery: '',
-      activeFilter: null,
-      storageError: null,
+  addFolder: (name, intent = '') =>
+    set((state) => {
+      const newFolder = {
+        id: `folder-${Date.now()}`,
+        name,
+        intent,
+        icon: 'folder',
+        expanded: false,
+        tabs: [],
+        createdAt: new Date().toISOString(),
+        section: 'today',
+      };
 
-      setPopupOpen: (isOpen, tab = null, position = { x: 0, y: 0 }) =>
-        set({
-          isPopupOpen: isOpen,
-          selectedTab: tab,
-          popupPosition: position,
-        }),
-      setSearchQuery: (query) => set({ searchQuery: query }),
-      setActiveFilter: (filter) => set({ activeFilter: filter }),
-      setStorageError: (error) => set({ storageError: error }),
+      const newFolders = [...state.folders, newFolder];
+      saveToStorage(STORAGE_KEYS.PROJECTS, newFolders);
+
+      return { folders: newFolders };
     }),
-    { name: 'UIStore' }
-  )
-);
 
-/**
- * Tag Store - manages tags
- */
-export const useTagStore = create(
-  devtools(
-    (set) => ({
-      tags: [],
+  deleteFolder: (folderId) =>
+    set((state) => {
+      const newFolders = state.folders.filter((folder) => folder.id !== folderId);
+      saveToStorage(STORAGE_KEYS.PROJECTS, newFolders);
 
-      setTags: (tags) => set({ tags }),
-      addTag: (tag) => set((state) => {
-        if (state.tags.includes(tag)) return state;
-        const newTags = [...state.tags, tag];
-        saveToStorage('recent_intents', newTags);
-        return { tags: newTags };
-      }),
-      removeTag: (tag) => set((state) => {
-        const newTags = state.tags.filter((t) => t !== tag);
-        saveToStorage('recent_intents', newTags);
-        return { tags: newTags };
-      }),
+      return {
+        folders: newFolders,
+        selectedFolder: state.selectedFolder === folderId ? null : state.selectedFolder,
+      };
     }),
-    { name: 'TagStore' }
-  )
-);
 
-/**
- * Hook to initialize store and listen for storage changes
- */
+  addTabToFolder: (folderId, tab) =>
+    set((state) => {
+      const addToFolderRecursive = (folders) =>
+        folders.map((folder) => {
+          if (folder.id === folderId) {
+            return {
+              ...folder,
+              tabs: [...(folder.tabs || []), tab],
+            };
+          }
+          if (folder.children && folder.children.length > 0) {
+            return {
+              ...folder,
+              children: addToFolderRecursive(folder.children),
+            };
+          }
+          return folder;
+        });
+
+      const newFolders = addToFolderRecursive(state.folders);
+      const newTabs = [...state.tabs, tab];
+
+      saveToStorage(STORAGE_KEYS.PROJECTS, newFolders);
+      saveToStorage(STORAGE_KEYS.TABS, newTabs);
+
+      return {
+        folders: newFolders,
+        tabs: newTabs,
+        timeSections: groupTabsByTime(newTabs),
+      };
+    }),
+
+  updateTabStatus: (tabId, status) =>
+    set((state) => {
+      const newTabs = state.tabs.map((tab) =>
+        tab.id === tabId ? { ...tab, status } : tab,
+      );
+
+      saveToStorage(STORAGE_KEYS.TABS, newTabs);
+
+      return {
+        tabs: newTabs,
+        timeSections: groupTabsByTime(newTabs),
+      };
+    }),
+
+  addTag: (tag) =>
+    set((state) => {
+      if (state.tags.includes(tag)) return state;
+
+      const newTags = [...state.tags, tag];
+      saveToStorage(STORAGE_KEYS.TAGS, newTags);
+
+      return { tags: newTags };
+    }),
+
+  removeTag: (tag) =>
+    set((state) => {
+      const newTags = state.tags.filter((t) => t !== tag);
+      saveToStorage(STORAGE_KEYS.TAGS, newTags);
+
+      return { tags: newTags };
+    }),
+
+  syncWithChrome: async () => {
+    await get().initialize();
+  },
+}));
+
+// Hook to initialize store on mount
 export const useInitializeStore = () => {
-  const loadData = useTabStore((state) => state.loadData);
+  const initialize = useTabStore((state) => state.initialize);
 
-  React.useEffect(() => {
-    loadData();
+  useEffect(() => {
+    initialize();
 
+    // Listen for storage changes from other parts of the extension
     if (typeof chrome !== 'undefined' && chrome.storage) {
       const handleStorageChange = (changes, areaName) => {
         if (areaName === 'local') {
-          const changedKeys = Object.keys(changes);
-          // Listen to relevant storage keys
-          const relevantKeys = ['tab_projects', 'tab_timeline', 'recent_intents'];
-          if (changedKeys.some((key) => relevantKeys.includes(key))) {
-            loadData();
-          }
+          Object.keys(changes).forEach((key) => {
+            if (Object.values(STORAGE_KEYS).includes(key)) {
+              initialize(); // Re-sync when storage changes
+            }
+          });
         }
       };
 
@@ -231,5 +291,5 @@ export const useInitializeStore = () => {
         chrome.storage.onChanged.removeListener(handleStorageChange);
       };
     }
-  }, [loadData]);
+  }, [initialize]);
 };

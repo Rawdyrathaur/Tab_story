@@ -1,25 +1,7 @@
 import { Folder, ChevronDown, MoreHorizontal } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tv } from 'tailwind-variants';
 import { cn } from '../../lib/cn';
-import { useFolderStore } from '../../store/useTabStore';
-import { useUIStore } from '../../store/useTabStore';
-import { memo, useCallback } from 'react';
-
-/**
- * FolderItem component
- * @typedef {Object} FolderItemProps
- * @property {string} id - Folder ID
- * @property {string} name - Folder name
- * @property {boolean} [expanded=false] - Whether folder is expanded
- * @property {boolean} [selected=false] - Whether folder is selected
- * @property {number} [level=1] - Indent level
- * @property {boolean} [hasChildren=false] - Has child folders
- * @property {boolean} [showMenu=false] - Show menu button
- * @property {Function} [onToggle] - Toggle callback
- * @property {Function} [onSelect] - Select callback
- * @property {Function} [onMenuClick] - Menu click callback
- */
 
 const folderItemVariants = tv({
   base: 'flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors cursor-pointer',
@@ -44,7 +26,7 @@ const chevronVariants = {
   collapsed: { rotate: 0 },
 };
 
-const FolderItem = memo(function FolderItem({
+export default function FolderItem({
   id,
   name,
   expanded = false,
@@ -56,37 +38,30 @@ const FolderItem = memo(function FolderItem({
   onSelect,
   onMenuClick,
 }) {
-  const toggleFolder = useFolderStore((state) => state.toggleFolder);
-  const setSelectedFolder = useFolderStore((state) => state.setSelectedFolder);
-  const selectedFolder = useFolderStore((state) => state.selectedFolder);
-
-  const handleToggle = useCallback((e) => {
+  const handleToggle = (e) => {
     e.stopPropagation();
     if (hasChildren && onToggle) {
-      toggleFolder(id);
+      onToggle(id);
     }
-  }, [hasChildren, onToggle, id, toggleFolder]);
+  };
 
-  const handleSelect = useCallback(() => {
+  const handleSelect = () => {
     if (onSelect) {
-      onSelect(id === selectedFolder ? null : id);
+      onSelect(id);
     }
-  }, [selectedFolder, id, onSelect]);
+  };
 
-  const handleMenuClick = useCallback((e) => {
+  const handleMenuClick = (e) => {
     e.stopPropagation();
     if (onMenuClick) {
       onMenuClick(e, id);
     }
-  }, [onMenuClick, id]);
+  };
 
   return (
     <div
       className={cn(folderItemVariants({ selected, level }))}
       onClick={handleSelect}
-      role="treeitem"
-      aria-expanded={expanded}
-      aria-selected={selected}
     >
       {hasChildren && (
         <motion.div
@@ -119,13 +94,10 @@ const FolderItem = memo(function FolderItem({
           onClick={handleMenuClick}
           className="text-white/40 hover:text-white/70 transition-colors"
           aria-label="More options"
-          type="button"
         >
           <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
         </button>
       )}
     </div>
   );
-});
-
-export default FolderItem;
+}

@@ -1,17 +1,6 @@
 import { tv } from 'tailwind-variants';
 import { cn } from '../../lib/cn';
 import { Dot } from 'lucide-react';
-import { memo } from 'react';
-
-/**
- * Chip component with variants
- * @typedef {Object} ChipProps
- * @property {string} [variant='default'] - Chip variant
- * @property {string} [size='default'] - Chip size
- * @property {React.ReactNode} [children] - Chip content
- * @property {boolean} [showDot=false] - Show dot indicator
- * @property {string} [className] - Additional CSS classes
- */
 
 const chipVariants = tv({
   base: 'inline-flex items-center gap-1.5 rounded-full font-medium transition-colors',
@@ -45,13 +34,13 @@ const chipDotColors = {
   tag: null,
 };
 
-const Chip = memo(function Chip({ variant, size, children, showDot = false, className, ...props }) {
+function Chip({ className, variant, size, children, showDot = false, ...props }) {
   return (
-    <span className={cn(chipVariants({ variant, size }), className)} {...props}>
+    <span className={cn(chipVariants({ variant, size, className }))} {...props}>
       {showDot && chipDotColors[variant] && <Dot size={8} className={chipDotColors[variant]} />}
       {children}
     </span>
   );
-});
+}
 
 export { Chip, chipVariants };
