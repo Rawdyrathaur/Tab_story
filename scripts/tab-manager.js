@@ -12,8 +12,8 @@ class TabManager {
     this.searchQuery = '';
     this.renderTimeout = null; // For debouncing renders
 
-    // Initialize asynchronously
-    this.init().catch(err => {});
+    // Initialize asynchronously with error handling
+    this.init().catch(err => console.error('Initialization failed:', err));
   }
 
   async init() {
@@ -32,16 +32,7 @@ class TabManager {
    */
   async loadProjects() {
     const rawProjects = await this.storageManager.getProjects();
-
-    // Deduplicate projects by ID (in case of data corruption)
-    const projectMap = new Map();
-    rawProjects.forEach(project => {
-      if (!projectMap.has(project.id)) {
-        projectMap.set(project.id, project);
-      }
-    });
-
-    this.projects = Array.from(projectMap.values());
+    this.projects = TabManager.deduplicateById(rawProjects);
     this.filteredProjects = [...this.projects];
   }
 
@@ -206,6 +197,106 @@ class TabManager {
   }
 
   /**
+   * Debounced renderProjects method using Lodash
+   */
+  renderProjects = _.debounce(() => {
+    const container = document.getElementById('project-groups');
+    const loadingState = document.getElementById('loading-state');
+    const emptyState = document.getElementById('empty-state');
+
+    if (!container) {
+      return;
+    }
+
+    if (loadingState) loadingState.classList.remove('hidden');
+    if (emptyState) emptyState.classList.add('hidden');
+    container.innerHTML = '';
+
+    if (this.filteredProjects.length === 0) {
+      if (emptyState) emptyState.classList.remove('hidden');
+      return;
+    }
+
+    // Calculate sections WITHOUT modifying the original projects
+    const now = new Date();
+    const projectsWithSections = this.filteredProjects.map(project => {
+      const projectDate = new Date(project.timestamp || project.createdAt || now);
+      const daysDiff = Math.floor((now - projectDate) / (24 * 60 * 60 * 1000));
+
+      let section = project.section;
+      if (!section) {
+        if (daysDiff === 0) {
+          section = 'today';
+        } else if (daysDiff <= 7) {
+          section = 'week';
+        } else {
+          section = 'older';
+        }
+      }
+
+      return { ...project, section };
+    });
+
+    const todayProjects = projectsWithSections.filter(p => p.section === 'today');
+    const weekProjects = projectsWithSections.filter(p => p.section === 'week');
+    const olderProjects = projectsWithSections.filter(p => p.section === 'older');
+
+    if (todayProjects.length > 0) {
+      const todayHeader = this.createSectionHeader('today', 'TODAY');
+      container.appendChild(todayHeader);
+
+      todayProjects.forEach(project => {
+        const activeTabs = project.tabs.filter(tab => !tab.removed);
+        if (activeTabs.length > 0) {
+          const projectElement = this.createProjectElement(project);
+          container.appendChild(projectElement);
+        }
+      });
+    }
+
+    if (weekProjects.length > 0) {
+      const weekHeader = this.createSectionHeader('calendar_month', 'LAST 7 DAYS');
+      container.appendChild(weekHeader);
+
+      weekProjects.forEach(project => {
+        const activeTabs = project.tabs.filter(tab => !tab.removed);
+        if (activeTabs.length > 0) {
+          const projectElement = this.createProjectElement(project);
+          container.appendChild(projectElement);
+        }
+      });
+    }
+
+    if (olderProjects.length > 0) {
+      const olderHeader = this.createSectionHeader('history', 'OLDER');
+      container.appendChild(olderHeader);
+
+      olderProjects.forEach(project => {
+        const activeTabs = project.tabs.filter(tab => !tab.removed);
+        if (activeTabs.length > 0) {
+          const projectElement = this.createProjectElement(project);
+          container.appendChild(projectElement);
+        }
+      });
+    }
+
+    this.attachProjectEventListeners();
+  }, 300);
+
+  /**
+   * Utility function to deduplicate items by ID
+   */
+  static deduplicateById(items) {
+    const map = new Map();
+    items.forEach(item => {
+      if (!map.has(item.id)) {
+        map.set(item.id, item);
+      }
+    });
+    return Array.from(map.values());
+  }
+
+  /**
    * Handle search - Simple show/hide approach (no re-rendering)
    */
   handleSearch(query) {
@@ -217,17 +308,17 @@ class TabManager {
 
     if (!this.searchQuery) {
       // No search - show everything normally
-      allSections.forEach(section => section.style.display = '');
+      allSections.forEach(section => section.classList.remove('hidden'));
       allProjects.forEach(project => {
-        project.style.display = '';
+        project.classList.remove('hidden');
         const tabs = project.querySelectorAll('.tab-item');
-        tabs.forEach(tab => tab.style.display = '');
+        tabs.forEach(tab => tab.classList.remove('hidden'));
       });
       return;
     }
 
     // Hide all section headers during search
-    allSections.forEach(section => section.style.display = 'none');
+    allSections.forEach(section => section.classList.add('hidden'));
 
     // Search mode - hide non-matching items
     allProjects.forEach(projectEl => {
@@ -243,7 +334,7 @@ class TabManager {
         const tabId = tabEl.dataset.tabId;
         const tab = project.tabs.find(t => t.id === tabId);
         if (!tab || tab.removed) {
-          tabEl.style.display = 'none';
+          tabEl.classList.add('hidden');
           return;
         }
 
@@ -256,15 +347,15 @@ class TabManager {
           project.intent.toLowerCase().includes(this.searchQuery);
 
         if (matches) {
-          tabEl.style.display = '';
+          tabEl.classList.remove('hidden');
           hasVisibleTabs = true;
         } else {
-          tabEl.style.display = 'none';
+          tabEl.classList.add('hidden');
         }
       });
 
       // Show/hide project based on visible tabs
-      projectEl.style.display = hasVisibleTabs ? '' : 'none';
+      projectEl.classList.toggle('hidden', !hasVisibleTabs);
     });
   }
 
@@ -284,22 +375,18 @@ class TabManager {
       clearTimeout(this.renderTimeout);
     }
 
-    const container = document.getElementById('project-groups');
-    const loadingState = document.getElementById('loading-state');
-    const emptyState = document.getElementById('empty-state');
+    this.renderProjects = _.debounce(() => {
+      const container = document.getElementById('project-groups');
+      const loadingState = document.getElementById('loading-state');
+      const emptyState = document.getElementById('empty-state');
 
-    if (!container) {
-      return;
-    }
+      if (!container) {
+        return;
+      }
 
-    if (loadingState) loadingState.classList.remove('hidden');
-    if (emptyState) emptyState.classList.add('hidden');
-    container.innerHTML = '';
-
-    this.renderTimeout = setTimeout(() => {
-      this.renderTimeout = null;
-
-      if (loadingState) loadingState.classList.add('hidden');
+      if (loadingState) loadingState.classList.remove('hidden');
+      if (emptyState) emptyState.classList.add('hidden');
+      container.innerHTML = '';
 
       if (this.filteredProjects.length === 0) {
         if (emptyState) emptyState.classList.remove('hidden');

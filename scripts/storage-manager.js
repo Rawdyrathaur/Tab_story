@@ -3,6 +3,8 @@
  * Handles Chrome Storage API interactions
  */
 
+import { loadFromStorage, saveToStorage, clearStorage } from '../utils/storage-utils';
+
 class StorageManager {
   constructor() {
     this.storage = chrome.storage.local;
@@ -26,7 +28,7 @@ class StorageManager {
    */
   async saveProjects(projects) {
     try {
-      await this.storage.set({ [this.STORAGE_KEYS.PROJECTS]: projects });
+      await saveToStorage(this.STORAGE_KEYS.PROJECTS, projects);
       return { success: true };
     } catch (error) {
       console.error('Failed to save projects:', error);
@@ -38,13 +40,7 @@ class StorageManager {
    * Get all projects
    */
   async getProjects() {
-    try {
-      const result = await this.storage.get(this.STORAGE_KEYS.PROJECTS);
-      return result[this.STORAGE_KEYS.PROJECTS] || this.getDefaultProjects();
-    } catch (error) {
-      console.error('Failed to get projects:', error);
-      return this.getDefaultProjects();
-    }
+    return await loadFromStorage(this.STORAGE_KEYS.PROJECTS);
   }
 
   /**
@@ -230,7 +226,7 @@ class StorageManager {
    */
   async saveSettings(settings) {
     try {
-      await this.storage.set({ [this.STORAGE_KEYS.SETTINGS]: settings });
+      await saveToStorage(this.STORAGE_KEYS.SETTINGS, settings);
       return { success: true };
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -266,7 +262,7 @@ class StorageManager {
    */
   async saveRecentIntents(intents) {
     try {
-      await this.storage.set({ [this.STORAGE_KEYS.INTENTS]: intents });
+      await saveToStorage(this.STORAGE_KEYS.INTENTS, intents);
       return { success: true };
     } catch (error) {
       console.error('Failed to save intents:', error);

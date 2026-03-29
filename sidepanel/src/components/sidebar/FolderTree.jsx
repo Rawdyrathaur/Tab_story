@@ -1,24 +1,36 @@
 import { Plus } from 'lucide-react';
-import { useTabStore } from '../../store/useTabStore';
+import { useFolderStore } from '../../store/useTabStore';
+import { useUIStore } from '../../store/useTabStore';
 import FolderItem from './FolderItem';
+import { memo, useCallback, useMemo } from 'react';
 
-export default function FolderTree() {
-  const folders = useTabStore((state) => state.folders);
-  const selectedFolder = useTabStore((state) => state.selectedFolder);
-  const toggleFolder = useTabStore((state) => state.toggleFolder);
-  const setSelectedFolder = useTabStore((state) => state.setSelectedFolder);
+/**
+ * FolderTree component - renders folder hierarchy
+ * @typedef {Object} FolderTreeProps
+ */
 
-  const handleFolderToggle = (folderId) => {
+const FolderTree = memo(function FolderTree() {
+  const folders = useFolderStore((state) => state.folders);
+  const selectedFolder = useFolderStore((state) => state.selectedFolder);
+  const addFolder = useFolderStore((state) => state.addFolder);
+
+  const toggleFolder = useFolderStore((state) => state.toggleFolder);
+  const setSelectedFolder = useFolderStore((state) => state.setSelectedFolder);
+
+  const handleFolderToggle = useCallback((folderId) => {
     toggleFolder(folderId);
-  };
+  }, [toggleFolder]);
 
-  const handleFolderSelect = (folderId) => {
+  const handleFolderSelect = useCallback((folderId) => {
     setSelectedFolder(folderId === selectedFolder ? null : folderId);
-  };
+  }, [selectedFolder, setSelectedFolder]);
 
-  const renderFolder = (folder, level = 1) => {
+  const handleAddFolder = useCallback(() => {
+    addFolder('New Folder', '');
+  }, [addFolder]);
+
+  const renderFolder = useCallback((folder, level = 1) => {
     const hasChildren = folder.children && folder.children.length > 0;
-    const isSelected = selectedFolder === folder.id;
 
     return (
       <div key={folder.id}>
@@ -26,35 +38,37 @@ export default function FolderTree() {
           id={folder.id}
           name={folder.name}
           expanded={folder.expanded}
-          selected={isSelected}
+          selected={selectedFolder === folder.id}
           level={level}
           hasChildren={hasChildren}
           showMenu={true}
           onToggle={handleFolderToggle}
           onSelect={handleFolderSelect}
+          onMenuClick={(e, folderId) => {
+            // TODO: Implement folder menu
+          }}
         />
 
-        {hasChildren && folder.expanded && (
-          <div className="flex flex-col">
-            {folder.children.map((child) => renderFolder(child, level + 1))}
-          </div>
-        )}
+        {hasChildren && folder.expanded && folder.children.map((child) => renderFolder(child, level + 1))}
       </div>
     );
-  };
+  }, [selectedFolder, handleFolderToggle, handleFolderSelect]);
 
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5" role="tree">
       {folders.map((folder) => renderFolder(folder))}
 
-      {/* Add Tab row */}
       <button
+        onClick={handleAddFolder}
         className="flex h-9 items-center gap-2 pl-7 text-xs font-medium text-[#A0A0B0] hover:bg-white/5 rounded-lg transition-colors"
-        onClick={() => console.log('Add Tab clicked')}
+        type="button"
+        aria-label="Add folder"
       >
         <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-        <span>Add Tab</span>
+        <span>Add Folder</span>
       </button>
     </div>
   );
-}
+});
+
+export default FolderTree;

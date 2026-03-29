@@ -1,48 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background-base: #0E0E10;
-    --background-elevated: #1A1A24;
-    --background-sidebar: #13131A;
-    --background-popup: #1E1E2A;
-    --accent-purple: #7C6FFF;
-    --accent-green: #50C878;
-    --accent-green-light: #5DDFB0;
-    --accent-green-dark: #2A6F4F;
-    --accent-blue: #5B9CF6;
-    --accent-amber: #D4A832;
-    --text-primary: #FFFFFF;
-    --text-secondary: #A0A0B0;
-    --text-muted: #505060;
-    --text-placeholder: #606070;
-    --border-subtle: rgba(255,255,255,0.06);
-    --border-default: rgba(255,255,255,0.10);
-    --border-focus: rgba(124,111,255,0.5);
-  }
-
-  * {
-    @apply border-border-subtle;
-  }
-
-  body {
-    @apply bg-background-base text-text-primary font-sans antialiased;
-    margin: 0;
-    padding: 0;
-    width: 860px;
-    min-height: 1280px;
-    overflow: hidden;
-  }
-
-  #root {
-    @apply h-full w-full;
-  }
+@theme {
+  --color-background-base: #0E0E10;
+  --color-background-elevated: #1A1A24;
+  --color-background-sidebar: #13131A;
+  --color-background-popup: #1E1E2A;
+  --color-accent-purple: #7C6FFF;
+  --color-accent-green: #50C878;
+  --color-accent-green-light: #5DDFB0;
+  --color-accent-green-dark: #2A6F4F;
+  --color-accent-blue: #5B9CF6;
+  --color-accent-amber: #D4A832;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A0A0B0;
+  --color-text-muted: #505060;
+  --color-text-placeholder: #606070;
+  --color-border-subtle: rgba(255,255,255,0.06);
+  --color-border-default: rgba(255,255,255,0.10);
+  --color-border-focus: rgba(124,111,255,0.5);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+* {
+  border-color: var(--color-border-subtle);
+}
+
+body {
+  background-color: var(--color-background-base);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  min-width: 900px;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Fix text overflow */
+input, button {
+  overflow: visible;
+}
+
+/* Fix flexbox overflow issues */
+.flex {
+  min-width: 0;
 }
