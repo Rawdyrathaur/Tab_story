@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: '25 4 * * 4'
 
 jobs:
   analyze:
@@ -24,6 +26,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
+          build-mode: none
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

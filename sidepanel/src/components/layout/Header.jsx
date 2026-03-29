@@ -1,20 +1,13 @@
 import { Search, Clock, Settings, LayoutGrid } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { memo } from 'react';
 
-/**
- * Header component with app title and action buttons
- * @typedef {Object} HeaderProps
- * @property {string} [className] - Additional CSS classes
- */
-
-const Header = memo(function Header({ className }) {
+export default function Header() {
   return (
     <header className="flex h-16 items-center justify-between bg-background-sidebar border-b border-white/6">
       {/* Left Side - App Icon & Title */}
       <div className="flex items-center gap-3 px-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-purple-800">
-          <LayoutGrid className="h-5 w-5 text-white" strokeWidth={2} />
+          <LayoutGrid className="h-5 w-5 text-white" />
         </div>
         <h1 className="text-lg font-bold text-white tracking-tight">
           Tab Story
@@ -35,6 +28,4 @@ const Header = memo(function Header({ className }) {
       </div>
     </header>
   );
-});
-
-export default Header;
+}

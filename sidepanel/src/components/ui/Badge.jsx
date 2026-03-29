@@ -1,16 +1,6 @@
 import { tv } from 'tailwind-variants';
 import { cn } from '../../lib/cn';
 import { Dot } from 'lucide-react';
-import { memo } from 'react';
-
-/**
- * Badge component for tab status
- * @typedef {Object} BadgeProps
- * @property {string} [variant='toExplore'] - Badge variant (toExplore|inProgress|done)
- * @property {string} [size='default'] - Badge size
- * @property {React.ReactNode} [children] - Badge content
- * @property {string} [className] - Additional CSS classes
- */
 
 const badgeVariants = tv({
   base: 'inline-flex items-center gap-1 rounded-full font-semibold transition-colors',
@@ -36,16 +26,15 @@ const badgeDotColors = {
   done: 'text-[#50C878]',
 };
 
-const Badge = memo(function Badge({ variant, size, children, className, ...props }) {
+function Badge({ className, variant, size, children, ...props }) {
   const dotColor = badgeDotColors[variant];
 
   return (
     <span className={cn(badgeVariants({ variant, size, className }))} {...props}>
       <Dot size={8} className={dotColor} />
-      <span className="sr-only">Status: </span>
       {children}
     </span>
   );
-});
+}
 
 export { Badge, badgeVariants };
