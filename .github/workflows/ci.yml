@@ -1,35 +1,41 @@
-name: CI - Run Tests
+name: CI
 
 on:
   push:
-    branches: ["main", "dev", "feature/**"]
+    branches:
+      - main
+      - react-ui-migration-issue-9
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
-  test:
-    name: Run Jest Tests
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '18'
 
-      - name: Install dependencies
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Run tests with coverage
-        run: npm test
+      - name: Install sidepanel dependencies
+        run: cd sidepanel && npm ci
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
+      - name: Build project
+        run: npm run build
+
+      - name: Run tests
+        run: npm test

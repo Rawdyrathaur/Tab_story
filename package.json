@@ -8,7 +8,8 @@
     "dev": "cd sidepanel && npm run dev"
   },
   "devDependencies": {
-    "jest": "^30.3.0"
+    "jest": "^30.3.0",
+    "vite-plugin-static-copy": "^3.4.0"
   },
   "jest": {
     "testEnvironment": "node",

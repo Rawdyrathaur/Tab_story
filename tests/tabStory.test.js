@@ -1,4 +1,3 @@
-
 'use strict';
 /**
  * Tests for Tab Story — Storage & Core Logic
@@ -7,28 +6,25 @@
  * we mock them here so Jest can run these tests in Node without a browser.
  */
 
-// ─── Mock chrome API ───────────────────────────────────────────────────────
+// Tests for Tab Story - Storage & Core Logic
+// Mock Chrome APIs for testing
+
 const mockStorage = {};
 
 global.chrome = {
   storage: {
     local: {
       get: jest.fn((keys, callback) => {
-
         let result = {};
-
         if (keys === null || keys === undefined) {
-          // Return a shallow copy of all items, matching chrome.storage behavior
           result = { ...mockStorage };
         } else if (Array.isArray(keys)) {
-          // Array of keys: return only those present in storage
           keys.forEach((k) => {
             if (mockStorage[k] !== undefined) {
               result[k] = mockStorage[k];
             }
           });
         } else if (typeof keys === 'object') {
-          // Object of default values: start with defaults, override with stored values
           result = { ...keys };
           Object.keys(keys).forEach((k) => {
             if (mockStorage[k] !== undefined) {
@@ -36,53 +32,23 @@ global.chrome = {
             }
           });
         } else {
-          // Single string key
           if (mockStorage[keys] !== undefined) {
             result[keys] = mockStorage[keys];
           }
         }
-
-        if (typeof callback === "function") {
-          // Match Chrome behavior: invoke callback asynchronously and do not
-          // return a Promise when a callback is provided.
-          Promise.resolve().then(() => callback(result));
-          return;
-        }
-
-        // Promise-based usage when no callback is supplied.
-
-        return Promise.resolve(result);
+        callback(result);
       }),
       set: jest.fn((items, callback) => {
         Object.assign(mockStorage, items);
-
-        if (typeof callback === "function") {
-          // Asynchronous callback invocation to mirror Chrome behavior.
-          Promise.resolve().then(() => callback());
-          return;
-        }
-
-
-        return Promise.resolve();
+        callback && callback();
       }),
-      remove: jest.fn((keys, callback) => {
-        const keyList = Array.isArray(keys) ? keys : [keys];
-        keyList.forEach((k) => delete mockStorage[k]);
-
-
-        if (typeof callback === "function") {
-          // Asynchronous callback invocation to mirror Chrome behavior.
-          Promise.resolve().then(() => callback());
-          return;
+      clear: jest.fn((callback) => {
+        for (const key in mockStorage) {
+          delete mockStorage[key];
         }
-
-
-        return Promise.resolve();
+        callback && callback();
       }),
     },
-  },
-  runtime: {
-    lastError: null,
   },
 };
 

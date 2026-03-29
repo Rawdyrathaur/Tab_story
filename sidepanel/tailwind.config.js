@@ -1,10 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -33,24 +29,13 @@ export default {
           default: 'rgba(255,255,255,0.10)',
           focus: 'rgba(124,111,255,0.5)',
         },
-      },
-      borderRadius: {
-        sm: '6px',
-        md: '10px',
-        lg: '14px',
-        pill: '999px',
-      },
-      boxShadow: {
-        card: '0 4px 16px rgba(0,0,0,0.4)',
-        popup: '0 16px 48px rgba(0,0,0,0.6)',
-        subtle: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        borderRadius: {
+          sm: '6px',
+          md: '10px',
+          lg: '14px',
+          pill: '999px',
+        },
       },
     },
   },
-  plugins: [
-    require('tailwindcss-animate'),
-  ],
 }
