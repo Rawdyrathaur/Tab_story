@@ -67,18 +67,20 @@ export default function TabDetailPopup() {
                   </div>
                   <div className="flex gap-1">
                     <button
-                      onClick={() => console.log('Quick action 1')}
-                      className="text-gray-400 hover:text-white/80 transition-colors"
-                      aria-label="Quick action"
+                      onClick={() => {
+                        // TODO: Implement favorite/bookmark functionality
+                      }}
+                      className="text-gray-400 hover:text-accent-amber transition-colors"
+                      aria-label="Add to favorites"
                     >
                       <Circle className="h-4.5 w-4.5" strokeWidth={2} />
                     </button>
                     <button
-                      onClick={() => console.log('Quick action 2')}
+                      onClick={handleClose}
                       className="text-gray-400 hover:text-white/80 transition-colors"
-                      aria-label="Quick action"
+                      aria-label="Close"
                     >
-                      <ArrowRight className="h-4.5 w-4.5" strokeWidth={2} />
+                      <ArrowRight className="h-4.5 w-4.5 rotate-90" strokeWidth={2} />
                     </button>
                   </div>
                 </div>
@@ -136,7 +138,10 @@ export default function TabDetailPopup() {
                   <Button
                     variant="ghost"
                     className="flex-1 h-8 gap-1.5 bg-white/8 hover:bg-white/14 rounded-lg"
-                    onClick={() => console.log('Move clicked')}
+                    onClick={() => {
+                      // TODO: Implement move to folder functionality
+                      handleClose();
+                    }}
                   >
                     <Move className="h-3 w-3" strokeWidth={2} />
                     <span>Move</span>

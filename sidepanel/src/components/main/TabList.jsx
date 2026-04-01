@@ -1,6 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
 import { useTabStore } from '../../store/useTabStore';
+import { FolderOpen } from 'lucide-react';
 import TimeSectionHeader from './TimeSectionHeader';
 import GroupCard from './GroupCard';
 
@@ -26,9 +27,11 @@ export default function TabList() {
   if (allItems.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center text-center p-8">
-        <div className="text-4xl mb-4">📂</div>
-        <h3 className="text-lg font-semibold text-white mb-2">No tabs yet</h3>
-        <p className="text-sm text-[#A0A0B0]">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 mb-4">
+          <FolderOpen className="h-8 w-8 text-white/20" strokeWidth={1.5} />
+        </div>
+        <h3 className="text-[16px] font-medium text-white/90 mb-2">No tabs yet</h3>
+        <p className="text-[12px] text-[#707080]">
           Start by creating a new intent to organize your tabs
         </p>
       </div>
@@ -39,9 +42,6 @@ export default function TabList() {
     <div
       ref={containerRef}
       className="flex flex-col overflow-auto"
-      style={{
-        height: 'calc(100vh - 64px)',
-      }}
     >
       <div
         style={{
@@ -64,20 +64,22 @@ export default function TabList() {
                 transform: `translateY(${virtualRow.start}px)`,
               }}
             >
-              <TimeSectionHeader label={section.label} />
+              <TimeSectionHeader label={section.label} count={section.tabs.length} />
 
               {/* Render tabs as group cards */}
-              {section.tabs.map((tab) => (
-                <GroupCard
-                  key={tab.id}
-                  group={{
-                    id: tab.id,
-                    name: tab.title,
-                    favicon: tab.favicon,
-                  }}
-                  tabs={[tab]}
-                />
-              ))}
+              <div className="flex flex-col gap-0">
+                {section.tabs.map((tab) => (
+                  <GroupCard
+                    key={tab.id}
+                    group={{
+                      id: tab.id,
+                      name: tab.title,
+                      favicon: tab.favicon,
+                    }}
+                    tabs={[tab]}
+                  />
+                ))}
+              </div>
             </div>
           );
         })}

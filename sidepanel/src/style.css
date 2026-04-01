@@ -8,16 +8,38 @@
     --background-elevated: #1A1A24;
     --background-sidebar: #13131A;
     --background-popup: #1E1E2A;
+
+    /* Status Colors - Distinct, Intentional Color Language */
+    --status-inprogress-bg: rgba(91, 156, 246, 0.18);
+    --status-inprogress-text: #5B9CF6;
+    --status-inprogress-border: rgba(91, 156, 246, 0.35);
+
+    --status-toexplore-bg: rgba(212, 168, 50, 0.18);
+    --status-toexplore-text: #D4A832;
+    --status-toexplore-border: rgba(212, 168, 50, 0.35);
+
+    --status-done-bg: rgba(80, 200, 120, 0.18);
+    --status-done-text: #50C878;
+    --status-done-border: rgba(80, 200, 120, 0.35);
+
+    /* Accent Colors */
     --accent-purple: #7C6FFF;
+    --accent-purple-bg: rgba(124, 111, 255, 0.18);
+    --accent-purple-border: rgba(124, 111, 255, 0.35);
+
     --accent-green: #50C878;
     --accent-green-light: #5DDFB0;
     --accent-green-dark: #2A6F4F;
     --accent-blue: #5B9CF6;
     --accent-amber: #D4A832;
+
+    /* Text Colors */
     --text-primary: #FFFFFF;
     --text-secondary: #A0A0B0;
     --text-muted: #505060;
     --text-placeholder: #606070;
+
+    /* Border Colors */
     --border-subtle: rgba(255,255,255,0.06);
     --border-default: rgba(255,255,255,0.10);
     --border-focus: rgba(124,111,255,0.5);

@@ -7,7 +7,7 @@ export default function MainPanel({ children, className }) {
       className={cn('flex flex-1 flex-col bg-background-base overflow-hidden', className)}
     >
       <ScrollArea className="flex-1">
-        <div className="p-0">
+        <div className="px-5 py-4">
           {children}
         </div>
       </ScrollArea>

@@ -1,26 +1,14 @@
 import { create } from 'zustand';
 import { useEffect } from 'react';
-
-// Chrome Storage Keys
-const STORAGE_KEYS = {
-  TABS: 'tab_items',
-  PROJECTS: 'tab_projects',
-  TAGS: 'recent_intents',
-  TIMELINE: 'tab_timeline',
-  SETTINGS: 'user_settings',
-};
+import { STORAGE_KEYS } from '../constants/storage';
+import { DEFAULT_TIME_SECTIONS } from '../constants/time';
 
 // Initial empty state
 const initialState = {
   tabs: [],
   folders: [], // Will be populated from tab_projects
   tags: [],
-  timeSections: {
-    today: { id: 'today', label: 'TODAY', tabs: [] },
-    yesterday: { id: 'yesterday', label: 'YESTERDAY', tabs: [] },
-    week: { id: 'week', label: 'THIS WEEK', tabs: [] },
-    older: { id: 'older', label: 'OLDER', tabs: [] },
-  },
+  timeSections: DEFAULT_TIME_SECTIONS,
   selectedFolder: null,
   selectedTab: null,
   searchQuery: '',
@@ -33,14 +21,12 @@ const initialState = {
 // Helper function to load from Chrome Storage
 const loadFromStorage = async (key) => {
   if (typeof chrome === 'undefined' || !chrome.storage) {
-    console.warn('Chrome Storage API not available');
     return null;
   }
   try {
     const result = await chrome.storage.local.get(key);
     return result[key];
   } catch (error) {
-    console.error(`Error loading ${key} from storage:`, error);
     return null;
   }
 };
@@ -48,13 +34,12 @@ const loadFromStorage = async (key) => {
 // Helper function to save to Chrome Storage
 const saveToStorage = async (key, value) => {
   if (typeof chrome === 'undefined' || !chrome.storage) {
-    console.warn('Chrome Storage API not available');
     return;
   }
   try {
     await chrome.storage.local.set({ [key]: value });
   } catch (error) {
-    console.error(`Error saving ${key} to storage:`, error);
+    // Silently fail in production
   }
 };
 
@@ -76,13 +61,6 @@ const projectsToFolders = (projects) => {
 
 // Helper to group tabs by time
 const groupTabsByTime = (tabs) => {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const week = new Date(today);
-  week.setDate(week.getDate() - 7);
-
   const groups = {
     today: { id: 'today', label: 'TODAY', tabs: [] },
     yesterday: { id: 'yesterday', label: 'YESTERDAY', tabs: [] },
@@ -90,13 +68,19 @@ const groupTabsByTime = (tabs) => {
     older: { id: 'older', label: 'OLDER', tabs: [] },
   };
 
+  const now = Date.now();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterday = today - (24 * 60 * 60 * 1000);
+  const week = today - (7 * 24 * 60 * 60 * 1000);
+
   tabs.forEach((tab) => {
-    const tabDate = new Date(tab.timestamp || tab.createdAt);
-    if (tabDate >= today) {
+    const tabTimestamp = tab.timestamp || tab.createdAt || Date.now();
+
+    if (tabTimestamp >= today) {
       groups.today.tabs.push(tab);
-    } else if (tabDate >= yesterday) {
+    } else if (tabTimestamp >= yesterday) {
       groups.yesterday.tabs.push(tab);
-    } else if (tabDate >= week) {
+    } else if (tabTimestamp >= week) {
       groups.week.tabs.push(tab);
     } else {
       groups.older.tabs.push(tab);
@@ -125,7 +109,7 @@ export const useTabStore = create((set, get) => ({
 
     set({
       folders,
-      tabs: tabs || [],
+      tabs: allTabs,
       tags: tags || [],
       timeSections: groupTabsByTime(allTabs),
       isLoading: false,
@@ -264,6 +248,85 @@ export const useTabStore = create((set, get) => ({
   syncWithChrome: async () => {
     await get().initialize();
   },
+
+  // Capture all tabs from Chrome and save to storage
+  captureTabs: async () => {
+    if (typeof chrome === 'undefined' || !chrome.tabs) {
+      console.warn('Chrome Tabs API not available');
+      return;
+    }
+
+    try {
+      const chromeTabs = await chrome.tabs.query({});
+      const savedTabs = chromeTabs
+        .filter(tab => tab.url && !tab.url.startsWith('chrome://'))
+        .map(tab => ({
+          id: `tab-${tab.id}`,
+          chromeId: tab.id,
+          title: tab.title || 'Untitled',
+          url: tab.url,
+          domain: new URL(tab.url).hostname,
+          favicon: tab.favIconUrl || '',
+          status: 'To Explore',
+          timestamp: Date.now(),
+          tags: [],
+          active: tab.active,
+        }));
+
+      // Save to storage
+      await saveToStorage(STORAGE_KEYS.TABS, savedTabs);
+
+      // Update store
+      set({
+        tabs: savedTabs,
+        timeSections: groupTabsByTime(savedTabs),
+      });
+
+      return savedTabs;
+    } catch (error) {
+      // Silently fail
+    }
+  },
+
+  // Add a single tab from Chrome
+  addTabFromChrome: async (chromeTab) => {
+    const newTab = {
+      id: `tab-${chromeTab.id}`,
+      chromeId: chromeTab.id,
+      title: chromeTab.title || 'Untitled',
+      url: chromeTab.url,
+      domain: new URL(chromeTab.url).hostname,
+      favicon: chromeTab.favIconUrl || '',
+      status: 'To Explore',
+      timestamp: Date.now(),
+      tags: [],
+      active: chromeTab.active,
+    };
+
+    const currentTabs = get().tabs;
+    const updatedTabs = [...currentTabs, newTab];
+
+    await saveToStorage(STORAGE_KEYS.TABS, updatedTabs);
+
+    set({
+      tabs: updatedTabs,
+      timeSections: groupTabsByTime(updatedTabs),
+    });
+
+    return newTab;
+  },
+
+  // Remove a tab
+  removeTab: (tabId) =>
+    set((state) => {
+      const newTabs = state.tabs.filter((tab) => tab.id !== tabId);
+      saveToStorage(STORAGE_KEYS.TABS, newTabs);
+
+      return {
+        tabs: newTabs,
+        timeSections: groupTabsByTime(newTabs),
+      };
+    }),
 }));
 
 // Hook to initialize store on mount

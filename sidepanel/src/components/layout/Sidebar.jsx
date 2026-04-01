@@ -4,10 +4,10 @@ import { cn } from '../../lib/cn';
 export default function Sidebar({ children, className }) {
   return (
     <aside
-      className={cn('flex w-60 flex-col bg-background-sidebar border-r border-white/6', className)}
+      className={cn('flex w-64 flex-col bg-background-sidebar border-r border-white/6', className)}
     >
       <ScrollArea className="flex-1">
-        <div className="px-3 py-2">
+        <div className="px-4 py-3">
           {children}
         </div>
       </ScrollArea>

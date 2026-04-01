@@ -7,6 +7,7 @@ export default function FolderTree() {
   const selectedFolder = useTabStore((state) => state.selectedFolder);
   const toggleFolder = useTabStore((state) => state.toggleFolder);
   const setSelectedFolder = useTabStore((state) => state.setSelectedFolder);
+  const addFolder = useTabStore((state) => state.addFolder);
 
   const handleFolderToggle = (folderId) => {
     toggleFolder(folderId);
@@ -49,11 +50,16 @@ export default function FolderTree() {
 
       {/* Add Tab row */}
       <button
-        className="flex h-9 items-center gap-2 pl-7 text-xs font-medium text-[#A0A0B0] hover:bg-white/5 rounded-lg transition-colors"
-        onClick={() => console.log('Add Tab clicked')}
+        className="flex h-10 items-center gap-2 pl-7 text-[10px] font-medium text-[#707080] hover:bg-white/5 rounded-lg transition-colors"
+        onClick={() => {
+          const folderName = prompt('Enter folder name:');
+          if (folderName && folderName.trim()) {
+            addFolder(folderName.trim());
+          }
+        }}
       >
-        <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-        <span>Add Tab</span>
+        <Plus className="h-3 w-3" strokeWidth={2} />
+        <span>New Folder</span>
       </button>
     </div>
   );

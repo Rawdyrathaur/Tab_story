@@ -4,7 +4,7 @@ import { tv } from 'tailwind-variants';
 import { cn } from '../../lib/cn';
 
 const folderItemVariants = tv({
-  base: 'flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors cursor-pointer',
+  base: 'flex h-10 items-center gap-2.5 rounded-lg px-3 text-[13px] font-medium transition-all cursor-pointer hover:bg-white/5 hover:translate-x-1',
   variants: {
     selected: {
       true: 'bg-white/7 text-white',

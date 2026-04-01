@@ -8,16 +8,17 @@ export default function NewIntentButton() {
   const setIsPopupOpen = useTabStore((state) => state.setPopupOpen);
 
   const handleClick = () => {
-    // In a real implementation, this would show a dialog to create an intent
-    // For now, it's a placeholder for the intent creation flow
-    console.log('New Intent button clicked');
+    const intentName = prompt('Enter intent name:');
+    if (intentName && intentName.trim()) {
+      addFolder(intentName.trim());
+    }
   };
 
   return (
     <Button
       variant="ghost"
       size="default"
-      className="flex h-10 w-full items-center justify-between px-3 text-sm font-semibold text-white hover:bg-white/5 rounded-lg"
+      className="flex h-11 w-full items-center justify-between px-3 text-[13px] font-medium text-white/90 hover:bg-white/5 hover:translate-x-1 hover:text-white transition-all rounded-lg border border-transparent hover:border-white/8"
       onClick={handleClick}
     >
       <motion.div

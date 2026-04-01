@@ -9,10 +9,10 @@ export default function GroupCard({ group, tabs = [] }) {
 
   return (
     <Collapsible.Root open={isOpen} onOpenChange={setIsOpen}>
-      <div className="mx-4 mb-3 rounded-xl bg-background-elevated border border-white/6 p-3.5">
+      <div className="mb-4 rounded-xl bg-background-elevated border border-white/6 p-4 transition-all hover:border-white/12 hover:bg-white/[0.03]">
         {/* Group Header */}
         <Collapsible.Trigger asChild>
-          <button className="flex w-full items-center gap-2 text-left outline-none">
+          <button className="flex w-full items-center gap-2 text-left outline-none hover:bg-white/5 rounded-lg -mx-2 px-2 transition-all">
             {/* Favicon */}
             {group.favicon && (
               <img
@@ -23,7 +23,7 @@ export default function GroupCard({ group, tabs = [] }) {
             )}
 
             {/* Group Name */}
-            <span className="flex-1 truncate text-sm font-semibold text-white">
+            <span className="flex-1 truncate text-[14px] font-bold text-white tracking-tight">
               {group.name}
             </span>
 
@@ -31,7 +31,7 @@ export default function GroupCard({ group, tabs = [] }) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('Menu clicked for', group.id);
+                // TODO: Implement menu with options (Rename, Delete, Move)
               }}
               className="ml-2 text-[#606070] hover:text-white/80 transition-colors"
               aria-label="More options"
@@ -52,18 +52,18 @@ export default function GroupCard({ group, tabs = [] }) {
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="mt-2 flex flex-col gap-0">
+                <div className="mt-3 flex flex-col gap-0">
                   {tabs.length > 0 ? (
                     tabs.map((tab, index) => (
                       <div key={tab.id}>
                         <TabRow tab={tab} />
                         {index < tabs.length - 1 && (
-                          <div className="ml-8 border-b border-white/4" />
+                          <div className="ml-8 my-2 border-b border-white/4" />
                         )}
                       </div>
                     ))
                   ) : (
-                    <div className="py-4 text-center text-sm text-[#505060]">
+                    <div className="py-4 text-center text-[12px] text-[#505060]">
                       No tabs in this group
                     </div>
                   )}

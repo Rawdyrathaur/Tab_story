@@ -8,8 +8,8 @@ const buttonVariants = tv({
       default: 'bg-white/8 hover:bg-white/14 text-white',
       primary: 'bg-accent-purple hover:bg-accent-purple/90 text-white',
       ghost: 'hover:bg-white/6 text-white',
-      icon: 'h-9 w-9 rounded-full bg-white/6 hover:bg-white/12 text-white border border-white/8',
-      pill: 'h-8 px-3 rounded-full text-xs font-semibold text-white',
+      icon: 'h-9 w-9 rounded-full bg-white/6 hover:bg-white/12 text-white border border-white/8 transition-all',
+      pill: 'h-8 px-3 rounded-full text-[10px] font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/20',
     },
     size: {
       default: 'h-10 px-4 py-2',
