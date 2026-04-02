@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useTabStore, useInitializeStore } from '../store/useTabStore';
+import { List } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import MainPanel from '../components/layout/MainPanel';
@@ -33,28 +34,27 @@ export default function App() {
       {/* Header */}
       <Header />
 
+    
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <Sidebar>
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-3">
             {/* New Intent Button */}
             <NewIntentButton />
 
             {/* Everything Link */}
             <button
-              className="flex h-9 items-center gap-2 pl-3 text-xs font-medium text-[#A0A0B0]"
+              className="flex h-10 items-center gap-2 px-3 text-xs font-medium text-[#A0A0B0] rounded-lg hover:bg-white/5 transition-colors"
               onClick={() => console.log('Everything clicked')}
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <List className="h-4 w-4" strokeWidth={2} />
               <span>Everything</span>
             </button>
           </div>
 
           {/* Folder Tree */}
-          <div className="mt-2">
+          <div className="mt-4">
             <FolderTree />
           </div>
 
@@ -74,7 +74,9 @@ export default function App() {
           <FilterChips />
 
           {/* Tab List */}
-          <TabList />
+          <div className="mt-6">
+            <TabList />
+          </div>
         </MainPanel>
       </div>
 
