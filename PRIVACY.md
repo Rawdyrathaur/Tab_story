@@ -3,165 +3,56 @@
 **Last Updated: November 6, 2025**
 
 ## Overview
+Tab Story is a Chrome extension designed to organize tabs and tab groups. This Privacy Policy describes what data the extension processes, where it is stored, and when it may be shared.
 
-Tab Story is committed to protecting your privacy. This privacy policy explains how we handle your data when you use our Chrome extension.
+## Data We Store (Local Only)
+Tab Story stores the following information **locally on your device** using Chrome’s storage APIs:
 
-## Our Privacy Commitment
+- **Tab and group data:** tab titles, URLs, group organization, timestamps, and any notes you add
+- **Intent data:** intent names/descriptions you create and relationships between intents and tabs
+- **Preferences:** extension settings and UI configuration
+- **Backups:** local backups of tab groups and related timeline/organization data
 
-**Tab Story is built with privacy at its core:**
-- Your data stays on your device
-- We don't track your browsing activity
-- We don't collect personal information
-- We don't use analytics or telemetry
-- We don't sell or share your data with third parties
+This data is stored only in your local browser profile and is **not** transmitted to Tab Story servers.
 
-## What Data We Process
+## AI Features
+### On-device processing (default)
+When available, AI features (e.g., summaries or intent detection) run **on-device** using Chrome’s built-in AI. In this mode, relevant content does not leave your computer.
 
-### Local Data Storage
+### Optional Gemini API fallback
+If on-device AI is unavailable and you enable the fallback, Tab Story may send only the specific content you request to Google’s Gemini API for processing. Use of Gemini is subject to Google’s Privacy Policy. You can disable this fallback in extension settings.
 
-Tab Story stores the following data **locally on your device** using Chrome's storage API:
+## What We Do Not Collect
+Tab Story does not:
+- collect personal information
+- track browsing activity
+- use analytics or telemetry
+- sell or share your local data with third parties
+- use cookies for tracking or advertising
 
-1. **Tab Information**
-   - Tab titles and URLs
-   - Tab groups and their organization
-   - Custom notes you add to tabs
-   - Timestamps of when tabs were created or modified
+## Permissions
+Tab Story requests the following permissions solely to provide functionality:
+- `tabs` (read and organize open tabs)
+- `tabGroups` (create and manage groups)
+- `storage` (store data locally)
+- `sidePanel` (display the UI)
+- `aiLanguageModelOriginTrial` (enable Chrome on-device AI features)
 
-2. **Intent Data**
-   - Intent names and descriptions you create
-   - Relationships between tabs and intents
-   - Intent-related metadata
+## Data Security and Control
+All data remains on your device. You can delete data through the extension’s storage controls, Chrome extension settings, or by uninstalling the extension. Data remains stored locally until you delete it.
 
-3. **User Preferences**
-   - Extension settings and configurations
-   - Storage management preferences
-   - UI customization options
-
-4. **Backups**
-   - Automatic backups of your tab groups
-   - Browsing timeline data
-
-**Important:** All this data is stored exclusively in Chrome's local storage on your device. It is never transmitted to our servers or any third-party services.
-
-## How We Process Your Data
-
-### Chrome Built-in AI (Primary Method)
-
-When you use AI features (like tab summaries or intent detection):
-
-- Processing happens **entirely on your device** using Chrome's built-in AI capabilities
-- Your tab content and browsing data **never leave your computer**
-- No internet connection is required for AI processing
-- No data is sent to external servers
-
-### Gemini API (Optional Fallback)
-
-If Chrome's built-in AI is unavailable, Tab Story may use the Gemini API as a fallback:
-
-- This feature is **optional** and only used when Chrome's built-in AI isn't available
-- If used, only the specific content you request to summarize is sent to Google's Gemini API
-- Data sent to Gemini is subject to [Google's Privacy Policy](https://policies.google.com/privacy)
-- You can disable this fallback in the extension settings
-
-## What We Don't Do
-
-- **No tracking:** We don't track your browsing habits, behavior, or patterns
-- **No analytics:** We don't collect usage statistics or telemetry
-- **No cookies:** We don't use cookies or similar tracking technologies
-- **No data collection:** We don't collect, store, or transmit your personal information
-- **No third-party sharing:** Your data is never sold, shared, or transmitted to third parties
-- **No advertising:** We don't use your data for advertising purposes
-- **No profiling:** We don't create user profiles or behavioral patterns
-
-## Data Security
-
-- All data is stored using Chrome's secure storage API
-- Data remains on your local device at all times
-- You have complete control over your data
-- You can delete all extension data at any time through Chrome's extension settings
-
-## Your Rights and Control
-
-You have complete control over your data:
-
-1. **View Your Data:** All data is accessible through the extension interface
-2. **Delete Your Data:**
-   - Delete individual tabs, groups, or intents
-   - Clear all data through storage management
-   - Uninstall the extension to remove all data
-3. **Export Your Data:** Use Chrome's developer tools to export your local storage data
-4. **Manage Storage:** Built-in storage management tools to clean old backups and unused data
-
-## Chrome Permissions
-
-Tab Story requires the following Chrome permissions:
-
-- **tabs:** To read and organize your open tabs
-- **tabGroups:** To create and manage tab groups
-- **storage:** To save your data locally on your device
-- **sidePanel:** To display the extension interface
-- **aiLanguageModelOriginTrial:** To use Chrome's built-in AI features
-
-These permissions are used exclusively for the extension's functionality and never for data collection or tracking.
-
-## Children's Privacy
-
-Tab Story does not knowingly collect information from children under 13. The extension is designed for general audiences and does not target children.
-
-## Open Source Transparency
-
-Tab Story is open source, which means:
-
-- You can review the source code to verify our privacy claims
-- The community can audit the code for security and privacy issues
-- All functionality is transparent and verifiable
-- Available at: [https://github.com/Rawdyrathaur/Tab_story](https://github.com/Rawdyrathaur/Tab_story)
-
-## Changes to This Privacy Policy
-
-We may update this privacy policy from time to time. Any changes will be:
-
-- Posted on this page with an updated "Last Updated" date
-- Announced in the extension's release notes
-- Made in accordance with maintaining or improving user privacy
-
-Continued use of Tab Story after privacy policy changes constitutes acceptance of the updated policy.
+## Children’s Privacy
+Tab Story is not directed to children under 13 and does not knowingly collect data from children.
 
 ## Third-Party Services
+Tab Story does not use third-party services except:
+- **Google Gemini API** (optional, if enabled)
+- **Chrome Web Store** (distribution and updates)
 
-Tab Story does not integrate with third-party services except for:
-
-- **Google Gemini API** (optional fallback, subject to Google's privacy policy)
-- **Chrome Web Store** (for extension distribution and updates)
-
-## Data Retention
-
-- Data is retained locally on your device for as long as you use the extension
-- You can delete data at any time using the built-in storage management tools
-- Uninstalling the extension removes all stored data from your device
+## Changes to This Policy
+Updates will be posted with a revised “Last Updated” date and may be reflected in release notes. Continued use after updates indicates acceptance of the revised policy.
 
 ## Contact
-
-If you have questions or concerns about this privacy policy or how Tab Story handles your data:
-
-- **GitHub Issues:** [https://github.com/Rawdyrathaur/Tab_story/issues](https://github.com/Rawdyrathaur/Tab_story/issues)
-- **Project Author:** Manish Rathaur ([@Rawdyrathaur](https://github.com/Rawdyrathaur))
-
-## Legal Compliance
-
-This privacy policy complies with applicable privacy laws and Chrome Web Store policies. As Tab Story does not collect personal data, many data protection regulations (such as GDPR, CCPA) do not apply to our data processing activities.
-
-## Summary
-
-**In plain language:**
-- Your data stays on your computer
-- We can't see what you're doing
-- We don't collect or track anything
-- You have complete control over your data
-- The extension works offline with local AI processing
-
-Tab Story is designed to help you organize tabs while respecting your privacy completely.
-
----
-
-**Tab Story - Privacy First, Always**
+Questions or concerns:
+- GitHub Issues: https://github.com/Rawdyrathaur/Tab_story/issues
+- Author: Manish Rathaur (@Rawdyrathaur)
