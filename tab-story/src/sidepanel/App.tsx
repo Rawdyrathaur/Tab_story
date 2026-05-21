@@ -1,0 +1,153 @@
+import { useState } from "react";
+import { saveCurrentTab } from "./hooks/useSaveTab";
+import { TabList } from "./components/TabList";
+
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
+import { ClipboardDocumentListIcon as ClipboardSolid } from "@heroicons/react/24/solid";
+
+import { TabMenu } from "./components/TabMenu";
+import type { SavedTab } from "./db";
+import { Navbar } from "./components/Navbar";
+import {
+  TagIcon, FolderIcon, CalendarIcon, ClockIcon,
+  Cog6ToothIcon, PlusIcon, ChevronLeftIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import {
+  TagIcon as TagSolid, FolderIcon as FolderSolid,
+  CalendarIcon as CalendarSolid, ClockIcon as ClockSolid,
+  Cog6ToothIcon as CogSolid, PlusIcon as PlusSolid,
+  InformationCircleIcon as InfoSolid,
+} from "@heroicons/react/24/solid";
+
+export type ViewMode = "grid" | "list";
+
+const mainItems = [
+  { outline: FolderIcon,     solid: FolderSolid,   label: "File Manager" },
+  { outline: TagIcon,        solid: TagSolid,       label: "Tags" },
+  { outline: CalendarIcon,   solid: CalendarSolid,  label: "Calendar" },
+  { outline: ClockIcon,      solid: ClockSolid,     label: "History" },
+  { outline: ClipboardDocumentListIcon, solid: ClipboardSolid, label: "Sticky Notes" },
+  { outline: Cog6ToothIcon,  solid: CogSolid,       label: "Settings" },
+];
+
+const ICO = "20px";
+
+export function App() {
+  const [activePanel, setActivePanel]   = useState<string | null>(null);
+  const [hoveredBtn,  setHoveredBtn]    = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+const [viewMode, setViewMode] = useState<ViewMode>("list");
+const [menuTab, setMenuTab] = useState<SavedTab | null>(null);
+const isOpen = activePanel !== null;
+  return (
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", position: "relative" }}>
+
+      {/* Sidebar */}
+      <div style={{
+        width: "48px", display: "flex", flexDirection: "column",
+        alignItems: "center", paddingTop: "10px", paddingBottom: "12px",
+        borderRight: "1px solid rgba(90,90,95,0.3)",
+        flexShrink: 0, zIndex: 30, background: "var(--bg-color)",
+      }}>
+        <div className="sb-tooltip-wrap" style={{ visibility: isOpen ? "visible" : "hidden" }}>
+          <button className="sb-btn" onClick={() => setActivePanel(null)}
+            onMouseEnter={() => setHoveredBtn("toggle")}
+            onMouseLeave={() => setHoveredBtn(null)}>
+            <ChevronLeftIcon style={{ width: ICO, height: ICO }} />
+          </button>
+          <span className="sb-tooltip">Close</span>
+        </div>
+
+        <div style={{ height: "20px" }} />
+
+        <div className="sb-tooltip-wrap">
+          <button className="sb-btn" onClick={saveCurrentTab}
+            onMouseEnter={() => setHoveredBtn("plus")}
+            onMouseLeave={() => setHoveredBtn(null)}>
+            {hoveredBtn === "plus"
+              ? <PlusSolid style={{ width: ICO, height: ICO }} />
+              : <PlusIcon  style={{ width: ICO, height: ICO }} />}
+          </button>
+          <span className="sb-tooltip">Save Tab</span>
+        </div>
+
+        <div style={{ height: "16px" }} />
+
+        {mainItems.map(({ outline: Outline, solid: Solid, label }) => {
+          const isActive  = activePanel === label;
+          const isHovered = hoveredBtn  === label;
+          const Icon = isActive || isHovered ? Solid : Outline;
+          return (
+            <div key={label} className="sb-tooltip-wrap" style={{ marginBottom: "4px" }}>
+              <button
+                className={`sb-btn${isActive ? " active" : ""}`}
+                onClick={() => setActivePanel(prev => prev === label ? null : label)}
+                onMouseEnter={() => setHoveredBtn(label)}
+                onMouseLeave={() => setHoveredBtn(null)}
+              >
+                <Icon style={{ width: ICO, height: ICO }} />
+              </button>
+              <span className="sb-tooltip">{label}</span>
+            </div>
+          );
+        })}
+
+        <div className="sb-tooltip-wrap" style={{ marginTop: "auto" }}>
+          <button
+            className={`sb-btn${activePanel === "About" ? " active" : ""}`}
+            onClick={() => setActivePanel(prev => prev === "About" ? null : "About")}
+            onMouseEnter={() => setHoveredBtn("about")}
+            onMouseLeave={() => setHoveredBtn(null)}
+          >
+            {activePanel === "About" || hoveredBtn === "about"
+              ? <InfoSolid             style={{ width: ICO, height: ICO }} />
+              : <InformationCircleIcon style={{ width: ICO, height: ICO }} />}
+          </button>
+          <span className="sb-tooltip">About</span>
+        </div>
+      </div>
+
+      {/* Slide-out panel */}
+      <div style={{
+        position: "absolute", top: 0, left: "48px",
+        height: "100%", width: "calc(100% - 48px)",
+        background: "var(--bg-color)",
+        borderRight: "1px solid rgba(90,90,95,0.3)",
+        zIndex: 20,
+        transform: isOpen ? "translateX(0)" : "translateX(-100%)",
+        transition: "transform 0.2s ease",
+        display: "flex", flexDirection: "column",
+        padding: "16px 12px", overflowY: "auto",
+      }}>
+        <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--placeholder-color)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "12px" }}>
+          {activePanel}
+        </div>
+        {activePanel === "Sticky Notes" ? (
+  <TabList searchQuery="" viewMode="list" onMenu={setMenuTab} mode="notes" />
+) : (
+  <div style={{ fontSize: "13px", color: "var(--text-color)" }}>Coming soon...</div>
+)}
+      </div>
+
+      {/* Main content */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column", overflow: "hidden",
+        transition: "filter 0.2s ease",
+        filter: isOpen ? "blur(3px)" : "none",
+        pointerEvents: isOpen ? "none" : "auto",
+      }}>
+        <Navbar
+          onSearch={setSearchQuery}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+        <main style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+  {menuTab && <TabMenu tab={menuTab} onClose={() => setMenuTab(null)} />}
+  <TabList searchQuery={searchQuery} viewMode={viewMode} onMenu={setMenuTab} />
+</main>
+      </div>
+
+    </div>
+  );
+}

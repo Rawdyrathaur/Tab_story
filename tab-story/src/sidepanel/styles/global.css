@@ -1,0 +1,92 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1f2937;
+  --icon-color: #333333;
+  --input-color: #1f2937;
+  --placeholder-color: #9ca3af;
+}
+
+html.dark {
+  --bg-color: #202020;
+  --text-color: #f9fafb;
+  --icon-color: #a1a1aa;
+  --input-color: #f9fafb;
+  --placeholder-color: #6b7280;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+input::placeholder {
+  color: var(--placeholder-color);
+}
+
+.sb-btn {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; border-radius: 8px;
+  cursor: pointer; color: var(--icon-color);
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+.sb-btn:hover { color: var(--text-color); }
+.sb-btn.active { color: var(--text-color); }
+
+.sb-tooltip-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-tooltip {
+  position: fixed;
+  left: 56px;
+  background: #18181b;
+  color: #e4e4e7;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: -apple-system, "SF Pro Text", "Inter", system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  padding: 5px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: translateX(-4px);
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sb-tooltip-wrap:hover .sb-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 130, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 130, 0.5);
+}
+.note-card:hover .note-delete-btn {
+  opacity: 1 !important;
+}
