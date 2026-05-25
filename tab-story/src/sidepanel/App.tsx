@@ -198,7 +198,7 @@ const handleSaveAllTabs = async () => {
     <div style={{ textAlign: "center", padding: "40px", color: "var(--placeholder-color)" }}>
       Loading...
     </div>
-  ) : folderCount === 0 && tabCount === 0 ? (
+  ) : tabCount === 0 ? (
     <EmptyState />
   ) : (
     <>
