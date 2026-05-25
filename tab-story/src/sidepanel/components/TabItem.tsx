@@ -49,6 +49,7 @@ export function TabItem({ tab, onMenu }: Props) {
           color: "var(--icon-color)", padding: "4px", borderRadius: "6px",
           opacity: hovered ? 1 : 0, transition: "opacity 0.15s ease",
           display: "flex", alignItems: "center",
+          outline: "none", 
         }}
       >
         <EllipsisVerticalIcon style={{ width: "16px", height: "16px" }} />

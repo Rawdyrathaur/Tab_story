@@ -41,7 +41,8 @@ function Tooltip({ title, url, children }: {
         <div style={{
           position: "fixed",
           bottom: `calc(100vh - ${coords.top}px)`,
-          left: coords.left,
+          left: "50%",
+transform: "translateX(-50%)",
           background: "var(--bg-color)",
           border: "1px solid rgba(90,90,95,0.35)",
           borderRadius: "10px", 
@@ -154,7 +155,7 @@ function TabRowList({ tab, onMenu, mode }: { tab: SavedTab; onMenu?: (tab: Saved
             <span
               onClick={() => chrome.tabs.create({ url: tab.url })}
               style={{
-                fontSize: "12.5px", fontWeight: 600, color: "var(--text-color)",
+fontSize: "11px", fontWeight: 600, color: "var(--text-color)",
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 maxWidth: "110px", cursor: "pointer",
               }}
@@ -174,7 +175,7 @@ function TabRowList({ tab, onMenu, mode }: { tab: SavedTab; onMenu?: (tab: Saved
           {/* Date (Pushed to the right using marginLeft: auto) */}
           <span style={{
             fontSize: "10.5px", color: "var(--placeholder-color)", flexShrink: 0,
-            marginLeft: "auto", marginRight: "4px"
+marginLeft: "auto",
           }}>
             {new Date(tab.createdAt).toLocaleDateString("en-GB")}
           </span>
@@ -194,7 +195,7 @@ function TabRowList({ tab, onMenu, mode }: { tab: SavedTab; onMenu?: (tab: Saved
               title="More options"
               style={{
                 width: "26px", height: "26px", borderRadius: "7px", border: "none",
-                background: "rgba(120,120,200,0.12)", color: "var(--text-color)",
+                background: "transparent", color: "var(--icon-color)",
                 cursor: "pointer", display: "flex", alignItems: "center",
                 justifyContent: "center",
               }}
@@ -276,10 +277,10 @@ function TabCardGrid({ tab, onMenu }: { tab: SavedTab; onMenu?: (tab: SavedTab) 
           title="More options"
           style={{
             width: "24px", height: "24px", borderRadius: "6px", border: "none",
-            background: "rgba(120,120,200,0.12)", color: "var(--text-color)",
+            background: "transparent", color: "var(--text-color)",
             cursor: "pointer", display: "flex", alignItems: "center",
             justifyContent: "center", flexShrink: 0,
-            opacity: hovered ? 1 : 0.6, transition: "opacity 0.15s ease"
+            opacity: 1,
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -306,9 +307,11 @@ function TabCardGrid({ tab, onMenu }: { tab: SavedTab; onMenu?: (tab: SavedTab) 
           </svg>
 
           <span style={{
-            fontSize: "12.5px", fontWeight: 600, color: "var(--text-color)",
-            display: "-webkit-box", WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.4",
+fontSize: "11px", fontWeight: 600, color: "var(--text-color)",
+overflow: "hidden", textOverflow: "ellipsis",
+display: "-webkit-box", WebkitLineClamp: 1,
+WebkitBoxOrient: "vertical",
+maxWidth: "80px",
           }}>
             {tab.title}
           </span>
@@ -455,13 +458,16 @@ export function TabList({
                    <TabRowList key={tab.id} tab={tab} onMenu={onMenu} mode={mode} />
                   ))
                 : (
-                  <div style={{
-                    display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "8px", padding: "8px 12px 12px",
-                    borderTop: "1px solid rgba(90,90,95,0.15)",
+                  <div className="tab-grid-scroll" style={{
+  display: "flex",
+  gap: "8px", padding: "8px 12px 12px",
+  borderTop: "1px solid rgba(90,90,95,0.15)",
+  overflowX: "auto", scrollSnapType: "x mandatory",
                   }}>
                     {folderTabs.map(tab => (
-                     <TabCardGrid key={tab.id} tab={tab} onMenu={onMenu} />
+<div style={{ minWidth: "140px", maxWidth: "140px", flexShrink: 0, scrollSnapAlign: "center", }}>
+  <TabCardGrid key={tab.id} tab={tab} onMenu={onMenu} />
+</div>
                     ))}
                   </div>
                 )

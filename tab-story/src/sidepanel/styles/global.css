@@ -90,3 +90,29 @@ input::placeholder {
 .note-card:hover .note-delete-btn {
   opacity: 1 !important;
 }
+button:focus {
+  outline: none;
+}
+.note-card:hover .note-delete-btn {
+  opacity: 1 !important;
+}
+
+/* ADD THIS */
+button:focus,
+button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tab-grid-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.tab-grid-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tab-grid-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120,120,130,0.3);
+  border-radius: 10px;
+}
+.tab-grid-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(120,120,130,0.5);
+}
