@@ -116,26 +116,6 @@ button:focus-visible {
 .tab-grid-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(120,120,130,0.5);
 }
-.sb-tooltip-below .sb-tooltip {
-  left: 50%;
-  top: auto;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%) translateY(4px);
-}
-.sb-tooltip-below:hover .sb-tooltip {
-  transform: translateX(-50%) translateY(0);
-}
-
-.sb-tooltip-below .sb-tooltip {
-  left: 50%;
-  top: auto;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%) translateY(4px);
-}
-.sb-tooltip-below:hover .sb-tooltip {
-  transform: translateX(-50%) translateY(0);
-}
-
 .sb-tooltip-below {
   position: relative;
 }
