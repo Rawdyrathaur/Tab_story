@@ -1,0 +1,5 @@
+name: "CodeQL config"
+languages:
+  - javascript
+  - typescript
+disable-default-queries: false
