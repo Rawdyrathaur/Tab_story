@@ -8,7 +8,6 @@ export default defineConfig({
     react(),
     webExtension({
       manifest: './manifest.json',
-      additionalInputs: ["src/notes/index.html"],
     }),
   ],
 })

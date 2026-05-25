@@ -182,7 +182,7 @@ marginLeft: "auto",
 
           {/* Actions (Always visible) */}
           <div style={{
-            display: "flex", gap: "4px", flexShrink: 0,
+display: "flex", gap: "2px", flexShrink: 0, marginLeft: "4px",
           }}>
            
 
@@ -194,10 +194,10 @@ marginLeft: "auto",
               }}
               title="More options"
               style={{
-                width: "26px", height: "26px", borderRadius: "7px", border: "none",
-                background: "transparent", color: "var(--icon-color)",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center",
+                width: "22px", height: "22px", borderRadius: "6px", border: "none",
+background: "transparent", color: "var(--placeholder-color)",
+cursor: "pointer", display: "flex", alignItems: "center",
+justifyContent: "center", flexShrink: 0,
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

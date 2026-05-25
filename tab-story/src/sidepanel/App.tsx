@@ -1,33 +1,31 @@
 import { useState } from "react";
 import { saveCurrentTab } from "./hooks/useSaveTab";
 import { TabList } from "./components/TabList";
-
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
-import { ClipboardDocumentListIcon as ClipboardSolid } from "@heroicons/react/24/solid";
-
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "./db";
+import { EmptyState } from "./components/EmptyState";
 import { TabMenu } from "./components/TabMenu";
 import type { SavedTab } from "./db";
 import { Navbar } from "./components/Navbar";
 import {
-  TagIcon, FolderIcon, CalendarIcon, ClockIcon,
+  TagIcon, BookmarkSquareIcon, CalendarIcon, ClockIcon,
   Cog6ToothIcon, PlusIcon, ChevronLeftIcon,
-  InformationCircleIcon,
+  InformationCircleIcon, TrashIcon, FolderArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import {
-  TagIcon as TagSolid, FolderIcon as FolderSolid,
+  TagIcon as TagSolid, BookmarkSquareIcon as BookmarkSquareSolid,
   CalendarIcon as CalendarSolid, ClockIcon as ClockSolid,
   Cog6ToothIcon as CogSolid, PlusIcon as PlusSolid,
-  InformationCircleIcon as InfoSolid,
+  InformationCircleIcon as InfoSolid, TrashIcon as TrashSolid, FolderArrowDownIcon as FolderArrowDownSolid,
 } from "@heroicons/react/24/solid";
 
 export type ViewMode = "grid" | "list";
 
 const mainItems = [
-  { outline: FolderIcon,     solid: FolderSolid,   label: "File Manager" },
+  { outline: BookmarkSquareIcon, solid: BookmarkSquareSolid, label: "Tab Manager" },
   { outline: TagIcon,        solid: TagSolid,       label: "Tags" },
   { outline: CalendarIcon,   solid: CalendarSolid,  label: "Calendar" },
   { outline: ClockIcon,      solid: ClockSolid,     label: "History" },
-  { outline: ClipboardDocumentListIcon, solid: ClipboardSolid, label: "Sticky Notes" },
   { outline: Cog6ToothIcon,  solid: CogSolid,       label: "Settings" },
 ];
 
@@ -37,9 +35,42 @@ export function App() {
   const [activePanel, setActivePanel]   = useState<string | null>(null);
   const [hoveredBtn,  setHoveredBtn]    = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-const [viewMode, setViewMode] = useState<ViewMode>("list");
-const [menuTab, setMenuTab] = useState<SavedTab | null>(null);
-const isOpen = activePanel !== null;
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [menuTab, setMenuTab] = useState<SavedTab | null>(null);
+  const isOpen = activePanel !== null;
+
+  // Data for empty state check
+  const folderCount = useLiveQuery(() => db.folders.count());
+  const tabCount    = useLiveQuery(() => db.tabs.count());
+
+const handleDeleteAll = async () => {
+  const confirmed = window.confirm("Delete all saved tabs and folders?");
+  if (!confirmed) return;
+  await db.tabs.clear();
+  await db.folders.clear();
+};
+
+const handleSaveAllTabs = async () => {
+  const allTabs = await chrome.tabs.query({ currentWindow: true });
+  for (const tab of allTabs) {
+    if (!tab.url || !tab.title) continue;
+    if (tab.url.startsWith("chrome://") || tab.url.startsWith("chrome-extension://") || tab.url.startsWith("about:")) continue;
+
+    const domain = (() => { try { return new URL(tab.url).hostname.replace("www.", ""); } catch { return tab.url; } })();
+    const favicon = tab.favIconUrl?.startsWith("http") ? tab.favIconUrl : `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
+    let folder = await db.folders.where("domain").equals(domain).first();
+    if (!folder) {
+      const folderId = await db.folders.add({ name: domain, domain, createdAt: Date.now() });
+      folder = { id: folderId as number, name: domain, domain, createdAt: Date.now() };
+    }
+
+    const existing = await db.tabs.where("url").equals(tab.url).first();
+    if (existing) continue;
+
+    await db.tabs.add({ url: tab.url, title: tab.title, favicon, domain, folderId: folder.id, tags: [], createdAt: Date.now(), notes: "", pinned: false });
+  }
+};
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", position: "relative" }}>
 
@@ -123,11 +154,6 @@ const isOpen = activePanel !== null;
         <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--placeholder-color)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "12px" }}>
           {activePanel}
         </div>
-        {activePanel === "Sticky Notes" ? (
-  <TabList searchQuery="" viewMode="list" onMenu={setMenuTab} mode="notes" />
-) : (
-  <div style={{ fontSize: "13px", color: "var(--text-color)" }}>Coming soon...</div>
-)}
       </div>
 
       {/* Main content */}
@@ -142,12 +168,46 @@ const isOpen = activePanel !== null;
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
+<div style={{ display: "flex", justifyContent: "center", gap: "4px", padding: "8px 0" }}>
+  <div className="sb-tooltip-wrap sb-tooltip-below">
+  <button className="sb-btn" onClick={handleSaveAllTabs}
+    onMouseEnter={() => setHoveredBtn("saveAll")}
+    onMouseLeave={() => setHoveredBtn(null)}
+    style={{ color: hoveredBtn === "saveAll" ? "#60a5fa" : "var(--icon-color)", transition: "color 0.15s ease" }}>
+    {hoveredBtn === "saveAll"
+      ? <FolderArrowDownSolid style={{ width: ICO, height: ICO }} />
+      : <FolderArrowDownIcon  style={{ width: ICO, height: ICO }} />}
+  </button>
+  <span className="sb-tooltip">Save All Tabs</span>
+</div>
+
+<div className="sb-tooltip-wrap sb-tooltip-below">
+  <button className="sb-btn" onClick={handleDeleteAll}
+    onMouseEnter={() => setHoveredBtn("deleteAll")}
+    onMouseLeave={() => setHoveredBtn(null)}
+    style={{ color: hoveredBtn === "deleteAll" ? "#f87171" : "var(--icon-color)", transition: "color 0.15s ease" }}>
+    {hoveredBtn === "deleteAll"
+      ? <TrashSolid style={{ width: ICO, height: ICO }} />
+      : <TrashIcon  style={{ width: ICO, height: ICO }} />}
+  </button>
+  <span className="sb-tooltip">Delete All</span>
+</div>
+</div>
         <main style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-  {menuTab && <TabMenu tab={menuTab} onClose={() => setMenuTab(null)} />}
-  <TabList searchQuery={searchQuery} viewMode={viewMode} onMenu={setMenuTab} />
+  {folderCount === undefined || tabCount === undefined ? (
+    <div style={{ textAlign: "center", padding: "40px", color: "var(--placeholder-color)" }}>
+      Loading...
+    </div>
+  ) : tabCount === 0 ? (
+    <EmptyState />
+  ) : (
+    <>
+      {menuTab && <TabMenu tab={menuTab} onClose={() => setMenuTab(null)} />}
+      <TabList searchQuery={searchQuery} viewMode={viewMode} onMenu={setMenuTab} />
+    </>
+  )}
 </main>
       </div>
-
     </div>
   );
 }
