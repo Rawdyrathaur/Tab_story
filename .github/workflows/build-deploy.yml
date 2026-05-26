@@ -2,10 +2,10 @@ name: 🚀 Build & Deploy
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
+    branches: [main, dev]
+    tags: ['v*']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -44,8 +44,8 @@ jobs:
       - name: 📦 Create distributable
         run: |
           mkdir -p releases
-          if [ -d "dist" ]; then
-            zip -r releases/tab-story-${{ github.sha }}.zip dist/
+          if [ -d "sidepanel/dist" ]; then
+            zip -r releases/tab-story-${{ github.sha }}.zip sidepanel/dist/
           fi
       
       - name: 📤 Upload artifacts
@@ -71,7 +71,7 @@ jobs:
       - name: 🔍 Verify no secrets in build
         run: |
           echo "🔍 Scanning build artifacts for secrets..."
-          if unzip -l tab-story-*.zip | grep -i "\.env\|secret\|\.key"; then
+          if unzip -l tab-story-*.zip | grep -iE "\.env|secret|\.key|password"; then
             echo "❌ Secrets found in build!"
             exit 1
           fi
@@ -95,6 +95,7 @@ jobs:
           name: tab-story-build
       
       - name: 🏷️ Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

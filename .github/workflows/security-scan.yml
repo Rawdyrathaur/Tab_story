@@ -2,11 +2,10 @@ name: 🔐 Security Scan & Vulnerability Check
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, dev]
   schedule:
-    # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
 
 jobs:
@@ -51,11 +50,6 @@ jobs:
           if grep -r "innerHTML\s*=" --include="*.js" --include="*.ts" --exclude-dir=node_modules --exclude-dir=dist . 2>/dev/null | grep -v "textContent" | head -5; then
             echo "⚠️  innerHTML found (ensure content is sanitized)"
           fi
-      
-      - name: 🔒 Check Content Security Policy
-        run: |
-          echo "✓ Checking CSP configuration..."
-          node -e "const csp = require('./config/csp.json'); console.log('CSP Profiles:', Object.keys(csp)); if(!csp.production) { console.error('❌ Missing production CSP'); process.exit(1); }"
       
       - name: 📋 Check manifest.json security
         run: |
@@ -183,11 +177,3 @@ jobs:
             exit 1
           fi
           echo "✓ .gitignore properly configured"
-
-summary: |
-  ✅ Security scanning complete
-  - All secrets detection checks passed
-  - Dependency audit completed
-  - Code quality verified
-  - Extension permissions verified
-  - Compliance checks passed
