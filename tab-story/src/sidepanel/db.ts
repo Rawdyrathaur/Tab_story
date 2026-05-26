@@ -11,6 +11,7 @@ export interface SavedTab {
   createdAt: number;
   notes: string;
   pinned: boolean;
+  scheduledAt?: number;
 }
 
 export interface Folder {
@@ -77,6 +78,12 @@ class TabStoryDB extends Dexie {
     });
     this.version(5).stores({
       tabs: '++id, url, domain, folderId, createdAt',
+      folders: '++id, name, domain',
+      studyFolders: '++id, createdAt',
+      studyTopics: '++id, studyFolderId',
+    });
+    this.version(6).stores({
+      tabs: '++id, url, domain, folderId, createdAt, scheduledAt',
       folders: '++id, name, domain',
       studyFolders: '++id, createdAt',
       studyTopics: '++id, studyFolderId',

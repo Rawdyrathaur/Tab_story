@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { SavedTab } from "../db";
 import { db } from "../db";
+import { getAuthToken, createCalendarEvent, backupToGoogleDrive } from '../hooks/useGoogleAuth';
 import {
   ArrowTopRightOnSquareIcon,
   BookmarkIcon,
@@ -10,6 +11,7 @@ import {
   TrashIcon,
   ChevronLeftIcon,
   CheckIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import { PencilSquareIcon as PencilSolid } from "@heroicons/react/24/solid";
 
@@ -19,12 +21,44 @@ interface Props {
 }
 
 export function TabMenu({ tab, onClose }: Props) {
-  const [view, setView] = useState<"menu" | "note">("menu");
+  const [view, setView] = useState<"menu" | "note" | "schedule">("menu");
   const [note, setNote] = useState(tab.notes || "");
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
 
   const saveNote = async () => {
     await db.tabs.update(tab.id!, { notes: note.trim() });
   };
+
+  const openInGoogleCalendar = async () => {
+  if (!scheduleDate) return;
+  try {
+    const token = await getAuthToken();
+    const startDateTime = scheduleDate + 'T' + (scheduleTime || '09:00') + ':00';
+    const endDateTime = scheduleDate + 'T' + (scheduleTime
+      ? String(parseInt(scheduleTime.split(':')[0]) + 1).padStart(2, '0') + ':' + scheduleTime.split(':')[1]
+      : '10:00') + ':00';
+
+    await createCalendarEvent(token, {
+      title: '📖 ' + tab.title,
+      description: 'Tab saved in Tab Story\n\n' + tab.url,
+      startDateTime,
+      endDateTime,
+    });
+
+    const scheduledAt = new Date(startDateTime).getTime();
+    await db.tabs.update(tab.id!, { scheduledAt });
+
+    // Backup to Drive
+    const allTabs = await db.tabs.toArray();
+    await backupToGoogleDrive(token, allTabs);
+
+    onClose();
+  } catch (err) {
+    console.error('Calendar error:', err);
+    alert('Failed to create event. Please try again.');
+  }
+};
 
   const actions = [
     {
@@ -44,6 +78,12 @@ export function TabMenu({ tab, onClose }: Props) {
       label: tab.notes ? "Edit Note" : "Add Note",
       color: tab.notes ? "#a78bfa" : "var(--text-color)",
       onClick: () => setView("note"),
+    },
+    {
+      icon: CalendarDaysIcon,
+      label: "Schedule in Calendar",
+      color: "#34d399",
+      onClick: () => setView("schedule"),
     },
     {
       icon: TagIcon,
@@ -89,7 +129,7 @@ export function TabMenu({ tab, onClose }: Props) {
       >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-          {view === "note" && (
+          {(view === "note" || view === "schedule") && (
             <button
               onClick={() => setView("menu")}
               style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--placeholder-color)", padding: 0, display: "flex" }}
@@ -101,7 +141,7 @@ export function TabMenu({ tab, onClose }: Props) {
             fontSize: "13px", fontWeight: 600, color: "var(--text-color)",
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
           }}>
-            {view === "note" ? "Why did you open this tab?" : tab.title}
+            {view === "note" ? "Why did you open this tab?" : view === "schedule" ? "Schedule in Google Calendar" : tab.title}
           </div>
         </div>
 
@@ -164,6 +204,55 @@ export function TabMenu({ tab, onClose }: Props) {
             >
               <CheckIcon style={{ width: "15px", height: "15px" }} />
               Save Note
+            </button>
+          </div>
+        )}
+
+        {/* Schedule view */}
+        {view === "schedule" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "11px", color: "var(--placeholder-color)" }}>Date</div>
+            <input
+              type="date"
+              value={scheduleDate}
+              onChange={e => setScheduleDate(e.target.value)}
+              style={{
+                width: "100%", padding: "9px 10px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "8px", color: "var(--text-color)",
+                fontSize: "13px", outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <div style={{ fontSize: "11px", color: "var(--placeholder-color)" }}>Time (optional)</div>
+            <input
+              type="time"
+              value={scheduleTime}
+              onChange={e => setScheduleTime(e.target.value)}
+              style={{
+                width: "100%", padding: "9px 10px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "8px", color: "var(--text-color)",
+                fontSize: "13px", outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              onClick={openInGoogleCalendar}
+              disabled={!scheduleDate}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                padding: "9px", borderRadius: "8px", border: "none",
+                background: scheduleDate ? "rgba(52,211,153,0.2)" : "rgba(255,255,255,0.05)",
+                color: scheduleDate ? "#34d399" : "var(--placeholder-color)",
+                fontSize: "13px", fontWeight: 600,
+                cursor: scheduleDate ? "pointer" : "not-allowed",
+              }}
+            >
+              <CalendarDaysIcon style={{ width: "15px", height: "15px" }} />
+              Open in Google Calendar
             </button>
           </div>
         )}
