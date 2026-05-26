@@ -36,6 +36,7 @@
     "husky": "^9.1.7",
     "jest": "^30.3.0",
     "lint-staged": "^15.5.2",
+    "ts-jest": "^29.4.11",
     "vite": "^8.0.13"
   },
   "engines": {
@@ -46,17 +47,32 @@
     "Chrome >= 127"
   ],
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "node",
     "testMatch": [
-      "**/tests/**/*.test.js"
+      "**/tests/**/*.test.{ts,js}"
     ],
+    "testPathIgnorePatterns": [
+      "node_modules",
+      "tab-story"
+    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
     "collectCoverageFrom": [
-      "utils/**/*.js",
-      "scripts/**/*.js"
+      "utils/**/*.{ts,js}",
+      "scripts/**/*.{ts,js}",
+      "!**/*.d.ts"
     ],
     "coverageReporters": [
       "text",
       "lcov"
-    ]
+    ],
+    "transform": {
+      "^.+\\.tsx?$": ["ts-jest", {
+        "tsconfig": {
+          "esModuleInterop": true,
+          "allowJs": true
+        }
+      }]
+    }
   }
 }
