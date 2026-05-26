@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-popover": "^1.1.15",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.3.0",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",
     "fuse.js": "^7.3.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

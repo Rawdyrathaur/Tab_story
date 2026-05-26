@@ -3,6 +3,7 @@ import { saveCurrentTab } from "./hooks/useSaveTab";
 import { TabList } from "./components/TabList";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db";
+import { CalendarPanel } from "./components/CalendarPanel";
 import { EmptyState } from "./components/EmptyState";
 import { TabMenu } from "./components/TabMenu";
 import type { SavedTab } from "./db";
@@ -43,6 +44,10 @@ export function App() {
   const folderCount = useLiveQuery(() => db.folders.count());
   const tabCount    = useLiveQuery(() => db.tabs.count());
 
+  const handleBatchAdd = () => {
+    // Placeholder – later you'll open a batch add form
+    console.log("Batch add clicked");
+  };
 const handleDeleteAll = async () => {
   const confirmed = window.confirm("Delete all saved tabs and folders?");
   if (!confirmed) return;
@@ -154,6 +159,7 @@ const handleSaveAllTabs = async () => {
         <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--placeholder-color)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "12px" }}>
           {activePanel}
         </div>
+        {activePanel === "Calendar" && <CalendarPanel />}
       </div>
 
       {/* Main content */}
@@ -192,13 +198,15 @@ const handleSaveAllTabs = async () => {
   </button>
   <span className="sb-tooltip">Delete All</span>
 </div>
+
+
 </div>
         <main style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
   {folderCount === undefined || tabCount === undefined ? (
     <div style={{ textAlign: "center", padding: "40px", color: "var(--placeholder-color)" }}>
       Loading...
     </div>
-  ) : tabCount === 0 ? (
+  ) : folderCount === 0 && tabCount === 0 ? (
     <EmptyState />
   ) : (
     <>

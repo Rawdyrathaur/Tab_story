@@ -5,7 +5,9 @@
   "permissions": [
     "sidePanel",
     "tabs",
-    "favicon"
+    "favicon",
+    "identity",
+    "storage"
   ],
   "icons": {
     "16": "icons/icon-16.png",
@@ -26,5 +28,12 @@
       "resources": ["_favicon/*"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "oauth2": {
+    "client_id": "466355657103-trtvip753to9ctso40pkemqqdtrvj15e.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/drive.appdata"
+    ]
+  }
 }

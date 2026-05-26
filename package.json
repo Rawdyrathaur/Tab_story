@@ -8,6 +8,7 @@
     "dev": "cd sidepanel && npm run dev"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "jest": "^30.3.0"
   },
   "jest": {
