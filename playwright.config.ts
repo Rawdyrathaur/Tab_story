@@ -3,5 +3,6 @@ export default defineConfig({
   testDir: './tests',
   use: {
     headless: false, 
+    
   },
 });

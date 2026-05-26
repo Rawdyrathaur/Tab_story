@@ -1,0 +1,12 @@
+#!/bin/bash
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔐 Running pre-commit security checks..."
+
+# Run lint-staged
+npx lint-staged
+
+# Run custom security checks
+bash scripts/hooks/pre-commit.sh
+
+# If any check failed, the commit is aborted
