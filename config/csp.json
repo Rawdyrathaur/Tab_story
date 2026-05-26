@@ -1,0 +1,28 @@
+{
+  "description": "Content Security Policy configurations for different environments",
+  "development": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:*",
+    "sandbox": "sandbox allow-scripts allow-same-origin allow-forms"
+  },
+  "staging": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self'; img-src 'self' https:; font-src 'self' data:; connect-src 'self'",
+    "sandbox": "sandbox allow-scripts allow-same-origin"
+  },
+  "production": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self'; img-src 'self' https:; font-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+    "sandbox": "sandbox allow-scripts allow-same-origin"
+  },
+  "best_practices": {
+    "explanation": "These CSP policies follow Manifest V3 security best practices",
+    "rules": [
+      "Never use 'unsafe-inline' for scripts in production",
+      "Never use 'unsafe-eval' in production",
+      "Use 'self' for same-origin resources",
+      "Restrict connect-src to necessary domains only",
+      "Use https: for external resources",
+      "Set base-uri to 'self' to prevent frame injection",
+      "Set form-action to 'self' to prevent form hijacking",
+      "Use sandbox attribute for iframes containing untrusted content"
+    ]
+  }
+}
