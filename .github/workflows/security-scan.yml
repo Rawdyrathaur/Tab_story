@@ -30,6 +30,8 @@ jobs:
       
       - name: 📦 Install dependencies
         run: npm ci --prefer-offline
+      - name: Install extension dependencies
+        run: npm ci --prefix tab-story --prefer-offline
       
       - name: 🔍 Detect secrets
         run: bash scripts/detect-secrets.sh || true
@@ -55,7 +57,7 @@ jobs:
         run: |
           echo "✓ Validating manifest.json..."
           node -e "
-          const manifest = require('./manifest.json');
+          const manifest = require('./tab-story/manifest.json');
           const checks = [
             manifest.content_security_policy && manifest.content_security_policy.extension_pages,
             manifest.manifest_version === 3,
@@ -87,6 +89,8 @@ jobs:
       
       - name: 📦 Install dependencies
         run: npm ci --prefer-offline
+      - name: Install extension dependencies
+        run: npm ci --prefix tab-story --prefer-offline
       
       - name: 🔍 Run npm audit
         run: npm audit --audit-level=moderate
@@ -113,6 +117,8 @@ jobs:
       
       - name: 📦 Install dependencies
         run: npm ci --prefer-offline
+      - name: Install extension dependencies
+        run: npm ci --prefix tab-story --prefer-offline
       
       - name: 🎨 Run ESLint
         run: npm run lint
@@ -134,7 +140,7 @@ jobs:
         run: |
           echo "📋 Current extension permissions:"
           node -e "
-          const manifest = require('./manifest.json');
+          const manifest = require('./tab-story/manifest.json');
           console.log('Permissions:', manifest.permissions);
           console.log('Host Permissions:', manifest.host_permissions || []);
           
