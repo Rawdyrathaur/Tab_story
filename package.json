@@ -11,8 +11,8 @@
   },
   "scripts": {
     "test": "jest --coverage",
-    "build": "cd sidepanel && npm run build",
-    "dev": "cd sidepanel && npm run dev",
+    "build": "cd tab-story && npm run build",
+    "dev": "cd tab-story && npm run dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "security:check": "npm audit --audit-level=moderate",
@@ -56,7 +56,13 @@
       "node_modules",
       "tab-story"
     ],
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
     "collectCoverageFrom": [
       "utils/**/*.{ts,js}",
       "scripts/**/*.{ts,js}",
@@ -67,12 +73,15 @@
       "lcov"
     ],
     "transform": {
-      "^.+\\.tsx?$": ["ts-jest", {
-        "tsconfig": {
-          "esModuleInterop": true,
-          "allowJs": true
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "esModuleInterop": true,
+            "allowJs": true
+          }
         }
-      }]
+      ]
     }
   }
 }

@@ -68,3 +68,7 @@ git-history-backup/
 
 # Playwright
 .playwright/
+
+.DS_Store
+**/.DS_Store
+tabstory_v1_extracted/
