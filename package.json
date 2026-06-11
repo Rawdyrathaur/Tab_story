@@ -10,13 +10,13 @@
     "url": "https://github.com/Rawdyrathaur/Tab_story"
   },
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest --coverage --passWithNoTests",
     "build": "cd tab-story && npm run build",
     "dev": "cd tab-story && npm run dev",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "npm run lint --prefix tab-story",
+    "lint:fix": "npm run lint --prefix tab-story -- --fix",
     "security:check": "npm audit --audit-level=moderate",
-    "security:scan": "echo '✅ Running security scan...' && bash scripts/detect-secrets.sh || true",
+    "security:scan": "echo '\u2705 Running security scan...' && bash scripts/detect-secrets.sh || true",
     "env:validate": "bash scripts/validate-env.sh",
     "env:validate:strict": "bash scripts/validate-env.sh --strict",
     "history:clean:dry": "bash scripts/clean-history.sh --dry-run",

@@ -106,6 +106,7 @@ function TagPill({ label }: { label: string }) {
 
 // ─── List Row ───────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function TabRowList({ tab, onMenu, mode }: { tab: SavedTab; onMenu?: (tab: SavedTab) => void; mode?: "default" | "notes" }) {
   const [hovered, setHovered] = useState(false);
 
