@@ -10,13 +10,13 @@
     "url": "https://github.com/Rawdyrathaur/Tab_story"
   },
   "scripts": {
-    "test": "jest --coverage",
-    "build": "cd sidepanel && npm run build",
-    "dev": "cd sidepanel && npm run dev",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "test": "jest --coverage --passWithNoTests",
+    "build": "cd tab-story && npm run build",
+    "dev": "cd tab-story && npm run dev",
+    "lint": "npm run lint --prefix tab-story",
+    "lint:fix": "npm run lint --prefix tab-story -- --fix",
     "security:check": "npm audit --audit-level=moderate",
-    "security:scan": "echo '✅ Running security scan...' && bash scripts/detect-secrets.sh || true",
+    "security:scan": "echo '\u2705 Running security scan...' && bash scripts/detect-secrets.sh || true",
     "env:validate": "bash scripts/validate-env.sh",
     "env:validate:strict": "bash scripts/validate-env.sh --strict",
     "history:clean:dry": "bash scripts/clean-history.sh --dry-run",
@@ -56,7 +56,13 @@
       "node_modules",
       "tab-story"
     ],
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
     "collectCoverageFrom": [
       "utils/**/*.{ts,js}",
       "scripts/**/*.{ts,js}",
@@ -67,12 +73,15 @@
       "lcov"
     ],
     "transform": {
-      "^.+\\.tsx?$": ["ts-jest", {
-        "tsconfig": {
-          "esModuleInterop": true,
-          "allowJs": true
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "esModuleInterop": true,
+            "allowJs": true
+          }
         }
-      }]
+      ]
     }
   }
 }

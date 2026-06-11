@@ -44,6 +44,7 @@ export function App() {
   const folderCount = useLiveQuery(() => db.folders.count());
   const tabCount    = useLiveQuery(() => db.tabs.count());
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleBatchAdd = () => {
     // Placeholder – later you'll open a batch add form
     console.log("Batch add clicked");

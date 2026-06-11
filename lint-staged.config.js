@@ -1,10 +1,10 @@
 /**
  * lint-staged Configuration
- * 
- * Runs linters and formatters on staged files before commit.
- * Only files that are staged (git add) are processed.
+ *
+ * Only the active V2 extension app is linted here.
+ * Root ESLint is not used for tab-story TSX files because the app has its own config.
  */
 
 export default {
-  "*.{js,jsx,ts,tsx}": ["eslint --fix"],
+  "tab-story/**/*.{js,jsx,ts,tsx}": () => "cd tab-story && npm run lint -- --fix"
 };
