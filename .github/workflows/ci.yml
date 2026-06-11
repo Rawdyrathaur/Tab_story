@@ -26,15 +26,56 @@ jobs:
       - name: Install extension dependencies
         run: npm ci --prefix tab-story --prefer-offline
 
-      - name: Run linter
-        run: npm run lint
+      name: CI/CD
 
-      - name: Run tests with coverage
-        run: npm test
+      on:
+        push:
+          branches: [main, dev, 'feature/**']
+        pull_request:
+          branches: [main, dev]
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
+      jobs:
+        ci:
+          name: CI - Install, Lint, Test, Build
+          runs-on: ubuntu-latest
+
+          steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+                cache: 'npm'
+
+            - name: Install root dependencies
+              run: npm ci --prefer-offline
+
+            - name: Install extension dependencies
+              run: npm ci --prefix tab-story --prefer-offline
+
+            - name: Run linter
+              run: npm run lint
+
+            - name: Run tests
+              run: npm test
+
+            - name: Build
+              run: npm run build
+              env:
+                NODE_ENV: production
+
+            - name: Package distributable
+              run: |
+                mkdir -p releases
+                if [ -d "tab-story/dist" ]; then
+                  zip -r releases/tab-story-${{ github.sha }}.zip tab-story/dist/
+                fi
+
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: tab-story-build
+                path: releases/
+                retention-days: 30
