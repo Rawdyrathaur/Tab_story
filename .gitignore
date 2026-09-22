@@ -72,3 +72,6 @@ git-history-backup/
 .DS_Store
 **/.DS_Store
 tabstory_v1_extracted/
+
+# Backend is maintained and deployed from its separate repository.
+tab-story-server/
