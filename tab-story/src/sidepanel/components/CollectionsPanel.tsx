@@ -69,7 +69,7 @@ export function CollectionsPanel({ onDiscussAI }: { onDiscussAI: (tab: SavedTab)
         {members.length > visibleCount && <button onClick={() => setVisibleCount(count => count + 40)}>Show more</button>}
       </>}
     </>}
-    {menuTab && collection && <TabMenu initialView={menuView} tab={menuTab} onClose={() => setMenuTab(null)} onDiscussAI={onDiscussAI} onRemoveFromCollection={async () => {
+    {menuTab && collection && <TabMenu initialView={menuView} tab={menuTab} onClose={() => setMenuTab(null)} onDiscussAI={onDiscussAI} firstScheduleSetup onRemoveFromCollection={async () => {
       await db.transaction('rw', db.collections, async () => { const latest = await db.collections.get(collection.id!); if (latest) await db.collections.update(collection.id!, { tabIds: latest.tabIds.filter(id => id !== menuTab.id) }); });
     }} />}
   </section>;

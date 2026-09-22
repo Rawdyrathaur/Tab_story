@@ -54,7 +54,10 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.runtime.onStartup.addListener(runRecovery);
-chrome.notifications.onPermissionLevelChanged.addListener(level => {
+// Older Chromium builds (and some test browsers) do not expose the optional
+// permission-level event.  Notification scheduling still works through the
+// explicit permission checks, so treat the event as an enhancement only.
+chrome.notifications?.onPermissionLevelChanged?.addListener(level => {
   if (level === 'granted') runRecovery();
 });
 chrome.alarms.onAlarm.addListener(alarm => { void serialized(() => handleAlarm(alarm)).catch(console.error); });

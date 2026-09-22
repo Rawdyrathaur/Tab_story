@@ -28,9 +28,10 @@ interface Props {
   onDiscussAI?: (tab: SavedTab) => void;
   initialView?: "menu" | "schedule";
   onRemoveFromCollection?: () => Promise<void>;
+  firstScheduleSetup?: boolean;
 }
 
-export function TabMenu({ tab, onClose, onDiscussAI, onRemoveFromCollection, initialView = "menu" }: Props) {
+export function TabMenu({ tab, onClose, onDiscussAI, onRemoveFromCollection, initialView = "menu", firstScheduleSetup = false }: Props) {
   const { t: tr } = useI18n();
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef);
@@ -229,7 +230,7 @@ export function TabMenu({ tab, onClose, onDiscussAI, onRemoveFromCollection, ini
           </div>
         )}
 
-        {view === "schedule" && <><ScheduleEditor tab={tab} onClose={onClose} />{tab.scheduledAt ? <div className="action-row"><button onClick={() => run(async () => { await cancelTabReminder(tab.id!); onClose(); })}>{tr("calendar.clear")}</button><button onClick={() => run(async () => { await completeTabReminder(tab.id!); onClose(); })}>{tr("calendar.complete")}</button></div> : null}</>}
+        {view === "schedule" && <><ScheduleEditor tab={tab} onClose={onClose} firstScheduleSetup={firstScheduleSetup} />{tab.scheduledAt ? <div className="action-row"><button onClick={() => run(async () => { await cancelTabReminder(tab.id!); onClose(); })}>{tr("calendar.clear")}</button><button onClick={() => run(async () => { await completeTabReminder(tab.id!); onClose(); })}>{tr("calendar.complete")}</button></div> : null}</>}
         {/* Automatic Simplified Tags View */}
         {view === "tags" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

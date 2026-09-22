@@ -1,4 +1,4 @@
-import { UndoCenter } from './components/ReviewPanel';
+import { ReviewPanel, UndoCenter } from './components/ReviewPanel';
 import { NotificationWarning } from './components/ReminderHealth';
 import { useEffect, useState } from "react";
 import { TabList } from "./components/TabList";
@@ -270,7 +270,7 @@ const handleSaveAllTabs = async () => {
           </span>
         </div>
         {activePanel === "Collections" && <CollectionsPanel onDiscussAI={tab => setAiModal({ title: tab.title, tabs: [tab] })} />}
-        {activePanel === "Calendar" && <><NotificationWarning /><CalendarPanel /></>}
+        {activePanel === "Calendar" && <><NotificationWarning /><ReviewPanel /><CalendarPanel /></>}
         {activePanel === "Tags" && <TagsPanel onMenu={setMenuTab} />}
         {activePanel === "History" && <HistoryPanel onBack={() => setActivePanel(null)} />}
         {activePanel === "Settings" && <SettingsPanel highlightReminders={reminderHighlight} />}

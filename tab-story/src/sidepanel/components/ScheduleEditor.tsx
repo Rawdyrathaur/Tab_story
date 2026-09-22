@@ -11,7 +11,7 @@ import { requestOfflineReaderAccess, saveOfflineArticle } from '../../reminders/
 
 type Preset = 'today_evening' | 'tomorrow_morning' | 'in_1_hour';
 
-export function ScheduleEditor({ tab, initialDate, onClose }: { tab: SavedTab; initialDate?: Date; onClose: () => void }) {
+export function ScheduleEditor({ tab, initialDate, onClose, firstScheduleSetup = false }: { tab: SavedTab; initialDate?: Date; onClose: () => void; firstScheduleSetup?: boolean }) {
   const { t } = useI18n();
   const tabs = useLiveQuery(() => db.tabs.filter(item => !item.deletedAt && item.status !== 'archived').toArray());
   const [targetId, setTargetId] = useState(tab.id!);
@@ -20,6 +20,8 @@ export function ScheduleEditor({ tab, initialDate, onClose }: { tab: SavedTab; i
   const [time, setTime] = useState(toLocalTimeInput(initial));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
+  const [setupAlerts, setSetupAlerts] = useState(false);
   const target = tabs?.find(item => item.id === targetId) || tab;
 
   function applyPreset(preset: Preset) {
@@ -34,12 +36,21 @@ export function ScheduleEditor({ tab, initialDate, onClose }: { tab: SavedTab; i
   async function confirm(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError('');
     try {
-      await requestReminderPermission();
-      const offlineAccess = await requestOfflineReaderAccess(target.url).catch(() => false);
+      const firstSchedule = firstScheduleSetup && setupAlerts && !target.scheduledAt;
+      // Saving remains available even when desktop notification permission is
+      // declined; the reminder settings card can request it afterwards.
+      await requestReminderPermission().catch(() => {});
       await scheduleTabReminder(targetId, parseLocalSchedule(date, time));
-      if (offlineAccess) void saveOfflineArticle(targetId);
+      void requestOfflineReaderAccess(target.url).then(access => { if (access) void saveOfflineArticle(targetId); }).catch(() => {});
       void navigator.storage?.persist?.().catch(() => {});
-      onClose();
+      if (firstSchedule) {
+        await chrome.storage.local.set({ reminderSetupVisited: true });
+        onClose();
+        window.dispatchEvent(new CustomEvent('tab-story:reminder-setup'));
+      } else {
+        setSaved(true);
+        setBusy(false);
+      }
     } catch (cause) {
       setError(cause instanceof Error && cause.message.startsWith('errors.') ? cause.message : 'Could not schedule this tab.');
       setBusy(false);
@@ -68,6 +79,13 @@ export function ScheduleEditor({ tab, initialDate, onClose }: { tab: SavedTab; i
     </div>
 
     {error && <p role="alert">{error.startsWith('errors.') ? t(error) : error}</p>}
-    <button className="pwa-schedule-confirm" type="submit" disabled={busy}>{busy ? 'Scheduling…' : 'Confirm Schedule'}</button>
+    {saved && <p role="status">Saved</p>}
+    <div className="action-row">
+      {!saved && <>
+        <button className="pwa-schedule-confirm" type="submit" disabled={busy} onClick={() => setSetupAlerts(false)}>{busy ? 'Scheduling…' : 'Save'}</button>
+        {firstScheduleSetup && !tab.scheduledAt && <button type="submit" disabled={busy} onClick={() => setSetupAlerts(true)}>Save &amp; set up alerts</button>}
+      </>}
+      <button type="button" onClick={onClose} disabled={busy}>{saved ? 'Close' : 'Cancel'}</button>
+    </div>
   </form>;
 }

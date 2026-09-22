@@ -128,6 +128,10 @@ check_sensitive_files() {
   echo "🚫 Checking for sensitive file patterns..."
   
   STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+  # The scanner and hook files contain the words they are designed to detect.
+  # Exclude only these rule definitions; all application files remain checked.
+  local scan_files
+  scan_files=$(printf '%s\n' "$STAGED_FILES" | grep -vE '^scripts/(detect-secrets\.sh|hooks/(pre-commit|pre-push)\.sh)$' || true)
   
   local sensitive_patterns=(
     "\.env"
@@ -144,7 +148,7 @@ check_sensitive_files() {
   )
   
   for pattern in "${sensitive_patterns[@]}"; do
-    if echo "$STAGED_FILES" | grep -iE "$pattern" > /dev/null; then
+    if echo "$scan_files" | grep -iE "$pattern" > /dev/null; then
       # Check if it's in allowed files
       if ! [[ "$pattern" == "\.env" ]]; then
         echo -e "${RED}❌ ERROR: Sensitive file pattern detected: $pattern${NC}"

@@ -14,10 +14,18 @@ export function CalendarPanel() {
   const [now, setNow] = useState(() => Date.now());
   const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [selected, setSelected] = useState(() => new Date());
+  const [choosing, setChoosing] = useState(false);
   const [editing, setEditing] = useState<SavedTab | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const tabs = useLiveQuery(() => db.tabs.toArray());
+  const collections = useLiveQuery(() => db.collections.toArray());
+  const active = (tabs || []).filter(tab => !tab.deletedAt && tab.status !== 'archived');
+  const collectionNames = new Map<number, string>();
+  for (const collection of collections || []) {
+    if (collection.deletedAt) continue;
+    for (const tabId of collection.tabIds) collectionNames.set(tabId, collection.name);
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 10000);
@@ -115,6 +123,11 @@ export function CalendarPanel() {
       {!selectedTasks.length && <p className="pwa-calendar-empty">{t('calendar.empty')}</p>}
     </div>
 
-    {editing && <ScheduleEditor key={`${editing.id}-${timestamp(editing)}`} tab={editing} onClose={() => setEditing(null)} />}
+    <div className="action-row">
+      <button onClick={() => { setChoosing(value => !value); setEditing(null); }}>{active.length ? 'Schedule' : 'Schedule current tab +'}</button>
+    </div>
+    {choosing && <div className="calendar-card"><label htmlFor="calendar-tab">{t('calendar.selectTab')}</label><select id="calendar-tab" value="" onChange={event => { setEditing(active.find(tab => tab.id === Number(event.target.value)) || null); setChoosing(false); }}><option value="">{t('calendar.selectTab')}</option>{active.map(tab => <option key={tab.id} value={tab.id}>{collectionNames.get(tab.id!) ? `${collectionNames.get(tab.id!)} · ${tab.title}` : tab.title}</option>)}</select>{!active.length && <p>{t('calendar.noTabs')}</p>}</div>}
+
+    {editing && <ScheduleEditor key={String(editing.id)} tab={editing} onClose={() => setEditing(null)} />}
   </section>;
 }

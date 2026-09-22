@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AISettingsCard } from './AISettingsCard';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { areReminderNotificationsEnabled, requestReminderPermission, setReminderNotificationsEnabled } from '../../reminders/service';
+import { ReminderHealth } from './ReminderHealth';
 
 export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?: number }) {
   const reminderCard = useRef<HTMLElement>(null);
@@ -17,8 +18,10 @@ export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?:
     return () => window.clearTimeout(timer);
   }, [highlightReminders]);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [websiteAlerts, setWebsiteAlerts] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [desktopPermission, setDesktopPermission] = useState('Checking…');
+  const [platform, setPlatform] = useState('');
   const [permissionBusy, setPermissionBusy] = useState(false);
   useEffect(() => {
     let active = true;
@@ -28,6 +31,8 @@ export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?:
         .then(async enabled => enabled ? chrome.notifications.getPermissionLevel() : null)
         .then(value => { if (active) setDesktopPermission(value === null ? 'Enabled when you schedule' : value === 'granted' ? 'Chrome allowed' : 'Blocked in Chrome'); })
         .catch(() => { if (active) setDesktopPermission('Unavailable'); });
+      void chrome.permissions.contains({ origins: ['https://*/*', 'http://*/*'] })
+        .then(value => { if (active) setWebsiteAlerts(value); }).catch(() => {});
     };
     refresh();
     window.addEventListener('focus', refresh);
@@ -40,6 +45,7 @@ export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?:
       chrome.permissions.onRemoved.removeListener(refresh);
     };
   }, []);
+  useEffect(() => { void chrome.runtime.getPlatformInfo().then(info => setPlatform(info.os)).catch(() => {}); }, []);
   const button = { padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', cursor: 'pointer' };
   return <div className="account-settings" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', minWidth: 0, width: '100%', gap: 12, color: 'var(--text-color)', fontSize: 12 }}>
     <details style={{ border: '1px solid var(--border-color)', borderRadius: 12, padding: 12 }}>
@@ -65,6 +71,16 @@ export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?:
         void chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` })
           .catch(() => setNotificationMessage('Couldn’t open Chrome settings. Try again.'));
       }}>Open Chrome extension settings ↗</button>}
+      <button style={button} disabled={permissionBusy || websiteAlerts} onClick={() => {
+        setPermissionBusy(true);
+        void chrome.permissions.request({ origins: ['https://*/*', 'http://*/*'] })
+          .then(granted => { setWebsiteAlerts(granted); setNotificationMessage(granted ? '' : 'Try again to enable website banners.'); })
+          .catch(() => setNotificationMessage('Try again to enable website banners.'))
+          .finally(() => setPermissionBusy(false));
+      }}>{websiteAlerts ? '✓ Website banners enabled' : permissionBusy ? 'Enabling…' : 'Enable website banners'}</button>
+      {platform === 'mac' && <a href="x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=com.google.Chrome.framework.AlertNotificationService" style={button}>Open Chrome Helper alerts</a>}
+      {platform === 'win' && <a href="ms-settings:notifications" style={button}>Open system notifications</a>}
     </section>
+    <ReminderHealth />
   </div>;
 }

@@ -15,8 +15,9 @@ export function NotificationWarning() {
     }).catch(() => setBlocked(false));
     const version = () => setUpgraded(true);
     refresh(); window.addEventListener('focus', refresh); window.addEventListener('tab-story:database-updated',version);
-    chrome.notifications.onPermissionLevelChanged.addListener(refresh);
-    return () => { window.removeEventListener('focus', refresh); window.removeEventListener('tab-story:database-updated',version); chrome.notifications.onPermissionLevelChanged.removeListener(refresh); };
+    const permissionChanged = chrome.notifications?.onPermissionLevelChanged;
+    permissionChanged?.addListener(refresh);
+    return () => { window.removeEventListener('focus', refresh); window.removeEventListener('tab-story:database-updated',version); permissionChanged?.removeListener(refresh); };
   }, []);
   return <>{upgraded && <p role="alert">Tab Story was updated in another window. <button onClick={() => location.reload()}>Reload to continue</button></p>}{blocked && <div role="alert" className="notification-warning">Notifications are blocked. Enable Tab Story in Chrome’s extension settings, then allow Chrome notifications in macOS System Settings or Windows Settings → System → Notifications. Check Do Not Disturb too. <button onClick={() => window.dispatchEvent(new Event('tab-story:reminder-setup'))}>Fix alerts</button></div>}</>;
 }

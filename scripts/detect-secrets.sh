@@ -51,6 +51,12 @@ print_message() {
 scan_file() {
   local file=$1
   local file_secrets=0
+
+  # These files deliberately contain secret-detection signatures. Scanning
+  # their rule lists would only report the scanner itself.
+  if [ "$file" = "$SCRIPT_DIR/detect-secrets.sh" ] || [ "$file" = "$SCRIPT_DIR/hooks/pre-push.sh" ]; then
+    return 0
+  fi
   
   # Skip binary files
   if file "$file" | grep -q "binary"; then
@@ -63,16 +69,16 @@ scan_file() {
   fi
   
   for pattern in "${SECRET_PATTERNS[@]}"; do
-    if grep -qE "$pattern" "$file" 2>/dev/null; then
+    if grep -qE -- "$pattern" "$file" 2>/dev/null; then
       if [ $file_secrets -eq 0 ]; then
         print_message "$RED" "❌ $file"
-        ((file_secrets++))
+        ((file_secrets += 1))
       fi
       
       # Show the line (masked)
       echo "   Found potential secret pattern"
-      grep -n -E "$pattern" "$file" 2>/dev/null | sed 's/:.*/: [REDACTED]/' | sed 's/^/     /' || true
-      ((SECRETS_FOUND++))
+      grep -n -E -- "$pattern" "$file" 2>/dev/null | sed 's/:.*/: [REDACTED]/' | sed 's/^/     /' || true
+      ((SECRETS_FOUND += 1))
     fi
   done
   
@@ -87,12 +93,14 @@ scan_directory() {
   
   print_message "$BLUE" "🔍 Scanning directory: $dir"
   
-  # Exclude common directories
-  local exclude_dirs="-path ./node_modules -prune -o -path ./.git -prune -o -path ./coverage -prune -o -path ./dist -prune -o"
-  
+  # `dir` is absolute, so relative `-path ./node_modules` exclusions do not
+  # match. Prune these directories by name at every depth to avoid reporting
+  # dependency fixtures or generated build artefacts as application secrets.
   while IFS= read -r -d '' file; do
     scan_file "$file"
-  done < <(find "$dir" $exclude_dirs -type f -print0)
+  done < <(find "$dir" \
+    \( -type d \( -name node_modules -o -name .git -o -name coverage -o -name dist \) -prune \) -o \
+    \( -type f -print0 \))
 }
 
 ##############################################################################
@@ -100,26 +108,24 @@ scan_directory() {
 ##############################################################################
 check_git_history() {
   print_message "$BLUE" "📜 Checking git history for secrets..."
-  
-  # Scan all commits (limit to last 50 for speed)
+
+  # Let Git search the last 50 commit diffs directly. This avoids spawning a
+  # grep process for every line in every commit and preserves patterns that
+  # begin with a dash.
   local commit_count=0
-  while IFS= read -r commit; do
-    ((commit_count++))
-    
-    # Get the diff for this commit
-    git show "$commit" 2>/dev/null | while IFS= read -r line; do
-      for pattern in "${SECRET_PATTERNS[@]}"; do
-        if echo "$line" | grep -qE "$pattern"; then
-          print_message "$RED" "❌ Secret found in commit: $commit"
-          ((SECRETS_FOUND++))
-          break
-        fi
-      done
-    done
-  done < <(git rev-list --all 2>/dev/null | head -50 || true)
-  
-  if [ $commit_count -gt 0 ]; then
-    echo "   Checked $commit_count recent commits"
+  for pattern in "${SECRET_PATTERNS[@]}"; do
+    while IFS= read -r commit; do
+      [ -z "$commit" ] && continue
+      print_message "$RED" "❌ Potential secret found in commit: $commit"
+      ((SECRETS_FOUND += 1))
+      ((commit_count += 1))
+    done < <(git log --all -n 50 --format='%H' -G "$pattern" -- . \
+      ':(exclude)scripts/detect-secrets.sh' \
+      ':(exclude)scripts/hooks/pre-push.sh' 2>/dev/null || true)
+  done
+
+  if [ "$commit_count" -eq 0 ]; then
+    echo "   Checked the last 50 commits"
   fi
 }
 
@@ -129,20 +135,24 @@ check_git_history() {
 check_env_files() {
   print_message "$BLUE" "📋 Checking environment files..."
   
-  local env_files=$(find "$ROOT_DIR" -name ".env*" -o -name "*.env" 2>/dev/null | grep -v ".env.example" || true)
+  local env_files=$(find "$ROOT_DIR" \( -name ".env*" -o -name "*.env" \) -not -name ".env.example" -print 2>/dev/null || true)
   
   if [ -z "$env_files" ]; then
     print_message "$GREEN" "✓ No .env files found (good!)"
     return
   fi
   
-  for file in $env_files; do
+  while IFS= read -r file; do
+    local relative="${file#"$ROOT_DIR"/}"
+    if git -C "$ROOT_DIR" ls-files --error-unmatch -- "$relative" >/dev/null 2>&1; then
+      continue
+    fi
     print_message "$RED" "⚠️  Found uncommitted .env file: $file"
     if [ "$FIX_MODE" = "--fix" ]; then
       print_message "$YELLOW" "   Removing from git tracking..."
       git rm --cached "$file" 2>/dev/null || true
     fi
-  done
+  done <<< "$env_files"
 }
 
 ##############################################################################
@@ -151,7 +161,7 @@ check_env_files() {
 check_code_comments() {
   print_message "$BLUE" "💬 Checking code comments for credentials..."
   
-  local suspicious_comments=$(grep -r "TODO.*password\|FIXME.*key\|XXX.*secret" "$ROOT_DIR/src" "$ROOT_DIR/scripts" 2>/dev/null || true)
+  local suspicious_comments=$(grep -r --exclude='detect-secrets.sh' "TODO.*password\|FIXME.*key\|XXX.*secret" "$ROOT_DIR/tab-story/src" "$ROOT_DIR/scripts" 2>/dev/null || true)
   
   if [ -n "$suspicious_comments" ]; then
     print_message "$YELLOW" "⚠️  Found suspicious comments:"

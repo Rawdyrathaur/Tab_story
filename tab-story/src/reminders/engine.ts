@@ -148,11 +148,15 @@ async function deliver(tabs: SavedTab[]) {
       await db.tabs.update(tab.id!, { status: late ? 'missed' : 'fired', firedAt: tab.firedAt || now,
         missedAt: late ? tab.missedAt || now : tab.missedAt, deliveryClaimAt: now, updatedAt: now });
       current.push(tab);
-      await createNextOccurrence(tab);
     }
   });
   if (!current.length) return;
   try {
+    // `createNextOccurrence` writes a synchronisation record and reads Chrome
+    // storage. Do it after the Dexie claim transaction has committed; awaiting
+    // non-Dexie promises inside that transaction can cause a PrematureCommitError
+    // and leave a missed reminder without its notification summary.
+    for (const tab of current) await createNextOccurrence(tab);
     const groups = current.length > 3 ? [current] : current.map(tab => [tab]);
     for (const group of groups) {
       const nativeAllowed = await chrome.notifications.getPermissionLevel().catch(() => 'denied') === 'granted';

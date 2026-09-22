@@ -14,9 +14,7 @@
     "activeTab",
     "scripting",
     "contextMenus",
-    "unlimitedStorage"
-  ],
-  "optional_permissions": [
+    "unlimitedStorage",
     "notifications"
   ],
   "icons": {
