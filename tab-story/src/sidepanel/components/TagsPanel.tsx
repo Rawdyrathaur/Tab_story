@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db";
 import type { SavedTab } from "../db";
+import { updateTab } from '../../sync/client';
 export function TagsPanel({ onMenu }: { onMenu: (tab: SavedTab) => void }) {
   const { t: tr, formatNumber } = useI18n();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export function TagsPanel({ onMenu }: { onMenu: (tab: SavedTab) => void }) {
   const handleRemoveTagFromTab = async (e: React.MouseEvent, tab: SavedTab, tagToRemove: string) => {
     e.stopPropagation();
     const updatedTags = (tab.tags || []).filter(t => t !== tagToRemove);
-    await db.tabs.update(tab.id!, { tags: updatedTags });
+    await updateTab(tab.id!, { tags: updatedTags });
   };
 
   return (

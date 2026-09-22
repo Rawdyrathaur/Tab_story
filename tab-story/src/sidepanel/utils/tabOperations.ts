@@ -94,6 +94,9 @@ export async function saveAllTabs(): Promise<void> {
 }
 
 export async function deleteAllData(): Promise<void> {
+  const now = Date.now();
+  const tabs = await db.tabs.toArray();
+  for (const tab of tabs) await writeTab({ ...tab, deletedAt: now, updatedAt: now });
   await db.transaction('rw', db.tabs, db.folders, async () => {
     await db.tabs.clear();
     await db.folders.clear();

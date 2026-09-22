@@ -8,6 +8,7 @@ import { db, type SavedTab } from '../db';
 import type { ViewMode } from '../App';
 import { getFaviconForDomain } from '../utils/url';
 import { saveOfflineArticle } from '../../reminders/offlineReader';
+import { updateTab } from '../../sync/client';
 
 function formatTabTitle(title: string): string {
   if (!title) return '';
@@ -88,7 +89,7 @@ export function TabList({ searchQuery = '', onMenu, mode = 'default', sortOrder 
             <button onClick={event => { event.stopPropagation(); onDiscussAI?.(tab); }} title={t('tabs.discuss')} aria-label={t('tabs.discuss')}><SparklesIcon className="saved-tab-ai-icon" /></button>
             <button onClick={event => { event.stopPropagation(); onMenu?.(tab); }} title={tab.notes ? t('tabs.editNote') : t('tabs.addNote')} aria-label={tab.notes ? t('tabs.editNote') : t('tabs.addNote')}><DocumentTextIcon className={`saved-tab-note-icon${tab.notes ? ' active' : ''}`} /></button>
             <button onClick={event => { event.stopPropagation(); onMenu?.(tab); }} title={t('common.moreOptions')} aria-label={t('common.moreOptions')}><EllipsisVerticalIcon /></button>
-            <button onClick={event => { event.stopPropagation(); void db.tabs.update(tab.id!, { pinned: !tab.pinned }); }} title={tab.pinned ? t('tabs.unpin') : t('tabs.pin')} aria-label={tab.pinned ? t('tabs.unpin') : t('tabs.pin')}><MapPinIcon className={`saved-tab-pin-icon${tab.pinned ? ' active' : ''}`} /></button>
+            <button onClick={event => { event.stopPropagation(); void updateTab(tab.id!, { pinned: !tab.pinned }); }} title={tab.pinned ? t('tabs.unpin') : t('tabs.pin')} aria-label={tab.pinned ? t('tabs.unpin') : t('tabs.pin')}><MapPinIcon className={`saved-tab-pin-icon${tab.pinned ? ' active' : ''}`} /></button>
             {missed && <span className="saved-tab-missed-plus" title="Missed reminder"><PlusIcon /></span>}
           </div>
         </div>

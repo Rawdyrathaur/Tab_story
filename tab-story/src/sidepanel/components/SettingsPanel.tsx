@@ -3,6 +3,7 @@ import { AISettingsCard } from './AISettingsCard';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { areReminderNotificationsEnabled, requestReminderPermission, setReminderNotificationsEnabled } from '../../reminders/service';
 import { ReminderHealth } from './ReminderHealth';
+import { SyncSettings } from './SyncSettings';
 
 export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?: number }) {
   const reminderCard = useRef<HTMLElement>(null);
@@ -52,6 +53,7 @@ export function SettingsPanel({ highlightReminders = 0 }: { highlightReminders?:
       <summary style={{ cursor: 'pointer', fontWeight: 700 }}>AI assistant</summary>
       <div style={{ marginTop: 12 }}><AISettingsCard compact /></div>
     </details>
+    <SyncSettings />
     <section ref={reminderCard} tabIndex={-1} aria-label="Reminders" className={`reminder-settings-card${highlightReminders ? ' reminder-spotlight' : ''}`} style={{ display: 'grid', gap: 12, padding: 14, border: '1px solid var(--border-color)', borderRadius: 12 }}>
       <strong style={{ display: 'flex', alignItems: 'center', gap: 8 }}><BellIcon aria-hidden="true" style={{ width: 20, height: 20 }} />Reminders</strong>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>

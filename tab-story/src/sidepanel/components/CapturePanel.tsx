@@ -4,6 +4,7 @@ import { captureLink } from '../../reminders/capture';
 import { getPresets, normalizeTaskUrl, downloadCalendar, type Recurrence } from '../../reminders/model';
 import { scheduleTabReminder, archiveReminder, requestReminderPermission } from '../../reminders/service';
 import { ScheduleEditor } from './ScheduleEditor';
+import { updateTab } from '../../sync/client';
 
 export function CapturePanel() {
   const [shown, setShown] = useState(location.hash === '#capture');
@@ -30,7 +31,7 @@ export function CapturePanel() {
       const match = (await db.tabs.toArray()).find(t => !t.deletedAt && !t.completedAt && t.status === 'pending' && normalizeTaskUrl(t.url) === normalizeTaskUrl(url));
       if (match && !choice) { setDuplicate(match); setPending(at); return; }
       const id = choice === 'move' && match ? match.id! : await captureLink(url, title, '', choice === 'both');
-      await db.tabs.update(id, { title: title.trim() || new URL(url).hostname });
+      await updateTab(id, { title: title.trim() || new URL(url).hostname });
       await scheduleTabReminder(id, at, repeat ? { freq: repeat, interval: 1, until: null } : null);
       if (ics) downloadCalendar((await db.tabs.get(id))!);
       setSaved(choice === 'move' ? null : id); setDuplicate(null);

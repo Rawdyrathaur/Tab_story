@@ -7,6 +7,9 @@ A Chrome side-panel extension for saving tabs, organizing resources, and schedul
 - Schedule local reminders with desktop alerts and optional website banners.
 - Summarize a selected page with Mozilla Readability and your own Gemini API key.
 - Optionally back up to Google Drive or create Google Calendar events with email reminders.
+- Cross-device sync uses a Tab Story account created with Google sign-in; the sync server URL is supplied at build time, never pasted by users.
+
+Production builds must use an HTTPS sync URL (`VITE_SYNC_SERVER_URL`); plain HTTP is accepted only for local `localhost` development.
 
 ## Run locally
 
@@ -18,6 +21,8 @@ npm run build
 ```
 
 Open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select `tab-story/dist`. Reload after rebuilding.
+
+For a production extension build, provide the deployed HTTPS sync API at build time, for example `VITE_SYNC_SERVER_URL=https://sync.example.com npm run build`. The extension then shows **Continue with Google**; users never paste an API URL or setup secret.
 
 ## Important limits
 

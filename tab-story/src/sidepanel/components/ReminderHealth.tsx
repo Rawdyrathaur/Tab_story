@@ -2,9 +2,6 @@ import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { DAY } from '../../reminders/model';
-import { getReviewPrefs, defaultReviewPrefs } from '../../reminders/lifecycle';
-import { testReminderNotification, restoreReminder, requestReminderReconciliation } from '../../reminders/service';
-import { exportScheduler, importScheduler, restoreSnapshot, validatePrefs } from '../../reminders/dataSafety';
 
 export function NotificationWarning() {
   const [blocked, setBlocked] = useState(false);
@@ -23,31 +20,59 @@ export function NotificationWarning() {
 }
 export function ReminderHealth() {
   const [now, setNow] = useState(Date.now);
-  const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [prefs, setPrefs] = useState(defaultReviewPrefs);
   const tick = useLiveQuery(() => db.meta.get('lastTickAt'));
   const rows = useLiveQuery(() => db.tabs.toArray()) || [];
-  const stats = useLiveQuery(() => db.meta.get('stats:' + new Date().toISOString().slice(0,7)));
-  const counts = (stats?.value || {}) as Record<string,number>;
-  useEffect(() => { void getReviewPrefs().then(setPrefs); const timer = setInterval(() => setNow(Date.now()),10000); return () => clearInterval(timer); }, []);
-  const age = tick ? Math.max(0, Math.floor((now-Number(tick.value))/1000)) : null;
-  async function run(fn: () => Promise<string | void>) { setBusy(true); setMessage(''); try { setMessage(await fn() || 'Saved'); } catch (e) { setMessage(e instanceof Error ? e.message : 'Operation failed'); } finally { setBusy(false); } }
-  return <section className="calendar-card reminder-health" aria-label="Reminder health and recovery">
-    <h3>Reminder health</h3><p role={age === null || age > 300 ? 'alert' : undefined}>Last heartbeat: {age === null ? 'waiting for first check' : `checked ${age} seconds ago`}{age !== null && age > 300 && ' · Delayed. Reload the extension in Chrome.'}</p>
-    <p>{rows.filter(t => t.missedAt && t.missedAt >= now-30*DAY).length} reminders missed in the last 30 days</p>
-    <button disabled={busy} onClick={() => void run(async () => { await testReminderNotification(); return 'Test reminder scheduled for 5 seconds from now.'; })}>Send test reminder</button>
-    <h3>Weekly Keep or Let go</h3>
-    <label className="checkbox-row"><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs({ ...prefs, enabled: e.target.checked })} />Weekly review</label>
-    <label>Day<select value={prefs.day} onChange={e => setPrefs({ ...prefs, day: +e.target.value })}>{['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((day,i) => <option key={day} value={i}>{day}</option>)}</select></label>
-    <label>Time<input type="time" value={prefs.time} onChange={e => setPrefs({ ...prefs, time: e.target.value })} /></label>
-    <button disabled={busy} onClick={() => void run(async () => { await db.meta.put({ key: 'reviewPrefs', value: validatePrefs(prefs) }); await requestReminderReconciliation(); })}>Save review preferences</button>
-    <p>This month: {counts.opened || 0} opened, {counts.letGo || 0} let go.</p>
-    <h3>Data safety</h3><p>A daily local recovery copy keeps your last 100 items.</p>
-    <button disabled={busy} onClick={() => void run(exportScheduler)}>Export schedule JSON</button>
-    <label>Import schedule JSON<input type="file" accept=".json,application/json" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) void run(async () => { if (file.size > 20000000) throw new Error('File exceeds 20 MB'); const n = await importScheduler(JSON.parse(await file.text())); return `Imported ${n} items. Existing items preserved.`; }); e.target.value = ''; }} /></label>
-    <button disabled={busy} onClick={() => void run(async () => `Recovered ${await restoreSnapshot()} items.`)}>Restore daily recovery copy</button>
-    <details><summary>Recently let go · {rows.filter(t => t.status === 'archived').length}</summary><p>Restore within 30 days.</p>{rows.filter(t => t.status === 'archived').map(t => <div className="archive-row" key={t.id}><span className="task-title">{t.title}</span><button disabled={busy} onClick={() => void run(() => restoreReminder(t.id!))}>Restore</button></div>)}</details>
-    {message && <p role="status">{message}</p>}
+  const age = tick ? Math.max(0, Math.floor((now - Number(tick.value)) / 1000)) : null;
+  const missed30 = rows.filter(tab => tab.missedAt && tab.missedAt >= now - 30 * DAY).length;
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const chart = Array.from({ length: 7 }, (_, index) => {
+    const start = startOfToday.getTime() - (6 - index) * DAY;
+    const end = start + DAY;
+    return {
+      label: new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(start),
+      value: rows.filter(tab => tab.missedAt && tab.missedAt >= start && tab.missedAt < end).length,
+    };
+  });
+  const max = Math.max(...chart.map(point => point.value), 1);
+  const healthy = age !== null && age <= 300;
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 10_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return <section aria-label="Reminder health" style={{ display: 'grid', gap: 10, padding: '10px 0 12px', borderBottom: '1px solid var(--border-color)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'grid', gap: 2 }}>
+        <strong style={{ fontSize: 13 }}>Reminder health</strong>
+        <small style={{ color: 'var(--placeholder-color)' }}>Missed reminders · last 7 days</small>
+      </div>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: healthy ? '#22c55e' : '#f59e0b', fontSize: 11, fontWeight: 700 }}>
+        <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: 'currentColor' }} />
+        {age === null ? 'Waiting' : healthy ? 'Healthy' : 'Delayed'}
+      </span>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr)', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'grid', gap: 2, minWidth: 66 }}>
+        <strong style={{ fontSize: 25, lineHeight: 1 }}>{missed30}</strong>
+        <small style={{ color: 'var(--placeholder-color)', lineHeight: 1.25 }}>missed<br />in 30 days</small>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <svg viewBox="0 0 280 64" role="img" aria-label="Missed reminders for the last seven days" style={{ display: 'block', width: '100%', height: 64, color: '#7c5cff' }}>
+          <line x1="0" y1="63" x2="280" y2="63" stroke="currentColor" strokeOpacity=".18" />
+          {chart.map((point, index) => {
+            const height = point.value ? Math.max(8, (point.value / max) * 48) : 4;
+            return <rect key={`${point.label}-${index}`} x={index * 40 + 8} y={63 - height} width="22" height={height} rx="6" fill="currentColor" opacity={point.value ? 0.9 : 0.18} />;
+          })}
+        </svg>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', color: 'var(--placeholder-color)', fontSize: 9, textAlign: 'center' }}>
+          {chart.map((point, index) => <span key={`${point.label}-label-${index}`}>{point.label}</span>)}
+        </div>
+      </div>
+    </div>
+    <small role={age === null || age > 300 ? 'alert' : undefined} style={{ color: age === null || age > 300 ? '#f59e0b' : 'var(--placeholder-color)' }}>
+      {age === null ? 'Waiting for the reminder service to check in.' : age > 300 ? 'The reminder service is delayed. Reload the extension.' : `Heartbeat checked ${age} seconds ago.`}
+    </small>
   </section>;
 }
