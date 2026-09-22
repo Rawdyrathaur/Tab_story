@@ -29,11 +29,13 @@ test.beforeEach(() => {
   Object.assign(db.tabs, {
     bulkDelete: async (ids: number[]) => ids.forEach(id => tabs.delete(id)),
     add: async (tab: SavedTab) => { const id = Math.max(0, ...tabs.keys()) + 1; tabs.set(id, { ...tab, id }); return id; },
+    put: async (tab: SavedTab) => { const id = tab.id ?? Math.max(0, ...tabs.keys()) + 1; const existing = tabs.get(id); if (existing) Object.assign(existing, tab, { id }); else tabs.set(id, { ...tab, id }); return id; },
     where: (field: keyof SavedTab) => ({ equals: (value: unknown) => ({ count: async () => [...tabs.values()].filter(t => t[field] === value).length }) }),
-    get: async (id: number) => tabs.get(id) && { ...tabs.get(id) },
+    get: async (id: number) => tabs.get(id),
     toArray: async () => [...tabs.values()].map(tab => ({ ...tab })),
     update: async (id: number, changes: Partial<SavedTab>) => { const tab = tabs.get(id); if (!tab) return 0; Object.assign(tab, changes); return 1; },
   });
+  Object.assign(db.syncOutbox, { put: async () => {} });
   Object.assign(db.meta, { get: async (key: string) => metadata.has(key) ? { key, value: metadata.get(key) } : undefined, put: async (row: { key: string; value: unknown }) => metadata.set(row.key,row.value) });
   Object.assign(db.reminderState, { get: async (id: string) => summaries.get(id), put: async (value: { id: string }) => summaries.set(value.id, value), delete: async (id: string) => summaries.delete(id) });
   Object.defineProperty(db, 'transaction', { configurable: true, value: async (...args: unknown[]) => (args.at(-1) as () => Promise<void>)() });

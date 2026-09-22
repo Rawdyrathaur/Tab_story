@@ -43,7 +43,8 @@ export async function setReminderNotificationsEnabled(enabled: boolean): Promise
 
 export async function areReminderNotificationsEnabled(): Promise<boolean> {
   const result = await chrome.storage.local.get(REMINDER_NOTIFICATIONS_KEY);
-  return result[REMINDER_NOTIFICATIONS_KEY] === true;
+  // Notifications are enabled by default; users can still explicitly disable them.
+  return result[REMINDER_NOTIFICATIONS_KEY] !== false;
 }
 
 export const scheduleTabReminder = (tabId: number, scheduledAt: number, recurrence?: Recurrence | null) => request('schedule', { tabId, scheduledAt, recurrence });
