@@ -48,6 +48,27 @@ const mainItems = [
 
 const ICO = "20px";
 
+function formatActionError(cause: unknown): string {
+  const message = cause instanceof Error
+    ? cause.message
+    : typeof cause === "string"
+      ? cause
+      : cause && typeof cause === "object" && "message" in cause
+        ? String((cause as { message?: unknown }).message ?? "")
+        : "";
+  const normalized = message.trim();
+
+  if (/FREE_TAB_LIMIT_REACHED/i.test(normalized)) {
+    return "Chrome could not open another tab right now. Close an unused tab and try again.";
+  }
+  if (/QUOTA_BYTES|quota exceeded/i.test(normalized)) {
+    return "Tab Story storage is full. Delete some saved tabs and try again.";
+  }
+  return normalized && normalized !== "[object Object]"
+    ? normalized
+    : "The action could not be completed. Please try again.";
+}
+
 export function App() {
   useEffect(() => {
     const run=()=>void syncNow().catch(()=>{});
@@ -59,7 +80,7 @@ export function App() {
   const [activePanel, setActivePanel] = useState<string | null>(() =>
     ["#calendar", "#review", "#capture"].includes(window.location.hash) ? "Calendar" : null);
   const [reminderHighlight, setReminderHighlight] = useState(0);
-  const [error, setError] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [hoveredBtn,  setHoveredBtn]  = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode] = useState<ViewMode>("list");
@@ -102,11 +123,11 @@ export function App() {
   }, []);
 
   const runAction = async (action: () => Promise<void>) => {
-    setError(false);
+    setActionError(null);
     try { await action(); }
     catch (cause) {
       console.error("[Tab Story] Action failed", cause);
-      setError(true);
+      setActionError(formatActionError(cause));
     }
   };
 const handleDeleteAll = async () => {
@@ -344,7 +365,11 @@ const handleSaveAllTabs = async () => {
   )}
 </main>
       </div>
-      {!!dueTabs?.length && !error && activePanel !== 'Calendar' && <div className="app-alert" role="status" style={{ overflowWrap: 'anywhere' }}>
+      {actionError && <div className="app-alert app-action-error" role="alert" aria-live="assertive">
+        <span style={{ overflowWrap: 'anywhere' }}>{actionError}</span>
+        <button type="button" onClick={() => setActionError(null)} aria-label="Dismiss error">Dismiss</button>
+      </div>}
+      {!!dueTabs?.length && !actionError && activePanel !== 'Calendar' && <div className="app-alert" role="status" style={{ overflowWrap: 'anywhere' }}>
         {dueTabs.length === 1 ? `Reminder: ${dueTabs[0].title}` : `${dueTabs.length} tabs are due`}
         <button onClick={() => setActivePanel('Calendar')}>View reminders</button>
       </div>}
