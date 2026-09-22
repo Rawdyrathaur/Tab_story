@@ -1,6 +1,6 @@
 import { getWeekInfo } from "../../i18n/core";
 import { getFaviconForDomain } from '../utils/url';
-import { requestReminderReconciliation } from "../../reminders/service";
+import { restoreReminder } from "../../reminders/service";
 import { useI18n } from "../../i18n/useI18n";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -8,7 +8,6 @@ import { db } from "../db";
 import {
   ClockIcon,
   ArrowPathIcon,
-  TrashIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
 import { isToday, isThisWeek } from "date-fns";
@@ -212,7 +211,7 @@ export function HistoryPanel({ onBack }: { onBack?: () => void }) {
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
-                            try { await db.tabs.update(tab.id!, { deletedAt: undefined }); await requestReminderReconciliation(); } catch (cause) { console.error(cause); window.alert(tr("app.operationFailed")); }
+                            try { await restoreReminder(tab.id!); } catch (cause) { console.error(cause); window.alert(tr("app.operationFailed")); }
                           }}
                           style={{
                             display: "inline-flex",
@@ -241,30 +240,7 @@ export function HistoryPanel({ onBack }: { onBack?: () => void }) {
                         >
                           <ArrowPathIcon style={{ width: "12px", height: "12px" }} />{tr("common.restore")}</button>
 
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if (window.confirm(tr("history.confirmDelete"))) {
-                              try { await db.tabs.delete(tab.id!); await requestReminderReconciliation(); } catch (cause) { console.error(cause); window.alert(tr("app.operationFailed")); }
-                            }
-                          }}
-                          title={tr("history.delete")}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: "#ef4444",
-                            cursor: "pointer",
-                            padding: "4px",
-                            display: "flex",
-                            alignItems: "center",
-                            opacity: 0.6,
-                            transition: "opacity 0.15s ease",
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                          onMouseLeave={e => (e.currentTarget.style.opacity = "0.6")}
-                        >
-                          <TrashIcon style={{ width: "13px", height: "13px" }} />
-                        </button>
+
                       </div>
                     </div>
                   </div>

@@ -1,14 +1,17 @@
+import type { Recurrence } from './model';
 import { ReminderError, type ReminderErrorCode } from './errors.ts';
 
 export { ReminderError } from './errors.ts';
 export const REMINDER_MESSAGE = 'tab-story:reminder';
-export type ReminderOperation = 'schedule' | 'reschedule' | 'cancel' | 'complete' | 'snooze' | 'reconcile' | 'test';
+export const REMINDER_NOTIFICATIONS_KEY = 'tabStory.reminderNotificationsEnabled';
+export type ReminderOperation = 'schedule' | 'reschedule' | 'cancel' | 'complete' | 'snooze' | 'reconcile' | 'test' | 'archive' | 'restore' | 'keep' | 'open';
 export interface ReminderRequest {
   type: typeof REMINDER_MESSAGE;
   operation: ReminderOperation;
   tabId?: number;
   scheduledAt?: number;
   minutes?: number;
+  recurrence?: Recurrence | null;
 }
 export type ReminderResponse = { ok: true } | { ok: false; code: ReminderErrorCode };
 
@@ -27,7 +30,23 @@ async function request(operation: ReminderOperation, options: Partial<ReminderRe
   if (!response.ok) throw new ReminderError(response.code);
 }
 
-export const scheduleTabReminder = (tabId: number, scheduledAt: number) => request('schedule', { tabId, scheduledAt });
+/** Request notification access only from a user-initiated reminder action. */
+export async function requestReminderPermission(): Promise<void> {
+  const granted = await chrome.permissions.request({ permissions: ['notifications'] });
+  if (!granted) throw new ReminderError('notificationPermission');
+  await chrome.storage.local.set({ [REMINDER_NOTIFICATIONS_KEY]: true });
+}
+
+export async function setReminderNotificationsEnabled(enabled: boolean): Promise<void> {
+  await chrome.storage.local.set({ [REMINDER_NOTIFICATIONS_KEY]: enabled });
+}
+
+export async function areReminderNotificationsEnabled(): Promise<boolean> {
+  const result = await chrome.storage.local.get(REMINDER_NOTIFICATIONS_KEY);
+  return result[REMINDER_NOTIFICATIONS_KEY] === true;
+}
+
+export const scheduleTabReminder = (tabId: number, scheduledAt: number, recurrence?: Recurrence | null) => request('schedule', { tabId, scheduledAt, recurrence });
 export const rescheduleTabReminder = (tabId: number, scheduledAt: number) => request('reschedule', { tabId, scheduledAt });
 export const cancelTabReminder = (tabId: number) => request('cancel', { tabId });
 export const completeTabReminder = (tabId: number) => request('complete', { tabId });
@@ -35,4 +54,12 @@ export const snoozeTabReminder = (tabId: number, minutes = 10) => request('snooz
 export const requestReminderReconciliation = () => request('reconcile');
 export const restoreScheduledReminders = requestReminderReconciliation;
 export const reconcileMissedReminders = requestReminderReconciliation;
-export const testReminderNotification = () => request('test');
+export const testReminderNotification = async () => { await requestReminderPermission(); await request('test'); };
+
+export async function archiveReminder(tabId: number) {
+  await request('archive', { tabId });
+  window.dispatchEvent(new CustomEvent('tab-story:archived', { detail: tabId }));
+}
+export const restoreReminder = (tabId: number) => request('restore', { tabId });
+export const keepReminder = (tabId: number, scheduledAt: number) => request('keep', { tabId, scheduledAt });
+export const openReminder = (tabId: number) => request('open', { tabId });

@@ -1,0 +1,590 @@
+TAB STORY — PREMIUM MARKETING WEBSITE BUILD BRIEF
+
+ROLE
+You are a senior product designer, UX writer, brand designer, and frontend engineer. Design and build a polished, conversion-focused marketing website for Tab Story. The result must feel like a real premium SaaS product—not a generic template, browser-extension directory page, or AI-generated landing page.
+
+PRODUCT SUMMARY
+Tab Story is a modern tab-saving, organization, scheduling, reminder, and reading product available in two connected experiences:
+
+1. Tab Story Browser Extension
+   - Saves the current tab or multiple tabs.
+   - Organizes saved pages into collections.
+   - Supports notes, tags, pinning, history, and review workflows.
+   - Schedules saved tabs and delivers reminders.
+   - Includes a “Discuss with AI” workflow.
+   - Can preserve readable article content for offline reading.
+   - Works directly inside the browser through a focused side panel.
+
+2. Tab Story PWA
+   - Provides a modern mobile and desktop web experience.
+   - Lets users access, organize, schedule, review, and read saved content.
+   - Shares the same account and synchronized data with the extension.
+   - Provides an installable app-like experience without requiring an app store.
+
+The extension and PWA should be presented as two parts of one connected product. The core value proposition is not merely “save tabs.” Tab Story helps people turn temporary browser tabs into an organized, searchable, scheduled personal knowledge and reading system.
+
+PRIMARY WEBSITE GOALS
+
+1. Explain the product in under five seconds.
+2. Make the browser extension the primary acquisition action.
+3. Present the PWA as the companion experience for accessing saved content anywhere.
+4. Communicate the benefits of scheduling, reminders, collections, offline reading, AI discussion, and cross-device sync.
+5. Convert free users into premium users without making the free plan feel useless.
+6. Establish trust around privacy, data ownership, reliable reminders, and synchronization.
+7. Look exceptional on mobile, tablet, laptop, and large desktop screens.
+
+TARGET USERS
+
+- People who keep too many browser tabs open.
+- Researchers and students collecting sources.
+- Professionals saving articles, documents, dashboards, and reference pages.
+- Readers who want to return to content at the right time.
+- Knowledge workers who want notes, tags, collections, AI discussion, and reminders in one workflow.
+- Users who switch between desktop and mobile and require synchronized access.
+
+BRAND POSITIONING
+
+Position Tab Story as calm, intelligent, dependable, and premium. It should feel like a blend of a refined productivity tool, a reading app, and a personal knowledge companion.
+
+Suggested positioning statement:
+“Turn open tabs into organized plans, reminders, and knowledge.”
+
+Suggested supporting statement:
+“Save from your browser, organize without friction, and return to every important page at the right moment—on any device.”
+
+Do not describe Tab Story as another bookmark manager. Emphasize that bookmarks are passive, while Tab Story makes saved content actionable through scheduling, reminders, review, offline access, and AI-assisted understanding.
+
+VOICE AND WRITING STYLE
+
+- Clear, confident, calm, and human.
+- Premium without sounding arrogant.
+- Short sentences and concrete benefits.
+- Avoid inflated claims such as “revolutionary,” “game-changing,” or “the future of productivity.”
+- Avoid excessive technical jargon on marketing sections.
+- Do not use placeholder copy or lorem ipsum.
+- Do not claim security certifications, user counts, ratings, integrations, or performance numbers unless actual data is supplied.
+
+VISUAL DIRECTION
+
+Create a sophisticated dark-first interface inspired by the Tab Story product UI, while remaining original and suitable for a public marketing website.
+
+Recommended visual language:
+
+- Near-black background with layered charcoal surfaces.
+- Soft borders and subtle glass effects rather than heavy gradients everywhere.
+- Accent colors: electric indigo, violet, emerald/mint, and carefully limited coral/red for urgency.
+- Large, crisp typography with strong hierarchy.
+- Rounded cards with intentional spacing and restrained shadows.
+- Product UI cards should be the visual hero: saved-tab cards, scheduled states, tags, notes, reminders, and AI actions.
+- Use tasteful motion: card stacking, scheduling transitions, subtle sync indicators, and scroll reveals.
+- Respect prefers-reduced-motion.
+- Maintain strong color contrast and keyboard-visible focus states.
+- Avoid excessive floating blobs, meaningless 3D objects, stock photography, and generic dashboard illustrations.
+
+The product should visually feel organized and calm even when demonstrating many saved tabs.
+
+SITE ARCHITECTURE
+
+Build the following public pages or routes:
+
+1. Home
+2. Features
+3. Pricing
+4. PWA / Web App
+5. Browser Extension
+6. Privacy
+7. Terms
+8. Support / Contact
+9. Sign in
+10. Create account
+
+Optional routes if supported by the project:
+
+- Changelog
+- Help center
+- Download / installation guide
+- Account and billing portal entry
+
+GLOBAL HEADER
+
+Header content:
+
+- Tab Story logo and wordmark.
+- Navigation: Features, Extension, Web App, Pricing.
+- Secondary action: Sign in.
+- Primary action: Add to Chrome or Get Tab Story.
+- On mobile, use an accessible menu with a clear primary CTA.
+- The header may become slightly translucent and compact after scrolling.
+
+HOME PAGE STRUCTURE
+
+SECTION 1 — HERO
+
+Eyebrow:
+“Your tabs, with a plan.”
+
+Headline options:
+
+A. “Turn open tabs into organized plans.”
+B. “Save it now. Return when it matters.”
+C. “A calmer way to save, schedule, and understand the web.”
+
+Recommended main headline:
+“Save it now. Return when it matters.”
+
+Supporting copy:
+“Tab Story turns browser tabs into organized collections, timely reminders, offline reading, and ideas you can discuss with AI—all synchronized across the extension and web app.”
+
+Primary CTA:
+“Add to Chrome — It’s free”
+
+Secondary CTA:
+“Open the Web App”
+
+Supporting microcopy:
+“Start free. No credit card required.”
+
+Hero visual:
+Create a high-fidelity product composition using real-looking Tab Story UI. Show two or three saved-tab cards with favicon, title, URL, note, scheduled time, status, and actions. Include one normal saved card, one scheduled card, and one missed reminder state. Place a mobile PWA view slightly behind or beside the extension panel to communicate synchronization. Avoid rendering fake browser chrome unless it improves comprehension.
+
+SECTION 2 — TRUST / CORE PROMISES
+
+Use a compact row with three or four statements:
+
+- Save in one click.
+- Return with reminders.
+- Read across devices.
+- Stay organized automatically.
+
+Do not invent customer logos. If no genuine logos or metrics exist, use product principles instead of fake social proof.
+
+SECTION 3 — PROBLEM AND TRANSFORMATION
+
+Headline:
+“Your browser should not be your to-do list.”
+
+Copy:
+“Important pages disappear inside crowded windows, forgotten bookmark folders, and links sent to yourself. Tab Story gives every saved page a place, a purpose, and—when needed—a time to come back.”
+
+Show a visual transition:
+
+- Before: crowded browser tabs and scattered saved links.
+- After: clean Tab Story collections with scheduled items and clear statuses.
+
+SECTION 4 — CORE FEATURE STORY
+
+Use an alternating product-story layout rather than a repetitive icon grid.
+
+Feature A: Save without breaking focus
+Copy: “Capture the current page or an entire window from the browser side panel. Add context now or organize it later.”
+
+Feature B: Schedule the page, not just the task
+Copy: “Choose when a saved page should return. Tab Story keeps the link, context, and reminder together.”
+
+Feature C: Collections that stay understandable
+Copy: “Group research, reading, projects, and ideas into clear collections. Add notes and tags so future-you knows why each page mattered.”
+
+Feature D: Discuss saved content with AI
+Copy: “Ask questions, clarify ideas, and continue thinking from the page you saved—without rebuilding the context from scratch.”
+
+Feature E: Read even when the page is unavailable
+Copy: “Save a clean reader-friendly copy of supported articles for focused offline reading.”
+
+Feature F: One story across devices
+Copy: “Save from the extension and continue in the web app. Changes synchronize through a conflict-safe, device-aware system.”
+
+Avoid exposing internal protocol terminology such as LWW, tombstones, cursors, or server versions on the marketing page. Those details may appear in technical documentation, not sales copy.
+
+SECTION 5 — EXTENSION + PWA
+
+Headline:
+“Two experiences. One organized library.”
+
+Use a side-by-side comparison:
+
+Browser Extension:
+- Capture while browsing.
+- Save one tab or many.
+- Schedule and annotate instantly.
+- Work from a focused side panel.
+
+Progressive Web App:
+- Review saved content anywhere.
+- Install on mobile or desktop.
+- Read saved articles in a focused view.
+- Manage collections and upcoming reminders.
+
+Shared foundation:
+- Secure account sync.
+- Per-device sessions.
+- Consistent reminders and saved content.
+- Free and premium plans.
+
+CTA beneath comparison:
+“Start with the extension” and “Explore the Web App.”
+
+SECTION 6 — HOW IT WORKS
+
+Use three steps:
+
+1. Save
+   “Capture a useful page before it disappears into tab clutter.”
+
+2. Add meaning
+   “Choose a collection, add a note or tags, and schedule a return if the page is time-sensitive.”
+
+3. Return and act
+   “Open it from a reminder, review queue, extension, or web app—exactly when it becomes useful.”
+
+Create a connected visual flow across the three steps.
+
+SECTION 7 — REMINDERS
+
+Headline:
+“A reminder that brings the context with it.”
+
+Explain that the user does not receive a vague task notification. The saved page, title, notes, schedule, and relevant context stay together.
+
+Show reminder states:
+
+- Reminder set.
+- Due now.
+- Missed.
+- Snoozed or rescheduled.
+- Completed or archived.
+
+Do not ask for notification permission immediately on page load. Notification permission must only be requested after a user intentionally activates a reminder or notification feature and understands why it is needed.
+
+SECTION 8 — AI FEATURE
+
+Headline:
+“Continue the thought, not just the tab.”
+
+Explain “Discuss with AI” as a contextual productivity feature. Keep the claims realistic. Do not imply that AI responses are always correct. If multiple AI providers or bring-your-own-key behavior exists, describe it only if currently supported.
+
+Suggested copy:
+“Use the page and your notes as the starting point for questions, summaries, and deeper exploration. You stay in control of what is shared.”
+
+Include a visible link to AI and privacy details.
+
+SECTION 9 — PRICING PREVIEW
+
+Headline:
+“Start small. Upgrade when Tab Story becomes part of your workflow.”
+
+Present two clear tiers.
+
+FREE
+
+- Unlimited tab saving and synchronization.
+- Browser extension access.
+- PWA access.
+- Core organization features.
+- Scheduling and reminders, subject to the actual product configuration.
+- Good for trying the complete workflow.
+
+PREMIUM
+
+- Full cross-device library.
+- AI Tools: summaries, key points, simple explanations, information finding, key-data extraction, translation, and related topics.
+- Offline reading, if premium-only in the real product.
+- Priority features or support only if genuinely offered.
+
+Saving tabs is a core free feature. Never show an upgrade prompt merely because a free user has saved several tabs.
+
+Use honest placeholders for undecided pricing:
+
+- “$X/month”
+- “$Y/year — save Z%”
+
+Mark these values as configuration content and do not hardcode invented final prices.
+
+Primary Premium CTA:
+“Upgrade to Premium”
+
+Include a monthly/yearly toggle only if both billing options will exist.
+
+SECTION 10 — PRIVACY AND RELIABILITY
+
+Headline:
+“Your saved web deserves dependable storage.”
+
+Communicate:
+
+- Data synchronizes through the user’s Tab Story account.
+- Device sessions and synchronization are handled independently per device.
+- Deleted items remain recoverable only according to the actual retention policy.
+- Notification access is requested in context, not aggressively at first launch.
+- Users should be able to delete their data and account.
+- AI-related data handling should be explained separately and precisely.
+
+Do not claim end-to-end encryption unless it is truly implemented. Do not claim that no data reaches the server because server-side synchronization is part of the product.
+
+SECTION 11 — FAQ
+
+Include at least these questions:
+
+1. Is Tab Story just a bookmark manager?
+2. How do the extension and web app work together?
+3. Can free users save and synchronize tabs?
+4. Does deleting a saved tab free a slot?
+5. Can I use Tab Story offline?
+6. When does Tab Story request notification permission?
+7. What happens if I edit the same saved item on two devices?
+8. Can I export or delete my data?
+9. Which browsers are supported?
+10. How does Discuss with AI use my content?
+
+For questions whose product policy is not yet confirmed, write clearly labeled placeholders instead of inventing an answer.
+
+SECTION 12 — FINAL CTA
+
+Headline:
+“Give every important tab a next step.”
+
+Supporting copy:
+“Save it, organize it, schedule it, and return when it matters.”
+
+Buttons:
+
+- “Add Tab Story to Chrome”
+- “Open the Web App”
+
+FOOTER
+
+Include:
+
+- Product: Features, Extension, Web App, Pricing, Changelog.
+- Resources: Help, Contact, Status, Documentation.
+- Company/legal: Privacy, Terms.
+- Sign in and account links.
+- Copyright and product name.
+- Optional theme selector.
+
+FEATURES PAGE
+
+Build a deeper feature page organized around user outcomes:
+
+- Capture: save current tab, batch save, preserved metadata.
+- Organize: collections, tags, notes, pinning, search.
+- Return: schedules, reminders, missed states, snooze, review.
+- Understand: Discuss with AI and saved context.
+- Read: focused reader and offline article copy.
+- Continue: extension/PWA synchronization and device-aware access.
+
+Each feature should have a product screenshot or faithful UI mockup, practical use case, and short explanation. Do not repeat identical cards across the entire page.
+
+EXTENSION PAGE
+
+Focus on speed and browser-native workflow.
+
+Recommended sections:
+
+- Extension-specific hero with “Add to Chrome.”
+- Browser side-panel demonstration.
+- Save-current-tab and save-all-tabs workflow.
+- Tab card anatomy: favicon, title, URL, notes, schedule, tags, AI, pin, actions.
+- Scheduling demonstration.
+- Permission explanation.
+- Installation steps.
+- Browser compatibility.
+- Link to the PWA companion.
+
+PWA PAGE
+
+Focus on access and continuity.
+
+Recommended sections:
+
+- Installable app experience.
+- Responsive mobile and desktop screenshots.
+- Collections and calendar/schedule views.
+- Reader/offline workflow.
+- Review and history.
+- Cross-device sync.
+- Clear “Open Web App” CTA.
+
+PRICING PAGE
+
+Requirements:
+
+- Free and Premium comparison.
+- Clearly explain that saving and synchronizing tabs is free, while AI Tools require Premium.
+- Configurable pricing values.
+- Monthly/yearly billing presentation if applicable.
+- FAQ specifically for billing, cancellation, refunds, and retained data.
+- Upgrade CTA.
+- No fake countdowns, artificial scarcity, or preselected expensive plan tricks.
+
+SIGN-IN AND ACCOUNT CREATION
+
+Use simple, focused authentication pages consistent with the main brand. Support the actual authentication methods available in the backend. Do not display social-login buttons unless they are implemented.
+
+Authentication UI must include:
+
+- Clear validation and error states.
+- Loading and success states.
+- Password visibility controls if passwords are used.
+- Account recovery only if implemented.
+- Links to privacy and terms.
+- Mobile-friendly input sizes.
+
+IMPORTANT PRODUCT BEHAVIOR TO REFLECT
+
+- Free users can save and synchronize tabs without a tab-count paywall.
+- Premium access applies to AI Tools such as summarization, key points, explanations, extraction, translation, related topics, and page Q&A.
+- The server is authoritative when accepting or rejecting synchronized records.
+- Collections delete their children recoverably through synchronized soft deletion.
+- The extension and PWA perform push-before-pull synchronization.
+- These protocol mechanics should shape trustworthy behavior but should not be exposed as marketing jargon.
+
+DESIGN SYSTEM REQUIREMENTS
+
+Define reusable tokens for:
+
+- Background and elevated surface colors.
+- Primary, secondary, success, warning, danger, and text colors.
+- Typography scale.
+- Spacing scale.
+- Border radii.
+- Shadows and focus rings.
+- Container widths and responsive breakpoints.
+- Animation duration and easing.
+
+Create reusable components:
+
+- Header and mobile navigation.
+- Buttons and links.
+- Product screenshot frame.
+- Saved-tab card.
+- Schedule status badge.
+- Feature story section.
+- Pricing card.
+- Comparison table.
+- FAQ accordion.
+- Footer.
+- Toast or inline notification.
+- Modal only where genuinely necessary.
+
+ACCESSIBILITY
+
+- Meet WCAG 2.2 AA where practical.
+- Fully usable by keyboard.
+- Visible focus indicators.
+- Semantic headings and landmarks.
+- Accessible menu, dialog, accordion, and pricing toggle behavior.
+- Text alternatives for meaningful images.
+- Do not encode status using color alone.
+- Maintain at least 44px comfortable touch targets for important mobile controls.
+- Respect reduced-motion and high-contrast preferences.
+
+RESPONSIVE REQUIREMENTS
+
+- Mobile-first implementation.
+- No horizontal overflow at 320px width.
+- Product visuals must remain understandable on small screens.
+- Pricing cards should stack cleanly.
+- Navigation should remain simple and reachable.
+- On large screens, limit text line length and avoid empty, oversized layouts.
+- Test key breakpoints around 360px, 768px, 1024px, and 1440px.
+
+PERFORMANCE AND SEO
+
+- Target excellent Core Web Vitals.
+- Avoid unnecessarily large animation libraries.
+- Optimize screenshots and use modern formats.
+- Lazy-load noncritical imagery.
+- Include meaningful page titles and meta descriptions.
+- Add Open Graph and social preview metadata.
+- Add Product or SoftwareApplication structured data only with truthful information.
+- Generate sitemap and robots files if the framework supports them.
+- Use clean, readable URLs.
+- Ensure the hero’s essential content renders without waiting for client-side JavaScript where possible.
+
+ANALYTICS EVENTS
+
+Prepare privacy-conscious event hooks for:
+
+- Hero extension CTA click.
+- Hero PWA CTA click.
+- Pricing view.
+- Upgrade CTA click.
+- Extension installation-link click.
+- Sign-up started and completed.
+- FAQ interactions.
+- Limit-reached upgrade referral, including the relevant internal item identifier only if privacy policy permits it.
+
+Do not install analytics or tracking tools unless explicitly authorized. Create a clean adapter so the owner can connect a provider later.
+
+CONTENT AND ASSET REQUIREMENTS FROM THE OWNER
+
+Before production launch, request these real assets and decisions:
+
+1. Final Tab Story logo in SVG format.
+2. Extension store URL.
+3. Production PWA URL.
+4. Production API/server URL.
+5. Final monthly and annual Premium prices.
+6. Exact Free and Premium feature matrix.
+7. Supported browsers.
+8. Real extension and PWA screenshots.
+9. Privacy-policy details, including retention period and AI data handling.
+10. Support email address.
+11. Company or legal entity name and address if required.
+12. Billing provider and customer portal URL.
+13. Authentication methods.
+14. Refund and cancellation policy.
+15. Social links, if any.
+
+Until supplied, place these values in a clearly named configuration file. Never bury them inside components and never fabricate them.
+
+TECHNICAL IMPLEMENTATION
+
+Use the existing project’s technology if a website repository is supplied. If starting from an empty repository, prefer a production-ready React framework with TypeScript and good server rendering, metadata, and routing support. Keep dependencies lean.
+
+Implementation expectations:
+
+- TypeScript with strict mode.
+- Reusable components and centralized content/configuration.
+- Responsive CSS using the project’s established styling approach.
+- No duplicated desktop/mobile page implementations.
+- Real navigation and working CTA destinations through configuration.
+- Environment variables for server URLs and public integration keys.
+- Do not expose private secrets to browser code.
+- No hardcoded production prices, URLs, or unsupported claims.
+- Use stable, maintainable code rather than a single oversized page component.
+
+If authentication, subscriptions, and account management are not yet available, build the marketing UI and integration boundaries without pretending those backend operations are complete. Clearly report which actions remain placeholders.
+
+EXPECTED DELIVERABLES
+
+1. Fully implemented responsive marketing website.
+2. All required routes and navigation.
+3. Reusable design system and product UI components.
+4. Central content/configuration file for URLs, plan features, pricing, and legal identity.
+5. Original responsive product mockups based on Tab Story’s actual visual language.
+6. Accessible interaction states.
+7. SEO metadata and social preview configuration.
+8. A README containing setup, environment variables, build, and deployment instructions.
+9. A concise list of any information still required from the owner.
+10. Successful production build with no TypeScript errors.
+
+ACCEPTANCE CRITERIA
+
+The work is complete only when:
+
+- A new visitor understands what Tab Story does within five seconds.
+- The extension and PWA are clearly presented as one synchronized product.
+- The primary extension and PWA CTAs are visible and functional.
+- Free versus Premium behavior is accurately explained.
+- Tab saving and synchronization are correctly presented as free features, with AI Tools presented as Premium.
+- The design feels premium and intentionally related to the product UI.
+- The website works across mobile, tablet, and desktop.
+- All interactive components are keyboard accessible.
+- No fake statistics, testimonials, integrations, prices, or security claims appear.
+- No sensitive keys are shipped to the client.
+- The production build completes successfully.
+
+FINAL INSTRUCTION TO THE BUILDING AGENT
+
+Begin by inspecting the supplied Tab Story extension and PWA repositories so the marketing site reflects their real visual language and implemented features. Reuse concepts and design tokens where appropriate, but do not copy application screens blindly into a marketing layout. Build the website around clear product storytelling and real conversion paths. If a business fact is unknown, put it in configuration and label it for owner confirmation instead of inventing it.

@@ -1,4 +1,5 @@
 import { BugAntIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import brandIcon from "../assets/tab-story-brand.png?inline";
 import { useI18n } from "../../i18n/useI18n";
 
 export function AboutPanel() {
@@ -8,7 +9,7 @@ export function AboutPanel() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       <div style={{ textAlign: "center", padding: "20px 0" }}>
-        <img src="/icons/icon-128.png" width={64} height={64} style={{ borderRadius: "16px", marginBottom: "12px" }} alt="Tab Story" />
+        <img src={brandIcon} loading="eager" width={64} height={64} style={{ borderRadius: "16px", marginBottom: "12px", objectFit: "contain", display: "block", marginLeft: "auto", marginRight: "auto" }} alt="Tab Story" />
         <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-color)" }}>{tr("localization.documentTitle")}</div>
         <div style={{ fontSize: "12px", color: "var(--placeholder-color)", marginTop: "4px" }}>{tr("about.version", { version })}</div>
       </div>
@@ -24,6 +25,11 @@ export function AboutPanel() {
       }}>
         {tr("about.description")}
       </div>
+
+      <section style={{ color: "var(--text-color)", fontSize: "12px", lineHeight: 1.6 }}>
+        <strong style={{ display: "block", marginBottom: "4px", fontSize: "14px" }}>Your key, your control</strong>
+        <p style={{ margin: 0 }}>Your API key stays in your browser session and is sent only to your chosen AI provider.</p>
+      </section>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         <a
@@ -79,8 +85,8 @@ export function AboutPanel() {
         >
           <BugAntIcon aria-hidden="true" style={{ width: "20px", height: "20px", flexShrink: 0 }} />
           <span style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
-            <span style={{ display: "block", fontSize: "14px", fontWeight: 600 }}>{tr("about.reportIssue")}</span>
-            <span style={{ display: "block", fontSize: "12px", color: "var(--placeholder-color)", marginTop: "4px", lineHeight: 1.5 }}>{tr("about.reportIssueHint")}</span>
+            <span style={{ display: "block", fontSize: "14px", fontWeight: 600 }}>Help improve Tab Story</span>
+            <span style={{ display: "block", fontSize: "12px", color: "var(--placeholder-color)", marginTop: "4px", lineHeight: 1.5 }}>Have a feature idea or found a bug? Open a GitHub issue.</span>
           </span>
           <ArrowTopRightOnSquareIcon aria-hidden="true" style={{ width: "16px", height: "16px", flexShrink: 0 }} />
         </a>

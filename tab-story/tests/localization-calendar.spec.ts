@@ -10,7 +10,7 @@ async function launch(profile = '') {
   const worker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
   const url = `chrome-extension://${worker.url().split('/')[2]}/sidepanel.html`;
   const page = await context.newPage(); await page.goto(url);
-  await expect(page.getByRole('button', { name: 'Language', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Collections', exact: true })).toBeVisible();
   return { context, page, url };
 }
 async function seed(page: Page) {
@@ -23,22 +23,21 @@ async function message(page: Page, operation: string, tabId?: number, scheduledA
   return page.evaluate(async data => chrome.runtime.sendMessage({ type: 'tab-story:reminder', ...data }), { operation, tabId, scheduledAt });
 }
 
-test('language selector persists, every panel localizes and Arabic fits a narrow viewport', async ({ browserName }, info) => {
+test('stored language persists, every panel localizes and Arabic fits a narrow viewport', async ({ browserName }, info) => {
   expect(browserName).toBe('chromium');
   const { context, page } = await launch();
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   try {
     await seed(page);
-    await page.getByRole('button', { name: 'Language', exact: true }).click();
-    await page.getByRole('radio', { name: 'Deutsch' }).click();
-    await expect(page.locator('html')).toHaveAttribute('lang', /^de/);
+    await page.evaluate(() => chrome.storage.local.set({ 'tabStory.locale': 'de-DE' }));
     await page.reload();
     await expect(page.getByRole('button', { name: 'Kalender', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Kalender', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Vorheriger Monat' })).toBeVisible();
     await page.screenshot({ path: info.outputPath('german-calendar.png'), animations: 'disabled' });
-    await page.getByRole('button', { name: 'Sprache', exact: true }).click();
-    await page.getByRole('radio', { name: 'العربية' }).click();
+    await page.evaluate(() => chrome.storage.local.set({ 'tabStory.locale': 'ar' }));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'التقويم', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await expect(page.getByRole('button', { name: 'الشهر السابق' })).toBeVisible();
     for (const name of ['الوسوم', 'السجل', 'الإعدادات', 'حول', 'التقويم']) {
@@ -60,6 +59,8 @@ test('calendar and TabMenu schedule, reschedule, complete and clear real alarms'
     await page.getByLabel('Date', { exact: true }).fill('2030-10-10');
     await page.getByLabel('Time', { exact: true }).fill('14:30');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.locator('.schedule-editor').getByRole('status')).toContainText('Saved');
+    await page.locator('.schedule-editor').getByRole('button', { name: 'Close', exact: true }).click();
     await expect(page.locator('.schedule-editor')).toHaveCount(0);
     const first = await page.evaluate(async id => ({ tab: await window.db.tabs.get(id), alarm: await chrome.alarms.get('tab_story_reminder_' + id) }), id);
     expect(first.tab?.scheduledAt).toBe(first.alarm?.scheduledTime);
@@ -69,6 +70,8 @@ test('calendar and TabMenu schedule, reschedule, complete and clear real alarms'
     await page.getByRole('button', { name: 'Schedule', exact: true }).click();
     await page.getByLabel('Time', { exact: true }).fill('15:30');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.locator('.schedule-editor').getByRole('status')).toContainText('Saved');
+    await page.locator('.schedule-editor').getByRole('button', { name: 'Close', exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     const second = await page.evaluate(async id => chrome.alarms.get('tab_story_reminder_' + id), id);
     expect(second?.scheduledTime).toBe(first.alarm!.scheduledTime + 3600000);

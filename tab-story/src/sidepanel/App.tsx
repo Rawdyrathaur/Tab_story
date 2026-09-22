@@ -1,3 +1,5 @@
+import { UndoCenter } from './components/ReviewPanel';
+import { NotificationWarning } from './components/ReminderHealth';
 import { useEffect, useState } from "react";
 import { TabList } from "./components/TabList";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -10,30 +12,34 @@ import { AboutPanel } from "./components/AboutPanel";
 import { EmptyState } from "./components/EmptyState";
 import { TabMenu } from "./components/TabMenu";
 import { AIDiscussModal } from "./components/AIDiscussModal";
+import { OfflineReader } from './components/OfflineReader';
 import type { SavedTab } from "./db";
+import { CollectionsPanel } from "./components/CollectionsPanel";
 import { Navbar } from "./components/Navbar";
 import { useTheme } from "./hooks/useTheme";
 import { useI18n } from "../i18n/useI18n";
 import { deleteAllData, saveAllTabs, saveCurrentTab } from "./utils/tabOperations";
 import { requestReminderReconciliation } from "../reminders/service";
+import { syncNow } from '../sync/client';
 import {
   TagIcon, BookmarkSquareIcon, CalendarIcon, ClockIcon,
   Cog6ToothIcon, PlusIcon, ChevronLeftIcon,
   InformationCircleIcon, TrashIcon, FolderArrowDownIcon,
-  SunIcon, MoonIcon,
+  SunIcon, MoonIcon, RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import {
   TagIcon as TagSolid, BookmarkSquareIcon as BookmarkSquareSolid,
   CalendarIcon as CalendarSolid, ClockIcon as ClockSolid,
   Cog6ToothIcon as CogSolid, PlusIcon as PlusSolid,
   InformationCircleIcon as InfoSolid, TrashIcon as TrashSolid, FolderArrowDownIcon as FolderArrowDownSolid,
-  SunIcon as SunSolid, MoonIcon as MoonSolid,
+  SunIcon as SunSolid, MoonIcon as MoonSolid, RectangleStackIcon as RectangleStackSolid,
 } from "@heroicons/react/24/solid";
 
 export type ViewMode = "grid" | "list";
 
 const mainItems = [
   { outline: BookmarkSquareIcon, solid: BookmarkSquareSolid, label: "Tab Manager" },
+  { outline: RectangleStackIcon, solid: RectangleStackSolid, label: "Collections" },
   { outline: TagIcon,        solid: TagSolid,       label: "Tags" },
   { outline: CalendarIcon,   solid: CalendarSolid,  label: "Calendar" },
   { outline: ClockIcon,      solid: ClockSolid,     label: "History" },
@@ -43,10 +49,16 @@ const mainItems = [
 const ICO = "20px";
 
 export function App() {
+  useEffect(() => {
+    const run=()=>void syncNow().catch(()=>{});
+    run(); window.addEventListener('online',run); const timer=window.setInterval(run,60_000);
+    return()=>{window.removeEventListener('online',run);window.clearInterval(timer);};
+  },[]);
   const { theme, toggleTheme } = useTheme();
   const { t } = useI18n();
   const [activePanel, setActivePanel] = useState<string | null>(() =>
-    window.location.hash === "#calendar" ? "Calendar" : null);
+    ["#calendar", "#review", "#capture"].includes(window.location.hash) ? "Calendar" : null);
+  const [reminderHighlight, setReminderHighlight] = useState(0);
   const [error, setError] = useState(false);
   const [hoveredBtn,  setHoveredBtn]  = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +66,12 @@ export function App() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [menuTab, setMenuTab] = useState<SavedTab | null>(null);
   const [aiModal, setAiModal] = useState<{ title: string; tabs: SavedTab[] } | null>(null);
+  const [readerArticleId, setReaderArticleId] = useState<string | null>(null);
+  useEffect(() => {
+    const openSetup = () => { setMenuTab(null); setActivePanel("Settings"); setReminderHighlight(value => value + 1); };
+    window.addEventListener("tab-story:reminder-setup", openSetup);
+    return () => window.removeEventListener("tab-story:reminder-setup", openSetup);
+  }, []);
   const isOpen = activePanel !== null;
 
   // Data for empty state check
@@ -71,12 +89,14 @@ export function App() {
 
   useEffect(() => {
     const showCalendar = () => {
-      if (window.location.hash === "#calendar") setActivePanel("Calendar");
+      if (["#calendar", "#review", "#capture"].includes(window.location.hash)) setActivePanel("Calendar");
     };
     window.addEventListener("hashchange", showCalendar);
     void requestReminderReconciliation().catch((cause) => {
-      console.error("[Tab Story] Reminder recovery failed", cause);
-      setError(true);
+      // Recovery also runs in the service worker. Opening the side panel can
+      // briefly race with that worker waking, which is not a user action or a
+      // data-loss condition, so keep this diagnostic out of the global alert.
+      console.debug("[Tab Story] Background reminder recovery deferred", cause);
     });
     return () => window.removeEventListener("hashchange", showCalendar);
   }, []);
@@ -84,7 +104,10 @@ export function App() {
   const runAction = async (action: () => Promise<void>) => {
     setError(false);
     try { await action(); }
-    catch (cause) { console.error("[Tab Story] Action failed", cause); setError(true); }
+    catch (cause) {
+      console.error("[Tab Story] Action failed", cause);
+      setError(true);
+    }
   };
 const handleDeleteAll = async () => {
   const confirmed = window.confirm(t("app.confirmDeleteAll"));
@@ -114,6 +137,7 @@ const handleSaveAllTabs = async () => {
       }}
       style={{ display: "flex", height: "100vh", overflow: "hidden", position: "relative", background: "var(--bg-color)", color: "var(--text-color)" }}>
 
+      <UndoCenter />
       {/* Sidebar */}
       <div style={{
         width: "48px", display: "flex", flexDirection: "column",
@@ -245,10 +269,11 @@ const handleSaveAllTabs = async () => {
             {activePanel && t(`navigation.${activePanel}`)}
           </span>
         </div>
-        {activePanel === "Calendar" && <CalendarPanel />}
+        {activePanel === "Collections" && <CollectionsPanel onDiscussAI={tab => setAiModal({ title: tab.title, tabs: [tab] })} />}
+        {activePanel === "Calendar" && <><NotificationWarning /><CalendarPanel /></>}
         {activePanel === "Tags" && <TagsPanel onMenu={setMenuTab} />}
         {activePanel === "History" && <HistoryPanel onBack={() => setActivePanel(null)} />}
-        {activePanel === "Settings" && <SettingsPanel />}
+        {activePanel === "Settings" && <SettingsPanel highlightReminders={reminderHighlight} />}
         {activePanel === "About" && <AboutPanel />}
       </div>
 
@@ -313,6 +338,7 @@ const handleSaveAllTabs = async () => {
             setAiModal({ title: tab.title, tabs: [tab] });
           }
         }}
+        onRead={setReaderArticleId}
       />
     </>
   )}
@@ -322,9 +348,10 @@ const handleSaveAllTabs = async () => {
         {dueTabs.length === 1 ? `Reminder: ${dueTabs[0].title}` : `${dueTabs.length} tabs are due`}
         <button onClick={() => setActivePanel('Calendar')}>View reminders</button>
       </div>}
-      {error && <div className="app-alert" role="alert">{t("app.operationFailed")} <button onClick={() => setError(false)} aria-label={t("app.close")}>×</button></div>}
+      <NotificationWarning />
       {menuTab && <TabMenu tab={menuTab} onClose={() => setMenuTab(null)} onDiscussAI={(tab) => setAiModal({ title: tab.title, tabs: [tab] })} />}
       {aiModal && <AIDiscussModal title={aiModal.title} tabs={aiModal.tabs} onClose={() => setAiModal(null)} />}
+      {readerArticleId && <OfflineReader articleId={readerArticleId} onClose={() => setReaderArticleId(null)} />}
     </div>
   );
 }

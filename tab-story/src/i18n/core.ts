@@ -19,6 +19,7 @@ export const supportedLanguages = [
 
 export const messages: Record<string, Record<string, string>> = Object.fromEntries(
   supportedLanguages.map(({ code }) => [code, {
+    "navigation.Collections": ({ en: "Collections", hi: "संग्रह", es: "Colecciones", de: "Sammlungen", ar: "المجموعات", ur: "مجموعے" })[code],
     ...appMessages[code], ...calendarMessages[code], ...reminderMessages[code], ...uiMessages[code],
   }]),
 );

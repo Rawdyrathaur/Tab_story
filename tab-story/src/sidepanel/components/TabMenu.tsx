@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import type { SavedTab } from "../db";
 import { db } from "../db";
+import { updateTab } from '../../sync/client';
 import { ScheduleEditor } from './ScheduleEditor';
-import { cancelTabReminder, completeTabReminder } from '../../reminders/service';
+import { cancelTabReminder, completeTabReminder, archiveReminder } from '../../reminders/service';
 import { useI18n } from '../../i18n/useI18n';
 import {
   ArrowTopRightOnSquareIcon,
@@ -25,15 +26,17 @@ interface Props {
   tab: SavedTab;
   onClose: () => void;
   onDiscussAI?: (tab: SavedTab) => void;
+  initialView?: "menu" | "schedule";
+  onRemoveFromCollection?: () => Promise<void>;
 }
 
-export function TabMenu({ tab, onClose, onDiscussAI }: Props) {
+export function TabMenu({ tab, onClose, onDiscussAI, onRemoveFromCollection, initialView = "menu" }: Props) {
   const { t: tr } = useI18n();
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef);
   const [error, setError] = useState("");
-  async function run(action: () => Promise<unknown>) { try { await action(); } catch (cause) { console.error("[Tab Story] Tab menu", cause); setError(cause instanceof Error && cause.message.startsWith("errors.") ? cause.message : "app.operationFailed"); } }
-  const [view, setView] = useState<"menu" | "note" | "schedule" | "tags">("menu");
+  async function run(action: () => Promise<unknown>) { try { setError(''); await action(); } catch (cause) { console.error("[Tab Story] Tab menu", cause); setError(cause instanceof Error ? cause.message : 'This action could not be completed.'); } }
+  const [view, setView] = useState<"menu" | "note" | "schedule" | "tags">(initialView);
   const [note, setNote] = useState(tab.notes || "");
   const [tagsList, setTagsList] = useState<string[]>(tab.tags || []);
   const [newTagInput, setNewTagInput] = useState("");
@@ -55,17 +58,17 @@ export function TabMenu({ tab, onClose, onDiscussAI }: Props) {
     const next = [...tagsList, clean];
     setTagsList(next);
     setNewTagInput("");
-    await db.tabs.update(tab.id!, { tags: next });
+    await updateTab(tab.id!, { tags: next });
   };
 
   const removeTag = async (tagToRemove: string) => {
     const next = tagsList.filter(t => t !== tagToRemove);
     setTagsList(next);
-    await db.tabs.update(tab.id!, { tags: next });
+    await updateTab(tab.id!, { tags: next });
   };
 
   const saveNote = async () => {
-    await db.tabs.update(tab.id!, { notes: note.trim() });
+    await updateTab(tab.id!, { notes: note.trim() });
   };
 
   const actions = [
@@ -73,17 +76,17 @@ export function TabMenu({ tab, onClose, onDiscussAI }: Props) {
       icon: ArrowTopRightOnSquareIcon,
       label: tr("notifications.open"),
       color: "var(--text-color)",
-      onClick: async () => { await chrome.tabs.create({ url: tab.url }); onClose(); },
+      onClick: async () => { const url=new URL(tab.url);if(!['http:','https:'].includes(url.protocol))throw new Error('This saved URL cannot be opened.');await chrome.tabs.create({ url:url.href,active:true });onClose(); },
     },
     {
       icon: BookmarkIcon,
       label: tab.pinned ? tr("tabs.unpin") : tr("tabs.pin"),
       color: "var(--text-color)",
-      onClick: async () => { await db.tabs.update(tab.id!, { pinned: !tab.pinned }); onClose(); },
+      onClick: async () => { await updateTab(tab.id!, { pinned: !tab.pinned }); onClose(); },
     },
     {
       icon: SparklesIcon,
-      label: tr("tabs.discuss"),
+      label: "Tools",
       color: "#c084fc",
       onClick: () => {
         onClose();
@@ -112,13 +115,14 @@ export function TabMenu({ tab, onClose, onDiscussAI }: Props) {
       icon: ClipboardDocumentIcon,
       label: tr("tabs.copy"),
       color: "var(--text-color)",
-      onClick: async () => { await navigator.clipboard.writeText(tab.url); onClose(); },
+      onClick: async () => { if(!navigator.clipboard?.writeText)throw new Error('Clipboard access is unavailable.');await navigator.clipboard.writeText(tab.url);onClose(); },
     },
+    ...(onRemoveFromCollection ? [{ icon: BookmarkIcon, label: "Remove from collection", color: "var(--text-color)", onClick: async () => { await onRemoveFromCollection(); onClose(); } }] : []),
     {
       icon: TrashIcon,
-      label: tr("common.delete"),
+      label: "Let go",
       color: "#ef4444",
-      onClick: async () => { await db.tabs.update(tab.id!, { deletedAt: Date.now() }); await cancelTabReminder(tab.id!); onClose(); },
+      onClick: async () => { await archiveReminder(tab.id!); onClose(); },
     },
   ];
 
@@ -144,7 +148,7 @@ export function TabMenu({ tab, onClose, onDiscussAI }: Props) {
           boxShadow: "var(--modal-shadow)",
         }}
       >
-        {error && <p role="alert">{tr(error)}</p>}
+        {error && <p role="alert">{error.startsWith('errors.') ? tr(error) : error}</p>}
         <button aria-label={tr("app.close")} onClick={onClose} style={{ float: "inline-end" }}>×</button>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>

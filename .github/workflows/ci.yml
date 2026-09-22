@@ -49,9 +49,19 @@ jobs:
         run: npm run test:qa --prefix tab-story
 
       - name: Build extension
-        run: npm run build
+        run: npm run build --prefix tab-story
         env:
           NODE_ENV: production
+
+      - name: Install test browser
+        working-directory: tab-story
+        run: npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        run: npm run test:unit --prefix tab-story
+
+      - name: Browser and upgrade tests
+        run: xvfb-run -a npm run test:integration --prefix tab-story
 
       - name: Package extension
         working-directory: tab-story/dist

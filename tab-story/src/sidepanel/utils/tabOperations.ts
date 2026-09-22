@@ -1,6 +1,7 @@
 import { db } from '../db';
 import { getDomain, getFavicon, isInternalUrl } from './url';
 import { requestReminderReconciliation } from '../../reminders/service';
+import { updateTab, writeTab } from '../../sync/client';
 
 export async function saveTab(
   tabUrl: string,
@@ -13,7 +14,7 @@ export async function saveTab(
   const domain = getDomain(tabUrl);
   const favicon = getFavicon(tabFaviconUrl, domain);
 
-  await db.transaction('rw', db.tabs, db.folders, async () => {
+  await db.transaction('rw', db.tabs, db.folders, db.syncOutbox, async () => {
     let folder = await db.folders.where('domain').equals(domain).first();
 
     if (!folder) {
@@ -27,11 +28,10 @@ export async function saveTab(
 
     const existing = await db.tabs.where('url').equals(tabUrl).first();
     if (existing) {
-      if (existing.deletedAt) await db.tabs.update(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
+      if (existing.deletedAt) await updateTab(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
       return;
     }
-
-    await db.tabs.add({
+    await writeTab({
       url: tabUrl,
       title: tabTitle,
       favicon,
@@ -54,7 +54,7 @@ export async function saveCurrentTab(): Promise<void> {
 export async function saveAllTabs(): Promise<void> {
   const tabs = await chrome.tabs.query({ currentWindow: true });
 
-  await db.transaction('rw', db.tabs, db.folders, async () => {
+  await db.transaction('rw', db.tabs, db.folders, db.syncOutbox, async () => {
     for (const tab of tabs) {
       if (!tab.url || !tab.title) continue;
       if (isInternalUrl(tab.url)) continue;
@@ -75,11 +75,10 @@ export async function saveAllTabs(): Promise<void> {
 
       const existing = await db.tabs.where('url').equals(tab.url).first();
       if (existing) {
-        if (existing.deletedAt) await db.tabs.update(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
+        if (existing.deletedAt) await updateTab(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
         continue;
       }
-
-      await db.tabs.add({
+      await writeTab({
         url: tab.url,
         title: tab.title,
         favicon,

@@ -1,5 +1,6 @@
 import { db } from '../db';
 import type { SavedTab } from '../db';
+import { writeTab } from '../../sync/client';
 
 function getDomain(url: string): string {
   try {
@@ -68,7 +69,7 @@ export async function saveCurrentTab(): Promise<void> {
       pinned: false,
     };
 
-    await db.tabs.add(newTab);
+    await writeTab(newTab);
     console.log('tab saved!', newTab);
   } catch (err) {
     console.error('saveCurrentTab error:', err);

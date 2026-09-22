@@ -1,5 +1,8 @@
 import { db } from './sidepanel/db';
 
+// Migration markers belong to this installation, not a restored account backup.
+const backupTables = () => db.tables.filter(table => table.name !== 'migrationState' && table.name !== 'meta');
+
 const KEY = 'tabStory.backup';
 export const BACKUP_ALARM = 'tab-story:daily-backup';
 const PREFS = ['tabStory.locale', 'tab-story-theme', 'tabStory.aiModel'];
@@ -32,8 +35,8 @@ async function files(access: string) {
 async function backup() {
   const access = await token();
   const tables: Record<string, unknown[]> = {};
-  await db.transaction('r', db.tables, async () => {
-    for (const table of db.tables) tables[table.name] = await table.toArray();
+  await db.transaction('r', backupTables(), async () => {
+    for (const table of backupTables()) tables[table.name] = await table.toArray();
   });
   const payload = { version: 1, createdAt: Date.now(), tables, preferences: await chrome.storage.local.get(PREFS) };
   const content = JSON.stringify(payload);
@@ -55,7 +58,12 @@ async function restore(id: string) {
   if (raw.length > 20000000) throw new Error('Backup exceeds the size limit.');
   const data = JSON.parse(raw);
   if (data.version !== 1 || !data.tables || !data.preferences) throw new Error('Unsupported backup format.');
-  for (const table of db.tables) {
+  if (data.tables.collections === undefined) data.tables.collections = [];
+  if (!Array.isArray(data.tables.collections)) throw new Error('Invalid collections.');
+  for (const collection of data.tables.collections) {
+    if (!collection || typeof collection.name !== 'string' || typeof collection.category !== 'string' || !Array.isArray(collection.tabIds) || !collection.tabIds.every((id: unknown) => Number.isSafeInteger(id) && Number(id) > 0)) throw new Error('Invalid collection.');
+  }
+  for (const table of backupTables()) {
     const rows = data.tables[table.name];
     if (!Array.isArray(rows) || rows.length > 100000 || rows.some(row => !row || typeof row !== 'object' || Array.isArray(row))) throw new Error('Invalid backup table: ' + table.name);
     const ids = new Set<unknown>();
@@ -84,10 +92,10 @@ async function restore(id: string) {
   for (const key of PREFS) if (typeof data.preferences[key] === 'string') preferences[key] = data.preferences[key];
   // Preserve the current state locally before an explicitly confirmed replacement.
   const previous: Record<string, unknown[]> = {};
-  await db.transaction('r', db.tables, async () => { for (const table of db.tables) previous[table.name] = await table.toArray(); });
+  await db.transaction('r', backupTables(), async () => { for (const table of backupTables()) previous[table.name] = await table.toArray(); });
   await chrome.storage.local.set({ 'tabStory.beforeRestore': { tables: previous, preferences: await chrome.storage.local.get(PREFS) } });
-  await db.transaction('rw', db.tables, async () => {
-    for (const table of db.tables) { await table.clear(); await table.bulkPut(data.tables[table.name]); }
+  await db.transaction('rw', backupTables(), async () => {
+    for (const table of backupTables()) { await table.clear(); await table.bulkPut(data.tables[table.name]); }
   });
   await chrome.storage.local.set(preferences);
 }

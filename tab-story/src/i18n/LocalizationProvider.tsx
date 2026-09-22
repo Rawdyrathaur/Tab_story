@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { getDirection, getLanguage, LOCALE_STORAGE_KEY, resolveLocale, translate } from './core';
+import { getDirection, getLanguage, LOCALE_STORAGE_KEY, readStoredLocale, resolveLocale, translate } from './core';
 import { I18nContext } from './useI18n';
 import type { I18nContextValue } from './useI18n';
 
@@ -11,14 +11,20 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
   const dir = getDirection(locale);
 
   useEffect(() => {
-    void chrome.storage?.local?.remove(LOCALE_STORAGE_KEY).catch(cause => {
-      console.error('[Tab Story] locale.reset', cause);
+    let active = true;
+    const initialRevision = revision.current;
+    void readStoredLocale().then(saved => {
+      if (active && revision.current === initialRevision) setLocale(saved);
+    }).catch(cause => {
+      if (active) setError('localization.saveFailed');
+      console.error('[Tab Story] locale.read', cause);
     });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
-    document.documentElement.dir = 'ltr';
+    document.documentElement.dir = dir;
     document.documentElement.dataset.textDirection = dir;
     document.title = translate(locale, 'localization.documentTitle');
   }, [locale, dir]);

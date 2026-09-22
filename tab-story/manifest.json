@@ -10,18 +10,26 @@
     "identity",
     "storage",
     "alarms",
-    "notifications",
+    "offscreen",
     "activeTab",
-    "scripting"
+    "scripting",
+    "contextMenus",
+    "unlimitedStorage"
+  ],
+  "optional_permissions": [
+    "notifications"
   ],
   "icons": {
-    "16": "icons/icon-16.png",
-    "48": "icons/icon-48.png",
+    "16": "icons/icon-128.png",
+    "48": "icons/icon-128.png",
     "128": "icons/icon-128.png"
   },
   "host_permissions": [
     "https://www.googleapis.com/*",
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*",
+    "https://openrouter.ai/*",
+    "https://api.mistral.ai/*"
   ],
   "optional_host_permissions": [
     "https://*/*",
@@ -53,5 +61,13 @@
       "https://www.googleapis.com/auth/calendar.events",
       "https://www.googleapis.com/auth/drive.appdata"
     ]
+  },
+  "commands": {
+    "quick-save": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Save current tab for tomorrow morning"
+    }
   }
 }

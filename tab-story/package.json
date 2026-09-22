@@ -7,15 +7,17 @@
     "adm-zip": "0.6.1",
     "shell-quote": "1.10.0",
     "tmp": "0.2.7",
-    "node-notifier": { "uuid": "11.1.1" }
+    "node-notifier": {
+      "uuid": "11.1.1"
+    }
   },
   "scripts": {
     "dev": "vite",
     "build": "npm run clean && tsc -b && vite build",
     "lint": "eslint .",
     "test:qa": "node --experimental-strip-types tests/qa-automated-tests.ts",
-    "test:unit": "playwright test tests/reminders.spec.ts --workers=1",
-    "test:integration": "playwright test tests/extension.spec.ts tests/localization-calendar.spec.ts --workers=1",
+    "test:unit": "playwright test tests/reminders.spec.ts tests/ai.spec.ts --workers=1",
+    "test:integration": "playwright test tests/extension.spec.ts tests/localization-calendar.spec.ts tests/migration.spec.ts tests/collections.spec.ts tests/sound.spec.ts tests/ai-settings.spec.ts tests/scheduler-workflow.spec.ts --workers=1",
     "typecheck": "tsc -b",
     "preview": "vite preview",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
@@ -28,13 +30,16 @@
     "date-fns": "^4.3.0",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",
+    "dompurify": "^3.4.15",
     "fuse.js": "^7.3.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.60.0",
     "@types/chrome": "^0.1.42",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

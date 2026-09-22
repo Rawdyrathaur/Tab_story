@@ -1,3 +1,4 @@
+import { providers, isProvider, callCompatible } from './providers';
 import type { Source } from './service';
 import { summarizeArticle } from './summary';
 const jobs = new Map<string, AbortController>();
@@ -214,9 +215,10 @@ async function saveApiKey(plainKey: string) {
   await chrome.storage.session.set({ [GEMINI_SESSION_KEY]: plainKey });
 }
 
-async function getApiKey(): Promise<string> {
+async function getApiKey(provider = 'gemini'): Promise<string> {
+  const storageKey = provider === 'gemini' ? GEMINI_SESSION_KEY : 'tabStory.aiKey.' + provider;
   try {
-    const sessionVal = (await chrome.storage.session.get(GEMINI_SESSION_KEY))[GEMINI_SESSION_KEY];
+    const sessionVal = (await chrome.storage.session.get(storageKey))[storageKey];
     if (typeof sessionVal === 'string' && sessionVal) return sessionVal;
   } catch {
     return '';
@@ -225,7 +227,7 @@ async function getApiKey(): Promise<string> {
 }
 
 async function clearAllKeys() {
-  await chrome.storage.session.remove([GEMINI_SESSION_KEY, 'tabStory.geminiKey']);
+  await chrome.storage.session.remove([GEMINI_SESSION_KEY, 'tabStory.geminiKey', 'tabStory.aiKey.groq', 'tabStory.aiKey.openrouter', 'tabStory.aiKey.mistral']);
   await chrome.storage.local.remove([
     'tabStory.vaultKey_gemini', 'tabStory.vaultKey_groq',
     'tabStory.vaultKey_openrouter', 'tabStory.vaultKey_openai',
@@ -349,8 +351,8 @@ export async function handleAI(request: Record<string, unknown>) {
       if (await getApiKey()) activeId = 'gemini';
     }
 
-    const key = activeId === 'gemini' ? await getApiKey() : '';
-    if (!key || activeId !== 'gemini') {
+    const key = isProvider(activeId) ? await getApiKey(activeId) : '';
+    if (!key || !isProvider(activeId)) {
       return { configured: false };
     }
 
@@ -426,6 +428,13 @@ export async function handleAI(request: Record<string, unknown>) {
       return { models: availableModels, selectedModel: defaultModel, provider: 'Google Gemini', providerId: 'gemini' };
     }
 
+    if (isProvider(providerId) && providerId !== 'gemini') {
+      await callCompatible(providerId, key, 'Reply with OK.', new AbortController().signal, true);
+      await chrome.storage.session.set({ ['tabStory.aiKey.' + providerId]: key });
+      const config = providers[providerId];
+      await chrome.storage.local.set({ 'tabStory.activeAIProvider': config.name, 'tabStory.activeAIProviderId': providerId, 'tabStory.aiModel': config.model });
+      return { models: [config.model], selectedModel: config.model, provider: config.name, providerId };
+    }
     throw new Error('Unsupported AI provider.');
   }
 
@@ -440,10 +449,11 @@ export async function handleAI(request: Record<string, unknown>) {
       // ignore
     }
 
-    const providerId = String(request.providerId || stored['tabStory.activeAIProviderId'] || 'gemini').toLowerCase();
-    const key = providerId === 'gemini' ? await getApiKey() : '';
+    const providerId = String(stored['tabStory.activeAIProviderId'] || 'gemini').toLowerCase();
+    if (!isProvider(providerId)) throw new Error('Choose a supported AI provider.');
+    const key = await getApiKey(providerId);
     if (!key) {
-      throw new Error(`Connect your Gemini API key first. Keys are safely kept in your browser session.`);
+      throw new Error(`Connect your AI provider API key first. Keys are safely kept in your browser session.`);
     }
 
     const sources = request.sources as Source[];
@@ -463,11 +473,10 @@ export async function handleAI(request: Record<string, unknown>) {
     jobs.set(id, controller);
 
     try {
-      if (providerId !== 'gemini') throw new Error('Choose Google Gemini in AI settings to summarize this page.');
       const text = sources.map(source => source.text).join('\n\n');
       return await summarizeArticle(text, language, query, async (prompt) => {
         controller.signal.throwIfAborted();
-        return callGemini(key, model, prompt, controller.signal);
+        return providerId === 'gemini' ? callGemini(key, model, prompt, controller.signal) : callCompatible(providerId, key, prompt, controller.signal);
       }, controller.signal);
 
     } finally {

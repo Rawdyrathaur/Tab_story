@@ -80,6 +80,7 @@ export function Navbar({
           borderRadius: "10px",
           padding: "7px 12px",
           flex: 1,
+          minWidth: 0,
           background: "var(--input-bg)",
           cursor: "text",
         }}

@@ -11,27 +11,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { aiRequest } from "../../ai/service";
 
-interface AIProvider {
-  id: string;
-  name: string;
-  badge: string;
-  badgeColor: string;
-  keyUrl: string;
-  description: string;
-  requiresKey: boolean;
-}
-
-const AI_PROVIDERS: AIProvider[] = [
-  {
-    id: "gemini",
-    name: "Google Gemini",
-    badge: "Free Tier",
-    badgeColor: "#818cf8",
-    keyUrl: "https://aistudio.google.com/apikey",
-    description: "Use your Google AI Studio key.",
-    requiresKey: true,
-  },
-];
+import { providers } from '../../ai/providers';
+const AI_PROVIDERS = Object.entries(providers).map(([id, provider]) => ({ id, ...provider, requiresKey: true }));
 
 interface Props {
   onSuccess?: (connection: { provider: string; providerId: string; model: string }) => void;
@@ -79,12 +60,12 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
 
     try {
       const res = await aiRequest("connect", {
-        provider: "gemini",
+        provider: selectedProviderId,
         key: sanitizedKey,
       });
       const selectedModel = typeof res?.selectedModel === "string" ? res.selectedModel : "";
       if (!selectedModel) {
-        throw new Error("Gemini connected but no compatible Flash model was found.");
+        throw new Error("Connected but no compatible model was found.");
       }
 
       setConfigured(true);
@@ -162,7 +143,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
             transition: "all 0.12s ease",
           }}
         >
-          <KeyIcon style={{ width: "13px", height: "13px", color: "#818cf8" }} />
+          <KeyIcon style={{ width: "13px", height: "13px", color: "var(--ai-accent)" }} />
           API key
         </button>
 
@@ -196,9 +177,9 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
           style={{
             padding: "7px 10px",
             borderRadius: "8px",
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.25)",
-            color: "#ef4444",
+            background: "var(--ai-tint)",
+            border: "1px solid var(--ai-border)",
+            color: "var(--ai-accent)",
             fontSize: "11.5px",
             fontWeight: 500,
           }}
@@ -236,7 +217,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
                   background: "transparent",
                   border: "none",
                   fontSize: "11px",
-                  color: "#ef4444",
+                  color: "var(--ai-accent)",
                   cursor: "pointer",
                   fontWeight: 600,
                   padding: "2px 5px",
@@ -254,14 +235,17 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
             </label>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", minWidth: 0 }}>
               <select
+                aria-label="AI Provider"
                 value={selectedProviderId}
                 onChange={(e) => {
                   setSelectedProviderId(e.target.value);
+                  setApiKey(""); setShowKey(false);
                   setError("");
                 }}
                 disabled={busy}
                 style={{
-                  flex: 1,
+                  flex: "1 1 100%",
+                  minWidth: 0,
                   padding: "8px 10px",
                   borderRadius: "8px",
                   border: "1px solid var(--input-border)",
@@ -275,7 +259,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
               >
                 {AI_PROVIDERS.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.badge})
+                    {p.name} · {p.badge}
                   </option>
                 ))}
               </select>
@@ -286,16 +270,16 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
                   href={selectedProvider.keyUrl}
                   target="_blank"
                   rel="noreferrer"
-                  title={`Get Free ${selectedProvider.name} API Key`}
+                  title={`Get ${selectedProvider.name} API Key`}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
                     padding: "8px 10px",
                     borderRadius: "8px",
-                    background: "rgba(129, 140, 248, 0.12)",
-                    border: "1px solid rgba(129, 140, 248, 0.25)",
-                    color: "#818cf8",
+                    background: "var(--ai-tint)",
+                    border: "1px solid var(--ai-border)",
+                    color: "var(--ai-accent)",
                     fontSize: "11px",
                     fontWeight: 700,
                     textDecoration: "none",
@@ -304,7 +288,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
                     transition: "all 0.12s ease",
                   }}
                 >
-                  <span>Get Free Key</span>
+                  <span>Get API key</span>
                   <ArrowTopRightOnSquareIcon style={{ width: "12px", height: "12px" }} />
                 </a>
               )}
@@ -414,7 +398,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
           {/* Connect Action Button */}
           <button
             onClick={handleConnect}
-            disabled={busy || (selectedProvider.requiresKey && !apiKey.trim() && !configured)}
+            disabled={busy || !apiKey.trim()}
             style={{
               display: "flex",
               alignItems: "center",
@@ -423,8 +407,8 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
               padding: "9px 12px",
               borderRadius: "8px",
               border: "none",
-              background: "#6366f1",
-              color: "#ffffff",
+              background: "#fbbf24",
+              color: "#29200a",
               fontSize: "12.5px",
               fontWeight: 700,
               cursor: busy ? "wait" : "pointer",
@@ -449,7 +433,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
             }}
           >
             <ShieldCheckIcon style={{ width: "12px", height: "12px", color: "#34d399" }} />
-            <span>Session only · Sent to Google</span>
+            <span>Session only · Sent to {selectedProvider.name}</span>
           </div>
         </div>
       )}
@@ -528,7 +512,7 @@ export function AISettingsCard({ onSuccess, compact = false, initialTab = "api" 
                 padding: "9px 14px",
                 borderRadius: "8px",
                 border: "none",
-                background: "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)",
+                background: "linear-gradient(135deg, #a855f7 0%, #fbbf24 100%)",
                 color: "#ffffff",
                 fontSize: "12px",
                 fontWeight: 700,
