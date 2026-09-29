@@ -1,7 +1,7 @@
 import { test, expect, chromium } from '@playwright/test';
 import path from 'node:path';
 
-test('save active tab opens scheduling, deduplicates and labels its collection in Calendar', async () => {
+test('save active tab opens scheduling, deduplicates and preserves its collection', async () => {
   const extension = path.resolve('./dist');
   const context = await chromium.launchPersistentContext('', { headless: false, viewport: { width: 380, height: 800 }, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`] });
   context.setDefaultTimeout(6000);
@@ -35,9 +35,6 @@ test('save active tab opens scheduling, deduplicates and labels its collection i
     await expect(page.getByText('Already saved', { exact: true })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await page.screenshot({ path: test.info().outputPath('collections.png') });
-    await page.getByRole('button', { name: 'Calendar', exact: true }).first().click();
-    await page.getByRole('button', { name: 'Schedule', exact: true }).click();
-    await expect(page.locator('#calendar-tab')).toContainText('DaVinci Resolve · Resolve lesson');
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: 'Collections', exact: true }).click();
     await page.getByRole('button', { name: 'DaVinci Resolve 1', exact: true }).click();

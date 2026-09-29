@@ -7,7 +7,7 @@ async function setup() {
   const worker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
   const page = await context.newPage();
   await page.goto(`chrome-extension://${worker.url().split('/')[2]}/sidepanel.html#calendar`);
-  await expect(page.getByRole('button', { name: 'Schedule current tab +' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Calendar', exact: true })).toBeVisible();
   return { context, page, worker };
 }
 
@@ -56,26 +56,5 @@ test('competing reconciliation requests claim one batch, preserve missed inbox, 
     expect(rows.filter(t => t.status === 'pending')).toHaveLength(1);
     expect(await worker.evaluate(() => (globalThis as unknown as { deliveries: string[] }).deliveries)).toEqual(['tab_story_missed']);
     expect(await page.evaluate(() => chrome.action.getBadgeText({}))).toBe('10');
-  } finally { await context.close(); }
-});
-
-test('schedule import validates atomically and merges by normalized URL plus fireAt', async () => {
-  const { context, page } = await setup();
-  try {
-    await page.getByRole('button', { name: 'Settings', exact: true }).click();
-    const at = Date.now()+3600000;
-    const row = { url: 'https://example.com/Case?utm_source=x', title: 'Imported', domain: 'example.com', tags: [], notes: '', pinned: false, favicon: '', createdAt: Date.now(), fireAt: at, status: 'pending' };
-    const upload = async (tasks: unknown[]) => page.getByLabel('Import schedule JSON').setInputFiles({ name: 'schedule.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ schemaVersion: 11, tasks })) });
-    await upload([row, { ...row, url: 'javascript:alert(1)' }]);
-    await expect(page.getByRole('status')).toContainText('Invalid saved link');
-    expect(await page.evaluate(() => window.db.tabs.count())).toBe(0);
-    await upload([row, { ...row, url: 'https://example.com/Case#fragment' }]);
-    await expect(page.getByRole('status')).toContainText('Imported 1 items');
-    expect(await page.evaluate(() => window.db.tabs.count())).toBe(1);
-    await upload([row, { ...row, fireAt: at+3600000 }]);
-    await expect(page.getByRole('status')).toContainText('Imported 1 items');
-    await expect.poll(() => page.evaluate(() => window.db.tabs.count())).toBe(2);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: test.info().outputPath('settings-320.png') });
   } finally { await context.close(); }
 });

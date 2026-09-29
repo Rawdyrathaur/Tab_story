@@ -49,13 +49,13 @@ test('stored language persists, every panel localizes and Arabic fits a narrow v
   } finally { await context.close(); }
 });
 
-test('calendar and TabMenu schedule, reschedule, complete and clear real alarms', async () => {
+test('TabMenu schedules, reschedules, completes and clears real alarms', async () => {
   const { context, page } = await launch();
   try {
     const id = await seed(page);
-    await page.getByRole('button', { name: 'Calendar', exact: true }).click();
+    await page.getByRole('button', { name: 'Tab Manager', exact: true }).click();
+    await page.getByTitle('More options', { exact: true }).first().click();
     await page.getByRole('button', { name: 'Schedule', exact: true }).click();
-    await page.locator('#calendar-tab').selectOption(String(id));
     await page.getByLabel('Date', { exact: true }).fill('2030-10-10');
     await page.getByLabel('Time', { exact: true }).fill('14:30');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -65,7 +65,6 @@ test('calendar and TabMenu schedule, reschedule, complete and clear real alarms'
     const first = await page.evaluate(async id => ({ tab: await window.db.tabs.get(id), alarm: await chrome.alarms.get('tab_story_reminder_' + id) }), id);
     expect(first.tab?.scheduledAt).toBe(first.alarm?.scheduledTime);
     expect(first.tab?.scheduledAt).toBeGreaterThan(Date.now());
-    await page.getByRole('button', { name: 'Tab Manager', exact: true }).click();
     await page.getByTitle('More options', { exact: true }).first().click();
     await page.getByRole('button', { name: 'Schedule', exact: true }).click();
     await page.getByLabel('Time', { exact: true }).fill('15:30');
