@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - dev
-      - "feature/**"
+      - 'feature/**'
   pull_request:
     branches:
       - main
@@ -32,45 +32,45 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
-          cache-dependency-path: tab-story/package-lock.json
+          cache-dependency-path: tab-revo/package-lock.json
 
       - name: Install extension dependencies
-        run: npm ci --prefix tab-story --ignore-scripts
+        run: npm ci --prefix tab-revo --ignore-scripts
 
       - name: Lint
-        run: npm run lint --prefix tab-story
+        run: npm run lint --prefix tab-revo
 
       - name: Type-check
-        run: npm run typecheck --prefix tab-story
+        run: npm run typecheck --prefix tab-revo
 
       - name: Run deterministic checks
-        run: npm run test:qa --prefix tab-story
+        run: npm run test:qa --prefix tab-revo
 
       - name: Build extension
-        run: npm run build --prefix tab-story
+        run: npm run build --prefix tab-revo
         env:
           NODE_ENV: production
 
       - name: Install test browser
-        working-directory: tab-story
+        working-directory: tab-revo
         run: npx playwright install --with-deps chromium
 
       - name: Unit tests
-        run: npm run test:unit --prefix tab-story
+        run: npm run test:unit --prefix tab-revo
 
       - name: Browser and upgrade tests
-        run: xvfb-run -a npm run test:integration --prefix tab-story
+        run: xvfb-run -a npm run test:integration --prefix tab-revo
 
       - name: Package extension
-        working-directory: tab-story/dist
-        run: zip -r "../../tab-story-${GITHUB_SHA}.zip" .
+        working-directory: tab-revo/dist
+        run: zip -r "../../tab-revo-${GITHUB_SHA}.zip" .
 
       - name: Upload extension package
         uses: actions/upload-artifact@v4
         with:
-          name: tab-story-${{ github.sha }}
-          path: tab-story-${{ github.sha }}.zip
+          name: tab-revo-${{ github.sha }}
+          path: tab-revo-${{ github.sha }}.zip
           if-no-files-found: error
           retention-days: 30

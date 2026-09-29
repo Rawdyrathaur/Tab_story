@@ -161,7 +161,7 @@ check_env_files() {
 check_code_comments() {
   print_message "$BLUE" "💬 Checking code comments for credentials..."
   
-  local suspicious_comments=$(grep -r --exclude='detect-secrets.sh' "TODO.*password\|FIXME.*key\|XXX.*secret" "$ROOT_DIR/tab-story/src" "$ROOT_DIR/scripts" 2>/dev/null || true)
+  local suspicious_comments=$(grep -r --exclude='detect-secrets.sh' "TODO.*password\|FIXME.*key\|XXX.*secret" "$ROOT_DIR/tab-revo/src" "$ROOT_DIR/scripts" 2>/dev/null || true)
   
   if [ -n "$suspicious_comments" ]; then
     print_message "$YELLOW" "⚠️  Found suspicious comments:"

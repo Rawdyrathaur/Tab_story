@@ -74,4 +74,4 @@ git-history-backup/
 tabstory_v1_extracted/
 
 # Backend is maintained and deployed from its separate repository.
-tab-story-server/
+tab-revo-server/

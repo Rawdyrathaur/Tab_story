@@ -2,7 +2,7 @@
 
 Updated September 13, 2026
 
-Tab Story stores saved tab URLs, titles, folders, tags, notes, schedules, saved-item history, and preferences in your local Chrome profile. These records may contain personal information you choose to save. Tab Story has no application backend, advertising, analytics, or data-selling service.
+Tab Revo stores saved tab URLs, titles, folders, tags, notes, schedules, saved-item history, and preferences in your local Chrome profile. These records may contain personal information you choose to save. Tab Revo has no application backend, advertising, analytics, or data-selling service.
 
 ## Optional data sharing
 
@@ -25,8 +25,8 @@ Native reminders may show saved titles and domains on your desktop or lock scree
 
 Use the extension to delete saved records or clear extension data through Chrome. Uninstalling removes extension-local storage but not copies already uploaded to Google. Manage Calendar events in Google Calendar and app-data backups through Google Drive's connected-app settings. Disable daily backup or disconnect Google in Settings to stop future backups. Revoke Google access through your Google account; revoke website access through Chrome extension settings. Local data is retained until removed, subject to browser storage limits. Third-party retention follows the relevant Google service policies.
 
-Tab Story uses Google API information only to provide its user-facing features, in accordance with the Chrome Web Store User Data Policy and Google API Services User Data Policy, including their Limited Use requirements. Data is not sold, used for advertising, or sent to Tab Story servers.
+Tab Revo uses Google API information only to provide its user-facing features, in accordance with the Chrome Web Store User Data Policy and Google API Services User Data Policy, including their Limited Use requirements. Data is not sold, used for advertising, or sent to Tab Revo servers.
 
-Tab Story is not directed to children under 13. Policy changes will be reflected here with an updated date.
+Tab Revo is not directed to children under 13. Policy changes will be reflected here with an updated date.
 
 Contact: [Manish Rathaur / GitHub Issues](https://github.com/Rawdyrathaur/Tab_story/issues). Do not include API keys or private page content in public reports.

@@ -1,8 +1,9 @@
 # 🔐 Enterprise Security Setup Guide
 
-This document explains the production-grade security infrastructure for Tab Story Chrome Extension.
+This document explains the production-grade security infrastructure for Tab Revo Chrome Extension.
 
 **Table of Contents**
+
 - [Overview](#overview)
 - [Folder Structure](#folder-structure)
 - [Environment Configuration](#environment-configuration)
@@ -58,6 +59,7 @@ Tab_story/
 ## Environment Configuration
 
 ### What SHOULD be committed:
+
 - ✅ `.env.example` - Template with placeholders
 - ✅ `.env.development` - Dev-only configuration
 - ✅ `.env.staging` - Staging configuration
@@ -65,6 +67,7 @@ Tab_story/
 - ✅ `config/manifest.*.json` - Manifest files
 
 ### What SHOULD NEVER be committed:
+
 - ❌ `.env` - Local secrets
 - ❌ `.env.local` - Personal configuration
 - ❌ `.env.production` - Production secrets
@@ -102,6 +105,7 @@ Runs BEFORE a commit is created:
 ```
 
 **What it blocks:**
+
 - `.env` files
 - Password assignments
 - API keys
@@ -120,6 +124,7 @@ Runs BEFORE pushing to remote:
 ```
 
 **What it prevents:**
+
 - Pushing commits with hardcoded secrets
 - Pushing large binaries
 - Accidentally pushing to main
@@ -172,6 +177,7 @@ Security scanning runs on every push:
 ### Adding a Secret
 
 **Development:**
+
 ```bash
 # Create local config (git-ignored)
 cp .env.example .env.local
@@ -184,6 +190,7 @@ npm run env:validate
 ```
 
 **Production (CI/CD):**
+
 ```bash
 # Add to GitHub Secrets
 Settings > Secrets and Variables > Actions
@@ -195,12 +202,14 @@ Settings > Secrets and Variables > Actions
 ### Rotating a Compromised Key
 
 **Step 1: Immediate Action**
+
 ```bash
 # Revoke the key in your provider (AWS, GitHub, etc.)
 # Update GitHub Secrets if applicable
 ```
 
 **Step 2: Clean Local History**
+
 ```bash
 # DRY RUN (no changes)
 npm run history:clean:dry -- "old_api_key_pattern"
@@ -210,6 +219,7 @@ npm run history:clean -- "old_api_key_pattern"
 ```
 
 **Step 3: Notify Team**
+
 ```bash
 # Everyone must re-clone after history rewrite
 git clone <repo>
@@ -220,6 +230,7 @@ git fetch (will get old history)
 ```
 
 **Step 4: Create New Key**
+
 ```bash
 # Update GitHub Secrets
 # Update .env.example (if safe to do so)
@@ -304,11 +315,13 @@ Before releasing a new version:
 ### Content Security Policy
 
 Development (relaxed for debugging):
+
 ```json
 "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; ..."
 ```
 
 Production (strict):
+
 ```json
 "extension_pages": "script-src 'self'; object-src 'self'; ..."
 ```
@@ -344,6 +357,7 @@ Only request what you need:
 **Issue**: Commit blocked by security check
 
 **Solution**:
+
 ```bash
 # Check what was detected
 git diff --cached
@@ -363,6 +377,7 @@ git commit -m "message"
 **Issue**: Push blocked by security check
 
 **Solution**:
+
 ```bash
 # See all commits to be pushed
 git log origin/main..HEAD
@@ -382,6 +397,7 @@ git push
 **Issue**: Environment validation warning
 
 **Solution**:
+
 ```bash
 # Copy from example
 cp .env.example .env.local
@@ -398,6 +414,7 @@ npm run env:validate
 **Issue**: After running `clean-history.sh --execute`
 
 **Solution for Team**:
+
 ```bash
 # Don't use git pull or git fetch!
 # Full fresh clone required
@@ -448,6 +465,7 @@ git pull
 **DO NOT** open a public issue!
 
 Instead, use GitHub's private security advisory:
+
 - https://github.com/Rawdyrathaur/Tab_story/security/advisories/new
 
 **Or email**: [security contact from SECURITY.md]

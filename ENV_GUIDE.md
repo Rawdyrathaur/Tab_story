@@ -1,6 +1,6 @@
 # 🔑 Environment Variables Guide
 
-Complete guide for managing environment variables in Tab Story.
+Complete guide for managing environment variables in Tab Revo.
 
 ## Quick Start
 
@@ -89,6 +89,7 @@ VITE_PROD_SENTRY_DSN=
 ### 🔑 API Keys & Secrets
 
 **❌ NEVER hardcode these:**
+
 ```bash
 # DON'T DO THIS:
 VITE_API_KEY=sk_live_xxxxxxxxxxxxx      # Wrong! Will leak to browser
@@ -96,6 +97,7 @@ API_SECRET=my_secret_key                 # Wrong! Visible in git
 ```
 
 **✅ Store in GitHub Secrets instead:**
+
 ```yaml
 # .github/workflows/build-deploy.yml
 env:
@@ -104,6 +106,7 @@ env:
 ```
 
 **✅ OR use runtime environment variables:**
+
 ```bash
 # In CI/CD environment
 export API_KEY=sk_live_xxxxxxxxxxxxx
@@ -203,7 +206,7 @@ NODE_ENV=development npm run dev
 
 ## Accessing Variables in Code
 
-### ✅ Correct: Use VITE_ prefix (frontend)
+### ✅ Correct: Use VITE\_ prefix (frontend)
 
 ```javascript
 // Only VITE_ prefixed variables reach the browser
@@ -225,7 +228,7 @@ const apiSecret = process.env.API_SECRET; // ❌ Never expose this!
 ```javascript
 // This sends ALL variables to the browser - SECURITY RISK!
 const config = {
-  ...process.env,  // DON'T DO THIS!
+  ...process.env, // DON'T DO THIS!
 };
 ```
 
@@ -256,10 +259,7 @@ const config = JSON.parse(import.meta.env.VITE_CONFIG || '{}');
 ```javascript
 // src/config/validateEnv.js
 export function validateEnvironment() {
-  const required = [
-    'VITE_EXTENSION_NAME',
-    'NODE_ENV',
-  ];
+  const required = ['VITE_EXTENSION_NAME', 'NODE_ENV'];
 
   for (const key of required) {
     if (!import.meta.env[key]) {
@@ -329,6 +329,7 @@ npm run build
 **Problem**: Variable not found
 
 **Solution**:
+
 ```bash
 # Check if .env.local exists
 ls -la .env.local
@@ -348,6 +349,7 @@ echo "VITE_API_BASE_URL=https://api.example.com" >> .env.local
 **Problem**: Variable name suggests it contains secrets
 
 **Solution**:
+
 ```bash
 # Don't store in .env files
 # Use GitHub Secrets instead
@@ -365,6 +367,7 @@ mv .env.local.tmp .env.local
 **Problem**: Using in Node.js environment
 
 **Solution**:
+
 ```javascript
 // This only works in browser/Vite build
 // In Node.js files, use process.env instead
@@ -381,6 +384,7 @@ const url = process.env.VITE_API_URL;
 **Problem**: Works in dev, breaks in production
 
 **Solution**:
+
 ```bash
 # Check both environments
 NODE_ENV=development npm run env:validate
@@ -424,6 +428,7 @@ git commit -m "Add environment configuration template"
 See `.env.example` for complete list with descriptions.
 
 Quick reference:
+
 - `NODE_ENV` - Environment type
 - `VITE_*` - Frontend variables (safe)
 - `VITE_EXTENSION_*` - Extension metadata
@@ -441,7 +446,7 @@ Quick reference:
 - [ ] Created `.env.local` from `.env.example`
 - [ ] Never committed `.env.local`
 - [ ] Never committed API keys or tokens
-- [ ] Using VITE_ prefix for frontend variables
+- [ ] Using VITE\_ prefix for frontend variables
 - [ ] Validated with `npm run env:validate`
 - [ ] GitHub Secrets configured for CI/CD
 - [ ] `.gitignore` includes `*.env` and `.env.local`

@@ -1,12 +1,12 @@
-TAB STORY — PREMIUM MARKETING WEBSITE BUILD BRIEF
+TAB REVO — PREMIUM MARKETING WEBSITE BUILD BRIEF
 
 ROLE
-You are a senior product designer, UX writer, brand designer, and frontend engineer. Design and build a polished, conversion-focused marketing website for Tab Story. The result must feel like a real premium SaaS product—not a generic template, browser-extension directory page, or AI-generated landing page.
+You are a senior product designer, UX writer, brand designer, and frontend engineer. Design and build a polished, conversion-focused marketing website for Tab Revo. The result must feel like a real premium SaaS product—not a generic template, browser-extension directory page, or AI-generated landing page.
 
 PRODUCT SUMMARY
-Tab Story is a modern tab-saving, organization, scheduling, reminder, and reading product available in two connected experiences:
+Tab Revo is a modern tab-saving, organization, scheduling, reminder, and reading product available in two connected experiences:
 
-1. Tab Story Browser Extension
+1. Tab Revo Browser Extension
    - Saves the current tab or multiple tabs.
    - Organizes saved pages into collections.
    - Supports notes, tags, pinning, history, and review workflows.
@@ -15,13 +15,13 @@ Tab Story is a modern tab-saving, organization, scheduling, reminder, and readin
    - Can preserve readable article content for offline reading.
    - Works directly inside the browser through a focused side panel.
 
-2. Tab Story PWA
+2. Tab Revo PWA
    - Provides a modern mobile and desktop web experience.
    - Lets users access, organize, schedule, review, and read saved content.
    - Shares the same account and synchronized data with the extension.
    - Provides an installable app-like experience without requiring an app store.
 
-The extension and PWA should be presented as two parts of one connected product. The core value proposition is not merely “save tabs.” Tab Story helps people turn temporary browser tabs into an organized, searchable, scheduled personal knowledge and reading system.
+The extension and PWA should be presented as two parts of one connected product. The core value proposition is not merely “save tabs.” Tab Revo helps people turn temporary browser tabs into an organized, searchable, scheduled personal knowledge and reading system.
 
 PRIMARY WEBSITE GOALS
 
@@ -44,7 +44,7 @@ TARGET USERS
 
 BRAND POSITIONING
 
-Position Tab Story as calm, intelligent, dependable, and premium. It should feel like a blend of a refined productivity tool, a reading app, and a personal knowledge companion.
+Position Tab Revo as calm, intelligent, dependable, and premium. It should feel like a blend of a refined productivity tool, a reading app, and a personal knowledge companion.
 
 Suggested positioning statement:
 “Turn open tabs into organized plans, reminders, and knowledge.”
@@ -52,7 +52,7 @@ Suggested positioning statement:
 Suggested supporting statement:
 “Save from your browser, organize without friction, and return to every important page at the right moment—on any device.”
 
-Do not describe Tab Story as another bookmark manager. Emphasize that bookmarks are passive, while Tab Story makes saved content actionable through scheduling, reminders, review, offline access, and AI-assisted understanding.
+Do not describe Tab Revo as another bookmark manager. Emphasize that bookmarks are passive, while Tab Revo makes saved content actionable through scheduling, reminders, review, offline access, and AI-assisted understanding.
 
 VOICE AND WRITING STYLE
 
@@ -66,7 +66,7 @@ VOICE AND WRITING STYLE
 
 VISUAL DIRECTION
 
-Create a sophisticated dark-first interface inspired by the Tab Story product UI, while remaining original and suitable for a public marketing website.
+Create a sophisticated dark-first interface inspired by the Tab Revo product UI, while remaining original and suitable for a public marketing website.
 
 Recommended visual language:
 
@@ -109,10 +109,10 @@ GLOBAL HEADER
 
 Header content:
 
-- Tab Story logo and wordmark.
+- Tab Revo logo and wordmark.
 - Navigation: Features, Extension, Web App, Pricing.
 - Secondary action: Sign in.
-- Primary action: Add to Chrome or Get Tab Story.
+- Primary action: Add to Chrome or Get Tab Revo.
 - On mobile, use an accessible menu with a clear primary CTA.
 - The header may become slightly translucent and compact after scrolling.
 
@@ -133,7 +133,7 @@ Recommended main headline:
 “Save it now. Return when it matters.”
 
 Supporting copy:
-“Tab Story turns browser tabs into organized collections, timely reminders, offline reading, and ideas you can discuss with AI—all synchronized across the extension and web app.”
+“Tab Revo turns browser tabs into organized collections, timely reminders, offline reading, and ideas you can discuss with AI—all synchronized across the extension and web app.”
 
 Primary CTA:
 “Add to Chrome — It’s free”
@@ -145,7 +145,7 @@ Supporting microcopy:
 “Start free. No credit card required.”
 
 Hero visual:
-Create a high-fidelity product composition using real-looking Tab Story UI. Show two or three saved-tab cards with favicon, title, URL, note, scheduled time, status, and actions. Include one normal saved card, one scheduled card, and one missed reminder state. Place a mobile PWA view slightly behind or beside the extension panel to communicate synchronization. Avoid rendering fake browser chrome unless it improves comprehension.
+Create a high-fidelity product composition using real-looking Tab Revo UI. Show two or three saved-tab cards with favicon, title, URL, note, scheduled time, status, and actions. Include one normal saved card, one scheduled card, and one missed reminder state. Place a mobile PWA view slightly behind or beside the extension panel to communicate synchronization. Avoid rendering fake browser chrome unless it improves comprehension.
 
 SECTION 2 — TRUST / CORE PROMISES
 
@@ -164,12 +164,12 @@ Headline:
 “Your browser should not be your to-do list.”
 
 Copy:
-“Important pages disappear inside crowded windows, forgotten bookmark folders, and links sent to yourself. Tab Story gives every saved page a place, a purpose, and—when needed—a time to come back.”
+“Important pages disappear inside crowded windows, forgotten bookmark folders, and links sent to yourself. Tab Revo gives every saved page a place, a purpose, and—when needed—a time to come back.”
 
 Show a visual transition:
 
 - Before: crowded browser tabs and scattered saved links.
-- After: clean Tab Story collections with scheduled items and clear statuses.
+- After: clean Tab Revo collections with scheduled items and clear statuses.
 
 SECTION 4 — CORE FEATURE STORY
 
@@ -179,7 +179,7 @@ Feature A: Save without breaking focus
 Copy: “Capture the current page or an entire window from the browser side panel. Add context now or organize it later.”
 
 Feature B: Schedule the page, not just the task
-Copy: “Choose when a saved page should return. Tab Story keeps the link, context, and reminder together.”
+Copy: “Choose when a saved page should return. Tab Revo keeps the link, context, and reminder together.”
 
 Feature C: Collections that stay understandable
 Copy: “Group research, reading, projects, and ideas into clear collections. Add notes and tags so future-you knows why each page mattered.”
@@ -270,7 +270,7 @@ Include a visible link to AI and privacy details.
 SECTION 9 — PRICING PREVIEW
 
 Headline:
-“Start small. Upgrade when Tab Story becomes part of your workflow.”
+“Start small. Upgrade when Tab Revo becomes part of your workflow.”
 
 Present two clear tiers.
 
@@ -311,7 +311,7 @@ Headline:
 
 Communicate:
 
-- Data synchronizes through the user’s Tab Story account.
+- Data synchronizes through the user’s Tab Revo account.
 - Device sessions and synchronization are handled independently per device.
 - Deleted items remain recoverable only according to the actual retention policy.
 - Notification access is requested in context, not aggressively at first launch.
@@ -324,12 +324,12 @@ SECTION 11 — FAQ
 
 Include at least these questions:
 
-1. Is Tab Story just a bookmark manager?
+1. Is Tab Revo just a bookmark manager?
 2. How do the extension and web app work together?
 3. Can free users save and synchronize tabs?
 4. Does deleting a saved tab free a slot?
-5. Can I use Tab Story offline?
-6. When does Tab Story request notification permission?
+5. Can I use Tab Revo offline?
+6. When does Tab Revo request notification permission?
 7. What happens if I edit the same saved item on two devices?
 8. Can I export or delete my data?
 9. Which browsers are supported?
@@ -347,7 +347,7 @@ Supporting copy:
 
 Buttons:
 
-- “Add Tab Story to Chrome”
+- “Add Tab Revo to Chrome”
 - “Open the Web App”
 
 FOOTER
@@ -520,7 +520,7 @@ CONTENT AND ASSET REQUIREMENTS FROM THE OWNER
 
 Before production launch, request these real assets and decisions:
 
-1. Final Tab Story logo in SVG format.
+1. Final Tab Revo logo in SVG format.
 2. Extension store URL.
 3. Production PWA URL.
 4. Production API/server URL.
@@ -562,7 +562,7 @@ EXPECTED DELIVERABLES
 2. All required routes and navigation.
 3. Reusable design system and product UI components.
 4. Central content/configuration file for URLs, plan features, pricing, and legal identity.
-5. Original responsive product mockups based on Tab Story’s actual visual language.
+5. Original responsive product mockups based on Tab Revo’s actual visual language.
 6. Accessible interaction states.
 7. SEO metadata and social preview configuration.
 8. A README containing setup, environment variables, build, and deployment instructions.
@@ -573,7 +573,7 @@ ACCEPTANCE CRITERIA
 
 The work is complete only when:
 
-- A new visitor understands what Tab Story does within five seconds.
+- A new visitor understands what Tab Revo does within five seconds.
 - The extension and PWA are clearly presented as one synchronized product.
 - The primary extension and PWA CTAs are visible and functional.
 - Free versus Premium behavior is accurately explained.
@@ -587,4 +587,4 @@ The work is complete only when:
 
 FINAL INSTRUCTION TO THE BUILDING AGENT
 
-Begin by inspecting the supplied Tab Story extension and PWA repositories so the marketing site reflects their real visual language and implemented features. Reuse concepts and design tokens where appropriate, but do not copy application screens blindly into a marketing layout. Build the website around clear product storytelling and real conversion paths. If a business fact is unknown, put it in configuration and label it for owner confirmation instead of inventing it.
+Begin by inspecting the supplied Tab Revo extension and PWA repositories so the marketing site reflects their real visual language and implemented features. Reuse concepts and design tokens where appropriate, but do not copy application screens blindly into a marketing layout. Build the website around clear product storytelling and real conversion paths. If a business fact is unknown, put it in configuration and label it for owner confirmation instead of inventing it.

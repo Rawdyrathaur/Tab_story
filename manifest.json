@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Tab Story",
+  "name": "Tab story",
   "version": "1.0.1",
   "description": "Organize browser tabs by intent with smart clustering, timeline history, and auto-backup",
   "author": "Manish Rathaur",
@@ -16,7 +16,7 @@
     "identity"
   ],
   "action": {
-    "default_title": "Open Tab Story"
+    "default_title": "Open Tab Revo"
   },
   "side_panel": {
     "default_path": "sidepanel/dist/index.html"

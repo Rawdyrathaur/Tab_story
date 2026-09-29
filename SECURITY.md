@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-If you find a security vulnerability in Tab Story, please do **not** open a public issue.
+If you find a security vulnerability in Tab Revo, please do **not** open a public issue.
 
 Instead, report it directly by emailing or opening a private disclosure via GitHub:
 [github.com/Rawdyrathaur/Tab_story/security/advisories/new](https://github.com/Rawdyrathaur/Tab_story/security/advisories/new)
