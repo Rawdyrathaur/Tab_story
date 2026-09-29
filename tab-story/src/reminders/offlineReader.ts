@@ -24,8 +24,7 @@ export async function saveOfflineArticle(tabId: number) {
   if (blocked(url.hostname) || !/^https?:$/.test(url.protocol)) { await db.tabs.update(tabId, { articleStatus: 'skipped' }); return; }
   await db.tabs.update(tabId, { articleStatus: 'saving', articleError: null });
   try {
-    const target = await aiRequest('target', { url: tab.url });
-    const sourceResult = await aiRequest('sources', { tabId: target.tabId, url: tab.url });
+    const sourceResult = await aiRequest('read', { id: crypto.randomUUID(), url: tab.url });
     const source = parseArticle(sourceResult.snapshot);
     if (source.text.length < 400) { await db.tabs.update(tabId, { articleStatus: 'skipped' }); return; }
     const document = new DOMParser().parseFromString(sourceResult.snapshot.html, 'text/html');

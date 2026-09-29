@@ -28,6 +28,9 @@ export interface SavedTab {
   openedAt?: number;
   archivedAt?: number;
   updatedAt?: number;
+  syncVersion?: string;
+  conflictOf?: string;
+  conflictFrom?: string;
   deliveryClaimAt?: number;
   archivePrevious?: { status?: TaskStatus; notifiedScheduledAt?: number; completedAt?: number };
   url: string;
@@ -53,13 +56,15 @@ export interface Collection {
   name: string;
   category: string;
   tabIds: number[];
+  tabUuids?: string[];
   createdAt: number;
   updatedAt?: number;
   deletedAt?: number;
+  syncVersion?: string;
 }
 
 export type SyncRecordType = 'collection' | 'resource' | 'note' | 'reminder';
-export interface SyncOutboxEntry { id: string; type: SyncRecordType; content: Record<string, unknown>; collectionId?: string | null; isDeleted: boolean; editedAt: string; editedBy: string; }
+export interface SyncOutboxEntry { id: string; mutationId?: string; baseVersion?: string; type: SyncRecordType; content: Record<string, unknown>; collectionId?: string | null; isDeleted: boolean; editedAt: string; editedBy: string; accountId?: string; failed?: string; }
 
 export interface ReminderSummary {
   id: 'missed';

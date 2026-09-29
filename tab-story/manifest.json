@@ -26,8 +26,8 @@
     "https://www.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://api.groq.com/*",
-    "https://openrouter.ai/*",
-    "https://api.mistral.ai/*"
+    "https://api.cerebras.ai/*",
+    "https://en.wikipedia.org/*"
   ],
   "optional_host_permissions": [
     "https://*/*",

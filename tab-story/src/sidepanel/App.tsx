@@ -72,8 +72,8 @@ function formatActionError(cause: unknown): string {
 export function App() {
   useEffect(() => {
     const run=()=>void syncNow().catch(()=>{});
-    run(); window.addEventListener('online',run); const timer=window.setInterval(run,60_000);
-    return()=>{window.removeEventListener('online',run);window.clearInterval(timer);};
+    run(); window.addEventListener('online',run); window.addEventListener('focus',run); const timer=window.setInterval(run,60_000);
+    return()=>{window.removeEventListener('online',run);window.removeEventListener('focus',run);window.clearInterval(timer);};
   },[]);
   const { theme, toggleTheme } = useTheme();
   const { t } = useI18n();

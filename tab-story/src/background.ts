@@ -7,6 +7,17 @@ import { REMINDER_MESSAGE } from './reminders/service';
 import { reminderError } from './reminders/errors';
 import { handleAI } from './ai/background';
 import { BACKUP_ALARM, ensureBackupAlarm, handleBackup } from './backup';
+import { syncNow } from './sync/client';
+
+const SYNC_ALARM = 'tab-story:sync';
+const resumeSync = () => {
+  void chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 1 });
+  void syncNow().catch(() => {});
+};
+chrome.runtime.onStartup.addListener(resumeSync);
+chrome.runtime.onInstalled.addListener(resumeSync);
+chrome.alarms.onAlarm.addListener(alarm => { if (alarm.name === SYNC_ALARM) void syncNow().catch(() => {}); });
+resumeSync();
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
   if (request?.type !== 'tab-story:backup' || sender.id !== chrome.runtime.id || sender.tab) return;
@@ -43,6 +54,35 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     })
   );
   return true;
+});
+
+chrome.runtime.onConnect.addListener(port => {
+  if (port.name !== 'tab-story:ai-stream') return;
+  if (port.sender?.id !== chrome.runtime.id || !port.sender.url?.startsWith(chrome.runtime.getURL(''))) { port.disconnect(); return; }
+  const controller = new AbortController();
+  let started = false;
+  let connected = true;
+  const send = (message: Record<string, unknown>) => {
+    if (!connected) return;
+    try { port.postMessage(message); } catch { controller.abort(); connected = false; }
+  };
+  port.onDisconnect.addListener(() => { connected = false; controller.abort(); });
+  port.onMessage.addListener(request => {
+    if (started || request?.operation !== 'generate') return;
+    started = true;
+    // Keep the worker alive while a provider prepares its first token.
+    const keepAlive = setInterval(() => send({ type: 'pending' }), 20000);
+    void handleAI(request, text => send({ type: 'delta', text }), controller.signal, progress => send({ type: 'progress', ...progress })).then(
+      result => send({ type: 'result', result }),
+      error => send({
+        type: 'error',
+        code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+        error: error?.name === 'TimeoutError' ? 'The provider took too long. Please retry.'
+          : error?.name === 'AbortError' ? 'Request cancelled.'
+          : error instanceof Error ? error.message : 'AI request failed.',
+      }),
+    ).finally(() => { clearInterval(keepAlive); });
+  });
 });
 
 const runRecovery = () => { void serialized(recover).catch(console.error); };

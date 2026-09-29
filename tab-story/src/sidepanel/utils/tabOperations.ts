@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { getDomain, getFavicon, isInternalUrl } from './url';
 import { requestReminderReconciliation } from '../../reminders/service';
-import { updateTab, writeTab } from '../../sync/client';
+import { getSyncSettings, updateTabInTransaction, writeTab, writeTabInTransaction } from '../../sync/client';
 
 export async function saveTab(
   tabUrl: string,
@@ -13,6 +13,7 @@ export async function saveTab(
 
   const domain = getDomain(tabUrl);
   const favicon = getFavicon(tabFaviconUrl, domain);
+  const { deviceId } = await getSyncSettings();
 
   await db.transaction('rw', db.tabs, db.folders, db.syncOutbox, async () => {
     let folder = await db.folders.where('domain').equals(domain).first();
@@ -28,10 +29,10 @@ export async function saveTab(
 
     const existing = await db.tabs.where('url').equals(tabUrl).first();
     if (existing) {
-      if (existing.deletedAt) await updateTab(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
+      if (existing.deletedAt) await updateTabInTransaction(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined }, deviceId);
       return;
     }
-    await writeTab({
+    await writeTabInTransaction({
       url: tabUrl,
       title: tabTitle,
       favicon,
@@ -41,7 +42,7 @@ export async function saveTab(
       createdAt: Date.now(),
       notes: '',
       pinned: false,
-    });
+    }, deviceId);
   });
 }
 
@@ -53,6 +54,7 @@ export async function saveCurrentTab(): Promise<void> {
 
 export async function saveAllTabs(): Promise<void> {
   const tabs = await chrome.tabs.query({ currentWindow: true });
+  const { deviceId } = await getSyncSettings();
 
   await db.transaction('rw', db.tabs, db.folders, db.syncOutbox, async () => {
     for (const tab of tabs) {
@@ -75,10 +77,10 @@ export async function saveAllTabs(): Promise<void> {
 
       const existing = await db.tabs.where('url').equals(tab.url).first();
       if (existing) {
-        if (existing.deletedAt) await updateTab(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined });
+        if (existing.deletedAt) await updateTabInTransaction(existing.id!, { deletedAt: undefined, scheduledAt: undefined, notifiedScheduledAt: undefined }, deviceId);
         continue;
       }
-      await writeTab({
+      await writeTabInTransaction({
         url: tab.url,
         title: tab.title,
         favicon,
@@ -88,7 +90,7 @@ export async function saveAllTabs(): Promise<void> {
         createdAt: Date.now(),
         notes: '',
         pinned: false,
-      });
+      }, deviceId);
     }
   });
 }

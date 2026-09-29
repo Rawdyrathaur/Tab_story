@@ -3,14 +3,14 @@ import newCollectionIcon from '../assets/new-collection.png?inline';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PencilSquareIcon, TrashIcon, RectangleStackIcon, PlusIcon, EllipsisHorizontalIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { db, type SavedTab } from '../db';
-import { addToCollection, createCollection } from '../collections';
+import { addToCollection, createCollection, deleteCollection, renameCollection, removeFromCollection } from '../collections';
 import { TabRowList } from './TabList';
 import { TabMenu } from './TabMenu';
 import { useI18n } from '../../i18n/useI18n';
 
 export function CollectionsPanel({ onDiscussAI }: { onDiscussAI: (tab: SavedTab) => void }) {
   const { t } = useI18n();
-  const collections = useLiveQuery(() => db.collections.toArray());
+  const collections = useLiveQuery(() => db.collections.filter(collection => !collection.deletedAt).toArray());
   const tabs = useLiveQuery(() => db.tabs.toArray());
   const [active, setActive] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
@@ -51,11 +51,11 @@ export function CollectionsPanel({ onDiscussAI }: { onDiscussAI: (tab: SavedTab)
           : <button className="collection-add" onClick={() => { setName(''); setEditing(true); }}><img src={newCollectionIcon} loading="eager" alt="" width={84} height={84} style={{ objectFit: 'contain', flexShrink: 0 }} /><span>New collection</span></button>}
       </div>
       {menu && collection && <div className="action-row collection-actions"><button onClick={() => { setName(collection.name); setEditing(true); setMenu(false); }}><PencilSquareIcon aria-hidden="true" />Edit name</button><button disabled={busy} onClick={() => {
-        if (window.confirm('Delete this collection? Saved tabs and reminders will remain.')) void run(async () => { await db.collections.delete(collection.id!); reset(); });
+        if (window.confirm('Delete this collection? Saved tabs and reminders will remain.')) void run(async () => { await deleteCollection(collection.id!); reset(); });
       }}><TrashIcon aria-hidden="true" />Delete collection</button></div>}
       {editing && <form className="collection-name" onSubmit={event => { event.preventDefault(); void run(async () => {
         if (!name.trim()) return;
-        if (collection) await db.collections.update(collection.id!, { name: name.trim() });
+        if (collection) await renameCollection(collection.id!, name);
         else { setActive(await createCollection(name, '')); setVisibleCount(40); }
         setEditing(false);
       }); }}><input aria-label="Collection name" autoFocus required maxLength={100} value={name} onChange={event => setName(event.target.value)} placeholder="Collection name" /><button disabled={busy} type="submit">Save</button><button type="button" onClick={() => setEditing(false)}>Cancel</button></form>}
@@ -70,7 +70,7 @@ export function CollectionsPanel({ onDiscussAI }: { onDiscussAI: (tab: SavedTab)
       </>}
     </>}
     {menuTab && collection && <TabMenu initialView={menuView} tab={menuTab} onClose={() => setMenuTab(null)} onDiscussAI={onDiscussAI} firstScheduleSetup onRemoveFromCollection={async () => {
-      await db.transaction('rw', db.collections, async () => { const latest = await db.collections.get(collection.id!); if (latest) await db.collections.update(collection.id!, { tabIds: latest.tabIds.filter(id => id !== menuTab.id) }); });
+      await removeFromCollection(collection.id!, menuTab.id!);
     }} />}
   </section>;
 }
