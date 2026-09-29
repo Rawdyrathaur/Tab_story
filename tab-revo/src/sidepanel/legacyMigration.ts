@@ -1,12 +1,11 @@
 import type Dexie from 'dexie';
-type Table<T, K = any, I = T> = Dexie.Table<T, K, I>;
 import type { Folder, SavedTab } from './db';
 
 export const LEGACY_MIGRATION = 'chrome-storage-v1';
 type MigrationDB = Dexie & {
-  tabs: Table<SavedTab>;
-  folders: Table<Folder>;
-  migrationState: Table<{ id: string }, string>;
+  tabs: Dexie.Table<SavedTab>;
+  folders: Dexie.Table<Folder>;
+  migrationState: Dexie.Table<{ id: string }, string>;
 };
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};

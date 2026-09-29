@@ -1,5 +1,4 @@
 import Dexie from 'dexie';
-type Table<T, K = any, I = T> = Dexie.Table<T, K, I>;
 import { migrateTask, type TaskStatus, type Recurrence } from '../reminders/model';
 import { migrateLegacyStorage } from './legacyMigration';
 
@@ -143,20 +142,19 @@ export function generateAutoNote(names: string[]): string {
   return names.length > 0 ? `Topics: ${names.join(', ')}` : '';
 }
 
-export interface TabRevoDB extends Dexie {}
 export class TabRevoDB extends Dexie {
-  tabs!: Table<SavedTab>;
-  meta!: Table<{ key: string; value: unknown }, string>;
-  collections!: Table<Collection>;
-  folders!: Table<Folder>;
-  stickyNotes!: Table<StickyNote>;
-  studyFolders!: Table<StudyFolder>;
-  studyTopics!: Table<StudyTopic>;
-  reminderState!: Table<ReminderSummary, string>;
-  migrationState!: Table<{ id: string }, string>;
-  articles!: Table<OfflineArticle, string>;
-  tombstones!: Table<{ uuid: string; deletedAt: number }, string>;
-  syncOutbox!: Table<SyncOutboxEntry, string>;
+  tabs!: Dexie.Table<SavedTab>;
+  meta!: Dexie.Table<{ key: string; value: unknown }, string>;
+  collections!: Dexie.Table<Collection>;
+  folders!: Dexie.Table<Folder>;
+  stickyNotes!: Dexie.Table<StickyNote>;
+  studyFolders!: Dexie.Table<StudyFolder>;
+  studyTopics!: Dexie.Table<StudyTopic>;
+  reminderState!: Dexie.Table<ReminderSummary, string>;
+  migrationState!: Dexie.Table<{ id: string }, string>;
+  articles!: Dexie.Table<OfflineArticle, string>;
+  tombstones!: Dexie.Table<{ uuid: string; deletedAt: number }, string>;
+  syncOutbox!: Dexie.Table<SyncOutboxEntry, string>;
 
   constructor() {
     super('TabStoryDB');
