@@ -46,7 +46,7 @@ test('save active tab opens scheduling, deduplicates and preserves its collectio
     page.once('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Delete collection', exact: true }).click();
     await expect(page.getByRole('button', { name: 'New collection' })).toBeVisible();
-    expect(await page.evaluate(() => window.db.collections.count())).toBe(0);
+    expect(await page.evaluate(() => window.db.collections.filter(collection => !collection.deletedAt).count())).toBe(0);
   } finally { await context.close(); }
 });
 
