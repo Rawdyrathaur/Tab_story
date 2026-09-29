@@ -43,7 +43,7 @@ test('Gemini connects, keeps key out of prompts, generates from sources and forg
     const result = await handleAI({ operation: 'generate', model: '', id: 'test-request', language: 'fr', query: 'Summarize', sources: [{ title: 'Source', text: 'Supported source evidence. '.repeat(10), url: 'https://example.com', truncated: false }] });
     expect(result.text).toContain('summary');
     expect(generationAttempts).toBe(2);
-    expect(calls[1].body).toContain('article');
+    expect(calls[1].body).toContain('Supported source evidence.');
     expect(calls.every(call => !call.url.includes(key) && !call.body.includes(key))).toBe(true);
     await handleAI({ operation: 'forget' });
     expect(await handleAI({ operation: 'status' })).toEqual(expect.objectContaining({ configured: false }));
