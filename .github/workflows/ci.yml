@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: tab-revo/package-lock.json
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install extension dependencies
         run: npm ci --prefix tab-revo --ignore-scripts
