@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tabstory
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?database password is required}
+      POSTGRES_DB: tabstory
+    volumes:
+      - tab_story_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tabstory -d tabstory"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://tabstory:${POSTGRES_PASSWORD:?database password is required}@postgres:5432/tabstory
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?access secret is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?refresh secret is required}
+      SYNC_BOOTSTRAP_SECRET: ${SYNC_BOOTSTRAP_SECRET:?bootstrap secret is required}
+      GOOGLE_CLIENT_IDS: ${GOOGLE_CLIENT_IDS:?Google client IDs are required}
+      GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:?Google web client ID is required}
+      CLIENT_ORIGINS: ${CLIENT_ORIGINS:?client origins are required}
+      PORT: 8787
+      TRUST_PROXY_HOPS: 1
+    expose:
+      - "8787"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      SYNC_DOMAIN: ${SYNC_DOMAIN:?sync domain is required}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  tab_story_pg:
+  caddy_data:
+  caddy_config:

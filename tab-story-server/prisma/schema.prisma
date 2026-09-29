@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Tier {
+  free
+  premium
+}
+
+model User {
+  id String @id
+  tier Tier @default(free)
+  nextServerVersion BigInt @default(0)
+  purgeHorizon BigInt @default(0)
+  records Record[]
+  devices Device[]
+  limitHits LimitHit[]
+  syncMutations SyncMutation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Record {
+  userId String
+  id String
+  type String
+  content Json
+  collectionId String?
+  deletedByCollectionId String?
+  isDeleted Boolean @default(false)
+  editedAt DateTime
+  editedBy String
+  serverVersion BigInt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId,id])
+  @@index([userId,serverVersion])
+  @@index([userId,type,isDeleted])
+  @@index([userId,collectionId,isDeleted])
+}
+
+model Device {
+  id String
+  userId String
+  lastSyncAt DateTime?
+  lastServerVersion BigInt @default(0)
+  refreshTokenHash String?
+  pushSubscription Json?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId,id])
+}
+
+model SyncMutation {
+  userId String
+  id String
+  recordId String
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId,id])
+}
+
+model LimitHit {
+  id BigInt @id @default(autoincrement())
+  userId String
+  itemId String
+  timestamp DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId,timestamp])
+}
