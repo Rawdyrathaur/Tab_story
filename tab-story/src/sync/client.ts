@@ -498,17 +498,19 @@ let sessionGeneration = 0;
 let changeTimer: ReturnType<typeof setTimeout> | undefined;
 let retryTimer: ReturnType<typeof setTimeout> | undefined;
 let retryAttempt = 0;
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local' || !changes[settingsKey]) return;
-  const oldValue = changes[settingsKey].oldValue as Partial<Session> | undefined;
-  const newValue = changes[settingsKey].newValue as Partial<Session> | undefined;
-  if (oldValue?.userId !== newValue?.userId || oldValue?.refreshToken !== newValue?.refreshToken) {
-    sessionGeneration++;
-    stopActiveSync();
-    clearTimeout(retryTimer);
-    if (!newValue?.accessToken) setSyncStatus({ phase: 'local' });
-  }
-});
+if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes[settingsKey]) return;
+    const oldValue = changes[settingsKey].oldValue as Partial<Session> | undefined;
+    const newValue = changes[settingsKey].newValue as Partial<Session> | undefined;
+    if (oldValue?.userId !== newValue?.userId || oldValue?.refreshToken !== newValue?.refreshToken) {
+      sessionGeneration++;
+      stopActiveSync();
+      clearTimeout(retryTimer);
+      if (!newValue?.refreshToken) setSyncStatus({ phase: 'local' });
+    }
+  });
+}
 const scheduleSync = () => {
   clearTimeout(changeTimer);
   changeTimer = setTimeout(() => { void syncNow().catch(() => {}); }, 1500);
