@@ -30,13 +30,13 @@ test('Gemini connects, keeps key out of prompts, generates from sources and forg
       }
       return new Response(JSON.stringify({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'A concise summary of the article.' }] } }] }), { status: 200 });
     }
-    return new Response(JSON.stringify({ models: [{ name: 'models/gemini-test-flash', supportedGenerationMethods: ['generateContent'] }] }), { status: 200 });
+    return new Response(JSON.stringify({ models: [{ name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] }] }), { status: 200 });
   };
   try {
     const key = 'test-only-key-not-real-12345678';
-    expect(await handleAI({ operation: 'connect', key })).toEqual({
-      models: ['gemini-test-flash'],
-      selectedModel: 'gemini-test-flash',
+    expect(await handleAI({ operation: 'connect', key, accepted: true })).toEqual({
+      models: ['gemini-2.5-flash'],
+      selectedModel: 'gemini-2.5-flash',
       provider: 'Google Gemini',
       providerId: 'gemini',
     });
@@ -46,7 +46,7 @@ test('Gemini connects, keeps key out of prompts, generates from sources and forg
     expect(calls[1].body).toContain('article');
     expect(calls.every(call => !call.url.includes(key) && !call.body.includes(key))).toBe(true);
     await handleAI({ operation: 'forget' });
-    expect(await handleAI({ operation: 'status' })).toEqual({ configured: false });
+    expect(await handleAI({ operation: 'status' })).toEqual(expect.objectContaining({ configured: false }));
     await expect(handleAI({ operation: 'generate' })).rejects.toThrow('Connect your AI provider');
   } finally { globalThis.fetch = previousFetch; Object.defineProperty(globalThis, 'chrome', { configurable: true, value: previousChrome }); }
 });
@@ -63,7 +63,7 @@ test('Gemini connection rejects an invalid key instead of saving a false connect
     error: { message: 'API key not valid. Please pass a valid API key.' },
   }), { status: 400 });
   try {
-    await expect(handleAI({ operation: 'connect', key: 'invalid-key-value' })).rejects.toThrow('API key not valid');
+    await expect(handleAI({ operation: 'connect', key: 'invalid-key-value', accepted: true })).rejects.toThrow('Check the API key');
     expect(Object.keys(store).some((key) => key.includes('Key'))).toBe(false);
   } finally {
     globalThis.fetch = previousFetch;
@@ -91,7 +91,7 @@ test('long articles summarize every chunk then combine without sending URLs', as
   expect(calls.at(-1)).toContain('Condensed article notes.');
 });
 
-for (const provider of ['groq', 'openrouter', 'mistral']) {
+for (const provider of ['groq', 'cerebras'] as const) {
   test(`${provider} verifies, generates with its own key, and disconnects`, async () => {
     const session: Record<string, unknown> = {};
     const local: Record<string, unknown> = {};
@@ -105,25 +105,28 @@ for (const provider of ['groq', 'openrouter', 'mistral']) {
     Object.defineProperty(globalThis, 'chrome', { configurable: true, value: { storage: { session: storage(session), local: storage(local) } } });
     globalThis.fetch = async (url, options) => {
       calls.push({ url: String(url), auth: new Headers(options?.headers).get('Authorization') || '', body: String(options?.body) });
+      if (String(url).endsWith('/models')) {
+        return new Response(JSON.stringify({ data: [{ id: 'gpt-oss-120b' }] }), { status: 200 });
+      }
       return new Response(JSON.stringify({ choices: [{ message: { content: 'A useful summary.' }, finish_reason: 'stop' }] }), { status: 200 });
     };
     try {
       const key = 'test-key-for-' + provider;
-      const connected = await handleAI({ operation: 'connect', provider, key });
+      const connected = await handleAI({ operation: 'connect', provider, key, accepted: true });
       expect(connected.providerId).toBe(provider);
       expect((await handleAI({ operation: 'status' })).configured).toBe(true);
       const answer = await handleAI({ operation: 'generate', providerId: 'gemini', id: 'provider-test', language: 'en', sources: [{ url: 'https://example.com', text: 'Supported article information. '.repeat(10) }] });
       expect(answer.text).toContain('summary');
-      const host = { groq: 'api.groq.com', openrouter: 'openrouter.ai', mistral: 'api.mistral.ai' }[provider];
+      const host = { groq: 'api.groq.com', cerebras: 'api.cerebras.ai' }[provider];
       expect(calls).toHaveLength(2);
       expect(calls.every(call => new URL(call.url).host === host && call.auth === 'Bearer ' + key && !call.body.includes(key))).toBe(true);
       expect(JSON.stringify(local)).not.toContain(key);
       await handleAI({ operation: 'forget' });
-      expect(await handleAI({ operation: 'status' })).toEqual({ configured: false });
+      expect(await handleAI({ operation: 'status' })).toEqual(expect.objectContaining({ configured: false }));
       expect(Object.values(session)).not.toContain(key);
       globalThis.fetch = async () => new Response('{}', { status: 401 });
-      await expect(handleAI({ operation: 'connect', provider, key })).rejects.toThrow('check your API key');
-      expect(await handleAI({ operation: 'status' })).toEqual({ configured: false });
+      await expect(handleAI({ operation: 'connect', provider, key, accepted: true })).rejects.toThrow('check your API key');
+      expect(await handleAI({ operation: 'status' })).toEqual(expect.objectContaining({ configured: false }));
     } finally { globalThis.fetch = previousFetch; Object.defineProperty(globalThis, 'chrome', { configurable: true, value: previousChrome }); }
   });
 }
